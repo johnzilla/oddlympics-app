@@ -1,0 +1,230 @@
+---
+export const prerender = true;
+const title = 'oddlympics — World domination. Your world.';
+const description = 'Your personal Olympics, translated to your time zone. Personal World Cup 2026 notifications and more, on Bitcoin/Lightning rails.';
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content={description} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>{title}</title>
+</head>
+<body>
+  <main class="hero">
+    <div class="hero-content">
+      <span class="banner">World Cup 2026 · Launching June</span>
+      <h1 class="headline">World domination. Your world.</h1>
+      <p class="subhead">Your personal Olympics, translated to your time zone.</p>
+
+      <form class="cta-form" method="post" action="/api/signup">
+        <input
+          type="email"
+          name="email"
+          required
+          autocomplete="email"
+          placeholder="you@example.com"
+          aria-label="Email address"
+        />
+        <input type="hidden" name="requested_sport" value="world_cup" />
+        {/* honeypot — humans don't fill this */}
+        <input
+          type="text"
+          name="website"
+          tabindex="-1"
+          autocomplete="off"
+          class="hp"
+          aria-hidden="true"
+        />
+        <button type="submit">Get early access</button>
+      </form>
+
+      <p id="error" class="error" role="alert" hidden></p>
+
+      <p class="vip-cue">
+        Watching something stranger? Tell us what — we'll send VIP access.
+      </p>
+
+      <script is:inline>
+        try {
+          const COPY = {
+            'bad-email': 'That email looks off — try again.',
+            'bad-form': 'Something went wrong with the form. Try again.',
+            'bad-origin': 'Submission blocked. Please use the form on this page.',
+            'rate-limited': 'Too many tries. Wait an hour and try again.',
+            email: "We couldn't send the confirmation email. Try again in a minute.",
+            server: 'Server hiccup. Try again in a minute.',
+          };
+          const code = new URL(location.href).searchParams.get('error');
+          if (code) {
+            const el = document.getElementById('error');
+            el.textContent = COPY[code] || 'Something went wrong.';
+            el.hidden = false;
+          }
+        } catch {}
+      </script>
+    </div>
+  </main>
+</body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #0b0b0e;
+    --fg: #ececf1;
+    --fg-dim: #b8b8c2;
+    --line: rgba(255, 255, 255, 0.18);
+    --surface: rgba(255, 255, 255, 0.06);
+    --accent: hsl(18 70% 56%);
+    --accent-ink: #0b0b0e;
+    --pad: 48px;
+    --gap-banner: 18px;
+    --gap-headline: 14px;
+    --gap-cta: 28px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--mono);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body { min-height: 100dvh; }
+
+  .hero {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: var(--pad);
+  }
+
+  .hero-content {
+    max-width: 720px;
+    text-align: left;
+  }
+
+  .banner {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 5px 10px;
+    border-radius: 999px;
+    margin-bottom: var(--gap-banner);
+  }
+
+  .headline {
+    font-family: var(--mono);
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 var(--gap-headline);
+  }
+
+  .subhead {
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--fg-dim);
+    margin: 0 0 var(--gap-cta);
+    max-width: 540px;
+  }
+
+  .cta-form {
+    display: flex;
+    gap: 8px;
+    max-width: 460px;
+  }
+
+  .cta-form input[type="email"] {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--fg);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+
+  .cta-form input[type="email"]:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .cta-form input[type="email"]::placeholder { color: var(--fg-dim); }
+
+  .cta-form button {
+    padding: 12px 18px;
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .cta-form button:hover { filter: brightness(1.08); }
+  .cta-form button:active { transform: translateY(1px); }
+
+  .vip-cue {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--fg-dim);
+    margin: 14px 0 0;
+    max-width: 460px;
+  }
+
+  .error {
+    margin: 12px 0 0;
+    color: var(--accent);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Honeypot: visually + assistively hidden, but still in the DOM for bots */
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Mobile: stack the form so the email field doesn't get crushed */
+  @media (max-width: 520px) {
+    :root { --pad: 28px; }
+    .headline { font-size: 30px; }
+    .cta-form { flex-direction: column; }
+    .cta-form button { width: 100%; }
+  }
+
+  /* Reduce motion */
+  @media (prefers-reduced-motion: reduce) {
+    .cta-form button:active { transform: none; }
+  }
+</style>

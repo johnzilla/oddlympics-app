@@ -1,0 +1,57 @@
+---
+export const prerender = true;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Check your email — oddlympics</title>
+</head>
+<body>
+  <main class="hero">
+    <div class="hero-content">
+      <span class="banner">Step 2 of 2</span>
+      <h1 class="headline">Check your email.</h1>
+      <p class="subhead">
+        We just sent a confirmation link<span id="to-email"></span>.
+        Click it to lock in your spot.
+      </p>
+      <script is:inline>
+        try {
+          const e = new URL(location.href).searchParams.get('email');
+          if (e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) {
+            document.getElementById('to-email').textContent = ' to ' + e;
+          }
+        } catch {}
+      </script>
+      <p class="subhead" style="margin-top:24px">
+        No email? Check spam, or <a href="/" class="link">try again</a>.
+      </p>
+    </div>
+  </main>
+</body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #0b0b0e;
+    --fg: #ececf1;
+    --fg-dim: #b8b8c2;
+    --accent: hsl(18 70% 56%);
+    --pad: 48px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--mono); -webkit-font-smoothing: antialiased; }
+  body { min-height: 100dvh; }
+  .hero { min-height: 100dvh; display: flex; align-items: center; padding: var(--pad); }
+  .hero-content { max-width: 720px; }
+  .banner { display: inline-block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: var(--accent); border: 1px solid var(--accent); padding: 5px 10px; border-radius: 999px; margin-bottom: 18px; }
+  .headline { font-size: 36px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 14px; }
+  .subhead { font-size: 14px; line-height: 1.55; color: var(--fg-dim); margin: 0; max-width: 540px; }
+  .link { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 520px) { :root { --pad: 28px; } .headline { font-size: 30px; } }
+</style>

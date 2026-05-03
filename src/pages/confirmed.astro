@@ -1,0 +1,72 @@
+---
+export const prerender = true;
+const status = Astro.url.searchParams.get('status') ?? 'ok';
+
+const COPY: Record<string, { banner: string; headline: string; sub: string }> = {
+  ok: {
+    banner: "You're in",
+    headline: "Confirmed. We'll see you at kickoff.",
+    sub: "We'll email you the moment oddlympics goes live — well before World Cup 2026 kicks off in June. No spam between now and then.",
+  },
+  already: {
+    banner: 'Already confirmed',
+    headline: "You're already on the list.",
+    sub: "Nothing more to do. We'll email you when it's live.",
+  },
+  'bad-token': {
+    banner: 'Link expired',
+    headline: "That link didn't work.",
+    sub: 'Magic links expire after 7 days. Sign up again and click the new link.',
+  },
+  unknown: {
+    banner: "Couldn't find that signup",
+    headline: "Hmm — we don't have a record of that email.",
+    sub: 'Sign up again and click the link in the new email.',
+  },
+};
+
+const c = COPY[status] ?? COPY.ok;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>{c.headline} — oddlympics</title>
+</head>
+<body>
+  <main class="hero">
+    <div class="hero-content">
+      <span class="banner">{c.banner}</span>
+      <h1 class="headline">{c.headline}</h1>
+      <p class="subhead">{c.sub}</p>
+      <p class="subhead" style="margin-top:24px">
+        <a href="/" class="link">← back to oddlympics</a>
+      </p>
+    </div>
+  </main>
+</body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #0b0b0e;
+    --fg: #ececf1;
+    --fg-dim: #b8b8c2;
+    --accent: hsl(18 70% 56%);
+    --pad: 48px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--mono); -webkit-font-smoothing: antialiased; }
+  body { min-height: 100dvh; }
+  .hero { min-height: 100dvh; display: flex; align-items: center; padding: var(--pad); }
+  .hero-content { max-width: 720px; }
+  .banner { display: inline-block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: var(--accent); border: 1px solid var(--accent); padding: 5px 10px; border-radius: 999px; margin-bottom: 18px; }
+  .headline { font-size: 36px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 14px; }
+  .subhead { font-size: 14px; line-height: 1.55; color: var(--fg-dim); margin: 0; max-width: 540px; }
+  .link { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 520px) { :root { --pad: 28px; } .headline { font-size: 30px; } }
+</style>

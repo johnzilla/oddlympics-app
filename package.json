@@ -1,0 +1,20 @@
+{
+  "name": "oddlympics-app",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "serve": "node --env-file=.env ./dist/server/entry.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.5",
+    "astro": "^5.0.0",
+    "better-sqlite3": "^12.9.0",
+    "resend": "^6.12.2"
+  }
+}
