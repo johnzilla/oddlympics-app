@@ -76,10 +76,13 @@ echo "==> Caddyfile"
 install -m 644 "$REPO_DIR/Caddyfile" /etc/caddy/Caddyfile
 
 echo "==> sudoers: deploy user can restart oddlympics without password"
+# List both /bin and /usr/bin paths because sudo doesn't follow symlinks when
+# matching commands, and Ubuntu's usrmerge means systemctl is reachable at both.
 cat > /etc/sudoers.d/oddlympics-deploy <<EOF
-$DEPLOY_USER ALL=(root) NOPASSWD: /bin/systemctl restart oddlympics, /bin/systemctl status oddlympics, /bin/systemctl reload caddy
+$DEPLOY_USER ALL=(root) NOPASSWD: /bin/systemctl restart oddlympics, /usr/bin/systemctl restart oddlympics, /bin/systemctl status oddlympics, /usr/bin/systemctl status oddlympics, /bin/systemctl reload caddy, /usr/bin/systemctl reload caddy
 EOF
 chmod 440 /etc/sudoers.d/oddlympics-deploy
+visudo -cf /etc/sudoers.d/oddlympics-deploy
 
 echo "==> reload services"
 systemctl daemon-reload

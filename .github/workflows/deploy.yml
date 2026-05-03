@@ -60,10 +60,10 @@ jobs:
           npm ci --omit=dev --no-audit --no-fund
           # Rebuild better-sqlite3 native binding for this droplet's Node/glibc
           npm rebuild better-sqlite3
-          sudo /bin/systemctl restart oddlympics
+          sudo /usr/bin/systemctl restart oddlympics
           # Give it a beat, then check status
           sleep 2
-          sudo /bin/systemctl status oddlympics --no-pager | head -15
+          sudo /usr/bin/systemctl status oddlympics --no-pager | head -15
           EOF
 
       - name: Smoke test
