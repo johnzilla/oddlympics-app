@@ -1,0 +1,53 @@
+# /etc/systemd/system/oddlympics.service
+#
+# Run the Astro standalone server as a non-root user under systemd.
+# Loads runtime config from /etc/oddlympics.env (kept out of the git repo).
+
+[Unit]
+Description=oddlympics teaser app (Astro + Node)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=oddlympics
+Group=oddlympics
+WorkingDirectory=/opt/oddlympics
+EnvironmentFile=/etc/oddlympics.env
+
+# Bind only to localhost; Caddy is the public front
+Environment=HOST=127.0.0.1
+Environment=PORT=4321
+Environment=NODE_ENV=production
+
+ExecStart=/usr/bin/node ./dist/server/entry.mjs
+
+Restart=on-failure
+RestartSec=2
+KillSignal=SIGTERM
+TimeoutStopSec=15
+
+# SQLite lives here; needs to be writable
+ReadWritePaths=/var/lib/oddlympics
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+MemoryDenyWriteExecute=false
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+
+# Logs go to journald; tail with: journalctl -u oddlympics -f
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

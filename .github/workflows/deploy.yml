@@ -1,0 +1,78 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DROPLET_HOST: ${{ secrets.DROPLET_HOST }}
+      DROPLET_USER: deploy
+      APP_DIR: /opt/oddlympics
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$DROPLET_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Rsync to droplet
+        run: |
+          rsync -az --delete \
+            --exclude=node_modules \
+            --exclude=.env \
+            --exclude=data \
+            ./dist/ \
+            "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/dist/"
+          rsync -az \
+            ./package.json ./package-lock.json \
+            "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/"
+
+      - name: Install prod deps + restart on droplet
+        run: |
+          ssh "$DROPLET_USER@$DROPLET_HOST" bash -s <<'EOF'
+          set -euo pipefail
+          cd /opt/oddlympics
+          # --omit=dev keeps server runtime lean; --no-audit/--no-fund silence noise
+          npm ci --omit=dev --no-audit --no-fund
+          # Rebuild better-sqlite3 native binding for this droplet's Node/glibc
+          npm rebuild better-sqlite3
+          sudo /bin/systemctl restart oddlympics
+          # Give it a beat, then check status
+          sleep 2
+          sudo /bin/systemctl status oddlympics --no-pager | head -15
+          EOF
+
+      - name: Smoke test
+        run: |
+          for i in 1 2 3 4 5; do
+            code=$(curl -sk -o /dev/null -w '%{http_code}' "https://$DROPLET_HOST/")
+            if [[ "$code" == "200" ]]; then echo "OK ($code)"; exit 0; fi
+            echo "attempt $i: got $code, retrying..."
+            sleep 3
+          done
+          echo "smoke test failed" >&2
+          exit 1

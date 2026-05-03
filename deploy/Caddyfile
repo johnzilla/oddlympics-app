@@ -1,0 +1,37 @@
+# /etc/caddy/Caddyfile
+#
+# Caddy auto-provisions a Let's Encrypt certificate on first request to
+# oddlympics.app and renews it forever. Just point the A record at the droplet
+# and reload caddy.
+
+oddlympics.app, www.oddlympics.app {
+	encode zstd gzip
+
+	# Long cache for hashed/static assets emitted by the Astro build
+	@assets {
+		path /_astro/* /favicon.svg
+	}
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	# Reverse-proxy everything else to the Node server
+	reverse_proxy 127.0.0.1:4321 {
+		# Pass real client IP through so rate-limiting works
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	# Security headers
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		# Caddy adds Server: Caddy by default; hide it
+		-Server
+	}
+
+	# Redirect www → apex
+	@www host www.oddlympics.app
+	redir @www https://oddlympics.app{uri} permanent
+}
