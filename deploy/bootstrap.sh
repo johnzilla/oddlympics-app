@@ -76,10 +76,22 @@ echo "==> Caddyfile"
 install -m 644 "$REPO_DIR/Caddyfile" /etc/caddy/Caddyfile
 
 echo "==> sudoers: deploy user can restart oddlympics without password"
-# List both /bin and /usr/bin paths because sudo doesn't follow symlinks when
-# matching commands, and Ubuntu's usrmerge means systemctl is reachable at both.
+# Two notes on this rule:
+#  1. Sudo doesn't follow symlinks when matching commands, and Ubuntu's
+#     usrmerge means systemctl is reachable at both /bin/systemctl and
+#     /usr/bin/systemctl. List both.
+#  2. Sudoers rules match command args EXACTLY. The base form (e.g.
+#     "/usr/bin/systemctl status oddlympics") allows zero extra args; the
+#     wildcard form ("... oddlympics *") allows one or more. Listing both
+#     covers "sudo systemctl status oddlympics" and "sudo systemctl status
+#     oddlympics --no-pager" without surprises.
 cat > /etc/sudoers.d/oddlympics-deploy <<EOF
-$DEPLOY_USER ALL=(root) NOPASSWD: /bin/systemctl restart oddlympics, /usr/bin/systemctl restart oddlympics, /bin/systemctl status oddlympics, /usr/bin/systemctl status oddlympics, /bin/systemctl reload caddy, /usr/bin/systemctl reload caddy
+Cmnd_Alias ODDLYMPICS_CTL = \
+  /bin/systemctl restart oddlympics, /usr/bin/systemctl restart oddlympics, \
+  /bin/systemctl status oddlympics, /usr/bin/systemctl status oddlympics, \
+  /bin/systemctl status oddlympics *, /usr/bin/systemctl status oddlympics *, \
+  /bin/systemctl reload caddy, /usr/bin/systemctl reload caddy
+$DEPLOY_USER ALL=(root) NOPASSWD: ODDLYMPICS_CTL
 EOF
 chmod 440 /etc/sudoers.d/oddlympics-deploy
 visudo -cf /etc/sudoers.d/oddlympics-deploy

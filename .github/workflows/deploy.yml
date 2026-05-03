@@ -61,9 +61,10 @@ jobs:
           # Rebuild better-sqlite3 native binding for this droplet's Node/glibc
           npm rebuild better-sqlite3
           sudo /usr/bin/systemctl restart oddlympics
-          # Give it a beat, then check status
+          # Give it a beat, then check status. No --no-pager: sudoers rules match
+          # args exactly, and systemctl auto-skips the pager without a TTY anyway.
           sleep 2
-          sudo /usr/bin/systemctl status oddlympics --no-pager | head -15
+          sudo /usr/bin/systemctl status oddlympics | head -15
           EOF
 
       - name: Smoke test
