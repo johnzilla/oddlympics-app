@@ -124,3 +124,176 @@ Key routing rules:
 - Ship/deploy/PR → invoke /ship or /land-and-deploy
 - Save progress → invoke /context-save
 - Resume context → invoke /context-restore
+
+<!-- GSD:project-start source:PROJECT.md -->
+## Project
+
+**oddlympics — v1 MVP**
+
+**Personalized "when does MY thing happen" notifications for international sports
+fans, launching with the 2026 FIFA World Cup.** Users pick the teams they care
+about, get the matches in their own time zone, receive email + Telegram pings
+before kickoff, and can tip a single creator over Lightning. The teaser landing
+page is already live at https://oddlympics.app — this milestone turns it into
+the actual product before group stage starts on **2026-06-11**.
+
+**Core Value:** **A user picks their team and gets a kickoff notification in their local time,
+on time, before group stage 2026.** If everything else fails — tipping breaks,
+Telegram lags, the schedule is hand-typed — the user must still get a "USA
+vs. Iran kicks off in 60 minutes (your time)" email that lands when promised.
+
+### Constraints
+
+- **Timeline**: Hard ship date 2026-06-11 (World Cup group-stage kickoff) — picked by FIFA, not negotiable. Notifications need to fire on real matches starting that morning.
+- **Tech stack**: Astro 5 server mode + better-sqlite3 + Resend + Caddy + systemd on DigitalOcean. Established and shipping; no rewrites mid-deadline. New surface area uses the same stack unless there's a hard reason not to.
+- **Solo developer**: One contributor (johnzilla), evenings + weekends. Scope must respect this; no "hire help" assumptions.
+- **Single droplet**: One $6/mo box. No HA, no multi-region, no replicas. Restart cost ~2s; we'll live with it.
+- **Bitcoin/Lightning ideology**: No tokens, no L2 alternatives, no "maybe USDC for v1." Lightning + Cashu through vault, period.
+- **Existing email list**: Phase 1 cannot break the existing signup/confirm flow or invalidate captured emails. Migrations must be additive.
+- **No relocation**: Founder constraint — affects fundraising path but not the product itself; mentioned for completeness.
+<!-- GSD:project-end -->
+
+<!-- GSD:stack-start source:codebase/STACK.md -->
+## Technology Stack
+
+## Languages & runtime
+- **TypeScript** (strict — `tsconfig.json` extends `astro/tsconfigs/strict`)
+- **Astro 5** (`^5.0.0`) with `output: 'server'`
+- **Node 22** (pinned in `.github/workflows/deploy.yml` and CI; production droplet runs Node 22 via NodeSource)
+- ESM throughout (`"type": "module"` in `package.json`)
+- Native `node:` built-ins preferred — `node:crypto`, `node:fs`, `node:path` (see `src/lib/token.ts:1`, `src/lib/db.ts:2`)
+## Server adapter
+## Direct dependencies
+| Package | Version | What it does | Where used |
+|---|---|---|---|
+| `astro` | `^5.0.0` | Framework + dev server + build | `astro.config.mjs`, all `src/pages/*` |
+| `@astrojs/node` | `^9.5.5` | Standalone Node SSR adapter | `astro.config.mjs:2,7` |
+| `better-sqlite3` | `^12.9.0` | Synchronous SQLite driver (native binding) | `src/lib/db.ts:1` |
+| `resend` | `^6.12.2` | Transactional email API | `src/lib/email.ts:1` |
+## Native binding
+## Build & runtime config
+## NPM scripts
+## Environment variables
+| Var | Required | Default | Used in |
+|---|---|---|---|
+| `RESEND_API_KEY` | prod only | — | `src/lib/email.ts:3` (throws on prod boot if missing) |
+| `EMAIL_FROM` | optional | `oddlympics <onboarding@resend.dev>` | `src/lib/email.ts:4` |
+| `MAGIC_LINK_SECRET` | prod only | dev fallback string | `src/lib/token.ts:3` (throws on prod boot if missing) |
+| `PUBLIC_SITE_URL` | optional | `http://localhost:4321` | `src/lib/email.ts:5` (link base) |
+| `DATABASE_PATH` | optional | `./data/oddlympics.db` | `src/lib/db.ts:6` |
+| `NODE_ENV` | systemd sets to `production` | — | gates prod-only throws |
+| `HOST` / `PORT` | systemd sets `127.0.0.1` / `4321` | — | bind address for the adapter |
+## Frontend
+## Build output
+- `dist/server/entry.mjs` — Node entrypoint (the SSR server)
+- `dist/client/_astro/*` — hashed client assets (favicon SVG, etc.)
+- Prerendered HTML for the three pages with `prerender = true`
+<!-- GSD:stack-end -->
+
+<!-- GSD:conventions-start source:CONVENTIONS.md -->
+## Conventions
+
+## TypeScript
+- **Strict mode** — `tsconfig.json` extends `astro/tsconfigs/strict` (no other overrides).
+- **`type` over `interface`** for shape types (`type VipSignup`, `type Payload`).
+- **`node:` prefix on all built-ins:** `node:crypto`, `node:fs`, `node:path`
+- **Prepared-statement generics:** `db.prepare<[string, string, string | null, string | null]>(...)`
+- **Return-type annotations** on exported functions (`mintToken(...): string`,
+- **No `any`.** Casts go through `as` only at FormData boundaries
+## Naming
+- `camelCase` functions and locals
+- `SCREAMING_SNAKE_CASE` module constants
+- `PascalCase` types
+- `kebab-case` files (multi-word) and URL slugs
+- See STRUCTURE.md for the full list with examples
+## Error handling — three patterns
+## Logging
+- **`console.error` for caught DB / email failures** in route handlers, with a
+- **`console.log` for the dev email fallback** with a tag: `[email-dev-fallback]`
+- **No structured logger** (no pino, no winston). systemd captures stdout/stderr
+- No correlation IDs, no request IDs.
+## CSS
+- **Inline `<style is:global>` per page**, not a shared stylesheet. CLAUDE.md
+- **CSS variables defined in `:root`** of each page. The shared set:
+- **One mono font everywhere.** `--mono` is the only family used; no separate
+- **Mobile breakpoint at 520px** with a single `@media` block per page.
+- **Reduced motion respected** in `index.astro:233-235`.
+## Astro patterns
+- `export const prerender = true;` for static pages, `false` for API routes.
+- Frontmatter (`---` block) is for *build-time* values (titles, descriptions,
+- API route signatures: `export const POST: APIRoute = async ({ request, site }) => {...}`
+## Form handling
+- **`<form method="post" action="/api/signup">`** — old-school HTML POST, no
+- **Honeypot field** named `website` with class `.hp` (visually hidden,
+- **Email validation:** regex `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` plus a 254-char
+- **Allowlists** for enum-like fields: `VALID_SPORTS = new Set([...])`,
+## Security posture (in code)
+- **Constant-time comparison** for HMAC signatures: `timingSafeEqual` after
+- **Input always lowercased + trimmed** before hashing/storing
+- **DB writes parameterized** via prepared statements — no string interpolation.
+- **Origin check on POST** (`src/pages/api/signup.ts:18-34`) layered on top of
+- **Magic links idempotent** via `WHERE confirmed_at IS NULL` clause in the
+## What you won't see in this codebase
+- No comments explaining what code does — only why-comments where the choice
+- No JSDoc.
+- No barrel `index.ts` exports — every import names its file directly:
+- No `default export` in lib modules — only named exports.
+- No async wrappers around sync code.
+- No try/catch around things that can't reasonably throw.
+<!-- GSD:conventions-end -->
+
+<!-- GSD:architecture-start source:ARCHITECTURE.md -->
+## Architecture
+
+## Pattern
+## Layers
+```
+```
+## Entry points
+- **HTTP entrypoint (prod):** `dist/server/entry.mjs` — built by Astro from the
+- **HTTP entrypoint (dev):** `astro dev` (port 4321 by default), no build step.
+- **Static page prerender targets:** `src/pages/index.astro`, `pending.astro`,
+- **Server route handlers:** `src/pages/api/signup.ts`, `src/pages/api/confirm.ts`
+- **Module-load side effects:** Importing `src/lib/db.ts` runs the schema
+## Data flow — signup happy path
+## Data flow — confirmation
+## Critical abstraction: prerendered pages reading URL params
+- `src/pages/index.astro:61-78` — reads `?error=<code>` and renders message
+- `src/pages/pending.astro:28-35` — reads `?email=<address>` and inlines it
+## API routing
+## State
+- **Persistent:** SQLite `vip_signups` table on disk. One row per email.
+- **In-memory (per process):** `src/lib/rate-limit.ts` — `Map<key, timestamp[]>`,
+- **No session state, no cookies, no JWT** — the magic-link token is the only
+## Deployment topology
+- **Single process, single host.** No load balancer, no replicas.
+- **CI/CD:** GitHub Actions on push to `main` rsyncs the build to the droplet
+- **Restart cost:** brief 503 (~1-2 seconds, `RestartSec=2` in the unit) plus
+## Why this shape
+<!-- GSD:architecture-end -->
+
+<!-- GSD:skills-start source:skills/ -->
+## Project Skills
+
+No project skills found. Add skills to any of: `.claude/skills/`, `.agents/skills/`, `.cursor/skills/`, `.github/skills/`, or `.codex/skills/` with a `SKILL.md` index file.
+<!-- GSD:skills-end -->
+
+<!-- GSD:workflow-start source:GSD defaults -->
+## GSD Workflow Enforcement
+
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+
+Use these entry points:
+- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd-debug` for investigation and bug fixing
+- `/gsd-execute-phase` for planned phase work
+
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+<!-- GSD:workflow-end -->
+
+<!-- GSD:profile-start -->
+## Developer Profile
+
+> Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
+> This section is managed by `generate-claude-profile` -- do not edit manually.
+<!-- GSD:profile-end -->

@@ -113,37 +113,35 @@ Explicitly excluded for v1, with reasoning. Documented to prevent scope creep.
 
 ## Traceability
 
-Phase mapping is set during roadmap creation in the next step.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HARDEN-01 | Phase TBD | Pending |
-| HARDEN-02 | Phase TBD | Pending |
-| HARDEN-03 | Phase TBD | Pending |
-| HARDEN-04 | Phase TBD | Pending |
-| HARDEN-05 | Phase TBD | Pending |
-| HARDEN-06 | Phase TBD | Pending |
-| IDENT-01 | Phase TBD | Pending |
-| IDENT-02 | Phase TBD | Pending |
-| IDENT-03 | Phase TBD | Pending |
-| IDENT-04 | Phase TBD | Pending |
-| IDENT-05 | Phase TBD | Pending |
-| DATA-01 | Phase TBD | Pending |
-| DATA-02 | Phase TBD | Pending |
-| DATA-03 | Phase TBD | Pending |
-| DATA-04 | Phase TBD | Pending |
-| NOTIFY-01 | Phase TBD | Pending |
-| NOTIFY-02 | Phase TBD | Pending |
-| NOTIFY-03 | Phase TBD | Pending |
-| NOTIFY-04 | Phase TBD | Pending |
-| TIP-01 | Phase TBD | Pending |
-| TIP-02 | Phase TBD | Pending |
+| HARDEN-01 | Phase 1 | Pending |
+| HARDEN-02 | Phase 1 | Pending |
+| HARDEN-03 | Phase 1 | Pending |
+| HARDEN-04 | Phase 1 | Pending |
+| HARDEN-05 | Phase 1 | Pending |
+| HARDEN-06 | Phase 1 | Pending |
+| IDENT-01 | Phase 2 | Pending |
+| IDENT-02 | Phase 2 | Pending |
+| IDENT-03 | Phase 2 | Pending |
+| IDENT-04 | Phase 2 | Pending |
+| IDENT-05 | Phase 2 | Pending |
+| DATA-01 | Phase 2 | Pending |
+| DATA-02 | Phase 2 | Pending |
+| DATA-03 | Phase 2 | Pending |
+| DATA-04 | Phase 2 | Pending |
+| NOTIFY-01 | Phase 3 | Pending |
+| NOTIFY-02 | Phase 3 | Pending |
+| NOTIFY-03 | Phase 3 | Pending |
+| NOTIFY-04 | Phase 3 | Pending |
+| TIP-01 | Phase 4 | Pending |
+| TIP-02 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 21 total
-- Mapped to phases: 0 (will populate after roadmap)
-- Unmapped: 21 ⚠️ (expected pre-roadmap)
+- Mapped to phases: 21
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-08*
-*Last updated: 2026-05-08 after initial definition*
+*Last updated: 2026-05-08 — traceability populated after roadmap creation*
