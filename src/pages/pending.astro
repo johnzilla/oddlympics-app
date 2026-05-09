@@ -19,17 +19,36 @@ export const prerender = true;
 <body>
   <main class="hero">
     <div class="hero-content">
-      <span class="banner">Step 2 of 2</span>
-      <h1 class="headline">Check your email.</h1>
+      <span id="banner" class="banner"></span>
+      <h1 id="headline" class="headline"></h1>
       <p class="subhead">
-        We just sent a confirmation link<span id="to-email"></span>.
-        Click it to lock in your spot.
+        <span id="lead"></span><span id="to-email"></span>.
+        <span id="trail"></span>
       </p>
       <script is:inline>
         try {
-          const e = new URL(location.href).searchParams.get('email');
-          if (e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) {
-            document.getElementById('to-email').textContent = ' to ' + e;
+          const params = new URL(location.href).searchParams;
+          const action = params.get('action');
+          const email = params.get('email');
+          const COPY = action === 'manage'
+            ? {
+                banner: 'Schedule link sent',
+                headline: 'Check your email.',
+                lead: 'We just sent a link to your schedule',
+                trail: 'Click it to pick or change the teams you follow.',
+              }
+            : {
+                banner: 'Step 2 of 2',
+                headline: 'Check your email.',
+                lead: 'We just sent a confirmation link',
+                trail: 'Click it to lock in your spot.',
+              };
+          document.getElementById('banner').textContent = COPY.banner;
+          document.getElementById('headline').textContent = COPY.headline;
+          document.getElementById('lead').textContent = COPY.lead;
+          document.getElementById('trail').textContent = COPY.trail;
+          if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            document.getElementById('to-email').textContent = ' to ' + email;
           }
         } catch {}
       </script>

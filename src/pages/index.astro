@@ -58,6 +58,10 @@ const description = 'Your personal Olympics, translated to your time zone. Perso
         Watching something stranger? Tell us what — we'll send VIP access.
       </p>
 
+      <p class="manage-cue">
+        Already signed up? <a href="/manage" class="link">Manage your schedule</a>.
+      </p>
+
       <script is:inline>
         try {
           const COPY = {
@@ -202,6 +206,20 @@ const description = 'Your personal Olympics, translated to your time zone. Perso
     color: var(--fg-dim);
     margin: 14px 0 0;
     max-width: 460px;
+  }
+
+  .manage-cue {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--fg-dim);
+    margin: 8px 0 0;
+    max-width: 460px;
+  }
+
+  .link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .error {
