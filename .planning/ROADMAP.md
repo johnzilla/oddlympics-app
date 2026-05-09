@@ -40,7 +40,7 @@ Plans:
 - [x] 01-01-PLAN.md — HARDEN-01: fix confirmed.astro prerender + searchParams bug (move COPY map and status read into inline script)
 - [x] 01-02-PLAN.md — HARDEN-03: flip Origin missing default from allow to deny in /api/signup
 - [x] 01-03-PLAN.md — HARDEN-06: drop magic-link TTL from 7 days to 24 hours
-- [ ] 01-04-PLAN.md — HARDEN-02: full unsubscribe slice (DB column, token purpose claim, /api/unsubscribe endpoint, /unsubscribed page, RFC 8058 helper)
+- [x] 01-04-PLAN.md — HARDEN-02: full unsubscribe slice (DB column, token purpose claim, /api/unsubscribe endpoint, /unsubscribed page, RFC 8058 helper)
 - [x] 01-05-PLAN.md — HARDEN-04 (report-only): add Content-Security-Policy-Report-Only to Caddyfile, observe 1-2 days
 - [ ] 01-06-PLAN.md — HARDEN-04 (enforce): flip CSP from report-only to enforce, verify A grade on securityheaders.com
 - [x] 01-07-PLAN.md — HARDEN-05: daily off-droplet backup to Backblaze B2 via systemd timer + restore runbook + drill
