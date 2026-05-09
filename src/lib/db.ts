@@ -25,9 +25,16 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_vip_signups_confirmed ON vip_signups(confirmed_at);
 `);
 
-db.exec(`
-  ALTER TABLE vip_signups ADD COLUMN IF NOT EXISTS unsubscribed_at INTEGER;
-`);
+// SQLite does not support `ADD COLUMN IF NOT EXISTS` (that's a Postgres-ism).
+// Probe pragma_table_info instead and run ALTER only when the column is absent.
+{
+  const cols = db
+    .prepare("SELECT name FROM pragma_table_info('vip_signups')")
+    .all() as { name: string }[];
+  if (!cols.some((c) => c.name === 'unsubscribed_at')) {
+    db.exec(`ALTER TABLE vip_signups ADD COLUMN unsubscribed_at INTEGER;`);
+  }
+}
 
 export type VipSignup = {
   id: number;
