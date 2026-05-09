@@ -22,7 +22,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Caddy source file. Safe to run unconditionally — we re-create it below.
 rm -f /etc/apt/sources.list.d/caddy-stable.list
 apt-get update -y
-apt-get install -y curl ca-certificates gnupg lsb-release ufw rsync build-essential python3 rclone sqlite3
+apt-get install -y curl ca-certificates gnupg lsb-release ufw rsync build-essential python3
 
 echo "==> Node.js ${NODE_MAJOR}.x via NodeSource"
 if ! command -v node >/dev/null || [[ "$(node -v)" != v${NODE_MAJOR}.* ]]; then
@@ -56,35 +56,20 @@ id -u "$DEPLOY_USER" >/dev/null 2>&1 || useradd --create-home --shell /bin/bash 
 echo "==> directories"
 install -d -o "$APP_USER" -g "$APP_USER" -m 755 "$APP_DIR"
 install -d -o "$APP_USER" -g "$APP_USER" -m 750 "$DATA_DIR"
-install -d -o "$APP_USER" -g "$APP_USER" -m 750 /var/cache/oddlympics-backup
 
 # Deploy user owns the app dir for rsync; app user reads/executes it
 chown -R "$DEPLOY_USER":"$APP_USER" "$APP_DIR"
 chmod 750 "$APP_DIR"
 
-echo "==> systemd units"
+echo "==> systemd unit"
 install -m 644 "$REPO_DIR/oddlympics.service" /etc/systemd/system/oddlympics.service
-install -m 644 "$REPO_DIR/oddlympics-backup.service" /etc/systemd/system/oddlympics-backup.service
-install -m 644 "$REPO_DIR/oddlympics-backup.timer" /etc/systemd/system/oddlympics-backup.timer
-# Backup script lives in the deploy/ subdir of the app dir for ease of redeploy.
-# It does not need to be re-installed at boot — rsync will keep it in sync via
-# the deploy workflow once the directory exists. For the bootstrap, we copy it
-# into place so the very first timer firing has something to run.
-install -d -o "$APP_USER" -g "$APP_USER" -m 750 "$APP_DIR/deploy"
-install -m 755 -o "$APP_USER" -g "$APP_USER" "$REPO_DIR/oddlympics-backup.sh" "$APP_DIR/deploy/oddlympics-backup.sh"
 
-echo "==> environment files (only if missing — never overwrite)"
+echo "==> environment file (only if missing — never overwrite)"
 if [[ ! -f /etc/oddlympics.env ]]; then
   install -m 640 -o root -g "$APP_USER" "$REPO_DIR/oddlympics.env.example" /etc/oddlympics.env
   echo "    Edit /etc/oddlympics.env BEFORE first deploy."
 else
   echo "    /etc/oddlympics.env exists — leaving alone."
-fi
-if [[ ! -f /etc/oddlympics-backup.env ]]; then
-  install -m 640 -o root -g "$APP_USER" "$REPO_DIR/oddlympics-backup.env.example" /etc/oddlympics-backup.env
-  echo "    Edit /etc/oddlympics-backup.env with B2 credentials BEFORE first backup run."
-else
-  echo "    /etc/oddlympics-backup.env exists — leaving alone."
 fi
 
 echo "==> Caddyfile"
@@ -113,9 +98,8 @@ visudo -cf /etc/sudoers.d/oddlympics-deploy
 
 echo "==> reload services"
 systemctl daemon-reload
-systemctl enable oddlympics caddy oddlympics-backup.timer
+systemctl enable oddlympics caddy
 systemctl reload caddy || systemctl restart caddy
-systemctl start oddlympics-backup.timer
 
 echo
 echo "=========================================================="
@@ -123,11 +107,9 @@ echo "Bootstrap complete."
 echo
 echo "Next:"
 echo "  1. Edit /etc/oddlympics.env and fill in real values."
-echo "  2. Edit /etc/oddlympics-backup.env and fill in B2 credentials (see DEPLOY.md restore section)."
-echo "  3. Add ~deploy/.ssh/authorized_keys with the GitHub Actions deploy key."
-echo "  4. Point DNS A records (oddlympics.app, www.oddlympics.app) at this droplet."
-echo "  5. Push to main — GitHub Actions will rsync + restart."
+echo "  2. Add ~deploy/.ssh/authorized_keys with the GitHub Actions deploy key."
+echo "  3. Point DNS A records (oddlympics.app, www.oddlympics.app) at this droplet."
+echo "  4. Push to main — GitHub Actions will rsync + restart."
 echo
 echo "After first deploy: systemctl start oddlympics && journalctl -u oddlympics -f"
-echo "Verify backup: systemctl start oddlympics-backup.service && journalctl -u oddlympics-backup -n 30 --no-pager"
 echo "=========================================================="
