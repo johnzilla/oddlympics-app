@@ -1,31 +1,5 @@
 ---
 export const prerender = true;
-const status = Astro.url.searchParams.get('status') ?? 'ok';
-
-const COPY: Record<string, { banner: string; headline: string; sub: string }> = {
-  ok: {
-    banner: "You're in",
-    headline: "Confirmed. We'll see you at kickoff.",
-    sub: "We'll email you the moment oddlympics goes live — well before World Cup 2026 kicks off in June. No spam between now and then.",
-  },
-  already: {
-    banner: 'Already confirmed',
-    headline: "You're already on the list.",
-    sub: "Nothing more to do. We'll email you when it's live.",
-  },
-  'bad-token': {
-    banner: 'Link expired',
-    headline: "That link didn't work.",
-    sub: 'Magic links expire after 7 days. Sign up again and click the new link.',
-  },
-  unknown: {
-    banner: "Couldn't find that signup",
-    headline: "Hmm — we don't have a record of that email.",
-    sub: 'Sign up again and click the link in the new email.',
-  },
-};
-
-const c = COPY[status] ?? COPY.ok;
 ---
 <!doctype html>
 <html lang="en">
@@ -34,7 +8,7 @@ const c = COPY[status] ?? COPY.ok;
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <title>{c.headline} — oddlympics</title>
+  <title>Confirmed — oddlympics</title>
   <!-- Privacy-friendly analytics by Plausible -->
   <script async src="https://plausible.io/js/pa-wRAab3seDWDDBnGbRbe0K.js"></script>
   <script is:inline>
@@ -45,14 +19,57 @@ const c = COPY[status] ?? COPY.ok;
 <body>
   <main class="hero">
     <div class="hero-content">
-      <span class="banner">{c.banner}</span>
-      <h1 class="headline">{c.headline}</h1>
-      <p class="subhead">{c.sub}</p>
+      <span id="banner" class="banner"></span>
+      <h1 id="headline" class="headline"></h1>
+      <p id="sub" class="subhead"></p>
+      <p id="cta-row" class="subhead" style="margin-top:24px" hidden>
+        <a href="/" class="link">Re-send confirmation →</a>
+      </p>
       <p class="subhead" style="margin-top:24px">
         <a href="/" class="link">← back to oddlympics</a>
       </p>
     </div>
   </main>
+
+  <script is:inline>
+    try {
+      const COPY = {
+        ok: {
+          banner: "You're in",
+          headline: "Confirmed. We'll see you at kickoff.",
+          sub: "We'll email you the moment oddlympics goes live — well before World Cup 2026 kicks off in June. No spam between now and then.",
+          cta: false,
+        },
+        already: {
+          banner: 'Already confirmed',
+          headline: "You're already on the list.",
+          sub: "Nothing more to do. We'll email you when it's live.",
+          cta: false,
+        },
+        'bad-token': {
+          banner: 'Link expired',
+          headline: "That link didn't work.",
+          sub: 'Magic links expire after 24 hours. Sign up again and click the new link.',
+          cta: true,
+        },
+        unknown: {
+          banner: "Couldn't find that signup",
+          headline: "Hmm — we don't have a record of that email.",
+          sub: 'Sign up again and click the link in the new email.',
+          cta: true,
+        },
+      };
+      const status = new URL(location.href).searchParams.get('status') || 'ok';
+      const c = COPY[status] || COPY.ok;
+      document.getElementById('banner').textContent = c.banner;
+      document.getElementById('headline').textContent = c.headline;
+      document.getElementById('sub').textContent = c.sub;
+      if (c.cta) {
+        document.getElementById('cta-row').hidden = false;
+      }
+      document.title = c.headline + ' — oddlympics';
+    } catch {}
+  </script>
 </body>
 </html>
 
