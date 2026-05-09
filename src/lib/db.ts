@@ -25,6 +25,10 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_vip_signups_confirmed ON vip_signups(confirmed_at);
 `);
 
+db.exec(`
+  ALTER TABLE vip_signups ADD COLUMN IF NOT EXISTS unsubscribed_at INTEGER;
+`);
+
 export type VipSignup = {
   id: number;
   email: string;
@@ -33,6 +37,7 @@ export type VipSignup = {
   created_at: number;
   ip: string | null;
   user_agent: string | null;
+  unsubscribed_at: number | null;
 };
 
 export const upsertVipSignup = db.prepare<
@@ -56,4 +61,11 @@ export const markConfirmed = db.prepare<[string]>(`
 
 export const getByEmail = db.prepare<[string]>(`
   SELECT * FROM vip_signups WHERE email = ?
+`);
+
+export const markUnsubscribed = db.prepare<[string]>(`
+  UPDATE vip_signups
+  SET unsubscribed_at = strftime('%s','now')
+  WHERE email = ? AND unsubscribed_at IS NULL
+  RETURNING *
 `);

@@ -12,6 +12,7 @@ const effectiveSecret = SECRET || 'dev-only-insecure-secret-do-not-use-in-prod';
 type Payload = {
   email: string;
   exp: number;
+  purpose?: 'confirm' | 'unsubscribe';
 };
 
 function b64url(buf: Buffer): string {
@@ -27,13 +28,20 @@ function sign(data: string): string {
   return b64url(createHmac('sha256', effectiveSecret).update(data).digest());
 }
 
-export function mintToken(email: string): string {
+export function mintToken(
+  email: string,
+  opts?: { purpose?: 'confirm' | 'unsubscribe' },
+): string {
   const payload: Payload = { email, exp: Math.floor(Date.now() / 1000) + TTL_SECONDS };
+  if (opts?.purpose) payload.purpose = opts.purpose;
   const body = b64url(Buffer.from(JSON.stringify(payload)));
   return `${body}.${sign(body)}`;
 }
 
-export function verifyToken(token: string): { email: string } | null {
+export function verifyToken(
+  token: string,
+  expectedPurpose?: 'confirm' | 'unsubscribe',
+): { email: string } | null {
   if (typeof token !== 'string' || !token.includes('.')) return null;
   const [body, sig] = token.split('.');
   if (!body || !sig) return null;
@@ -51,5 +59,13 @@ export function verifyToken(token: string): { email: string } | null {
   }
   if (typeof payload.email !== 'string' || typeof payload.exp !== 'number') return null;
   if (Math.floor(Date.now() / 1000) > payload.exp) return null;
+
+  if (expectedPurpose) {
+    // Legacy tokens (minted before D-06) have no purpose field; treat them as 'confirm'
+    // for backward compatibility per D-04 (no proactive invalidation of in-flight tokens).
+    const tokenPurpose = payload.purpose ?? 'confirm';
+    if (tokenPurpose !== expectedPurpose) return null;
+  }
+
   return { email: payload.email };
 }
