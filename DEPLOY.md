@@ -125,6 +125,19 @@ SQL'
 
 Use **DigitalOcean Backups** (Droplet → Backups tab → Enable). Weekly snapshots, ~$1.20/mo for this droplet. Restore by spinning a new droplet from the snapshot.
 
+## Schedule data refresh
+
+The football-data.org ingestor (`scripts/ingest-schedule.mjs`) lands on the droplet at `/opt/oddlympics/scripts/`. Run it manually after a deploy to refresh teams + matches:
+
+```bash
+ssh root@oddlympics.app
+sudo -u oddlympics bash -c \
+  'set -a; . /etc/oddlympics.env; set +a; \
+   cd /opt/oddlympics && node scripts/ingest-schedule.mjs'
+```
+
+Idempotent (upserts on `id` conflict). Free-tier API rate limit is 10 req/min — the script makes 2 calls per run. Once a week is plenty; once a day is fine. Add a cron if you want it automatic.
+
 ## What's in v1 today
 
 - Hero + email capture + magic-link confirm flow (Astro + SQLite + Resend)

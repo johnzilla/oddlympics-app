@@ -47,6 +47,9 @@ jobs:
             --exclude=data \
             ./dist/ \
             "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/dist/"
+          rsync -az --delete \
+            ./scripts/ \
+            "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/scripts/"
           rsync -az \
             ./package.json ./package-lock.json \
             "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/"
