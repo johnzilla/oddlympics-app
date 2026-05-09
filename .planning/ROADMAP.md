@@ -37,13 +37,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   6. Magic-link tokens are revoked on first use (or expire within 24 hours), confirmed by a second-click attempt returning the appropriate error state
 **Plans**: 7 plans
 Plans:
-- [ ] 01-01-PLAN.md — HARDEN-01: fix confirmed.astro prerender + searchParams bug (move COPY map and status read into inline script)
-- [ ] 01-02-PLAN.md — HARDEN-03: flip Origin missing default from allow to deny in /api/signup
-- [ ] 01-03-PLAN.md — HARDEN-06: drop magic-link TTL from 7 days to 24 hours
+- [x] 01-01-PLAN.md — HARDEN-01: fix confirmed.astro prerender + searchParams bug (move COPY map and status read into inline script)
+- [x] 01-02-PLAN.md — HARDEN-03: flip Origin missing default from allow to deny in /api/signup
+- [x] 01-03-PLAN.md — HARDEN-06: drop magic-link TTL from 7 days to 24 hours
 - [ ] 01-04-PLAN.md — HARDEN-02: full unsubscribe slice (DB column, token purpose claim, /api/unsubscribe endpoint, /unsubscribed page, RFC 8058 helper)
-- [ ] 01-05-PLAN.md — HARDEN-04 (report-only): add Content-Security-Policy-Report-Only to Caddyfile, observe 1-2 days
+- [x] 01-05-PLAN.md — HARDEN-04 (report-only): add Content-Security-Policy-Report-Only to Caddyfile, observe 1-2 days
 - [ ] 01-06-PLAN.md — HARDEN-04 (enforce): flip CSP from report-only to enforce, verify A grade on securityheaders.com
-- [ ] 01-07-PLAN.md — HARDEN-05: daily off-droplet backup to Backblaze B2 via systemd timer + restore runbook + drill
+- [x] 01-07-PLAN.md — HARDEN-05: daily off-droplet backup to Backblaze B2 via systemd timer + restore runbook + drill
 
 ### Phase 2: Identity & Personal Schedule
 **Goal**: A signed-up user can identify themselves via magic-link, pick the teams they follow, and view a personal match schedule with all kickoffs in their local time
