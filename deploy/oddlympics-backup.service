@@ -1,0 +1,42 @@
+# /etc/systemd/system/oddlympics-backup.service
+#
+# Daily SQLite backup -> Backblaze B2.
+# Triggered by oddlympics-backup.timer; runs once and exits (Type=oneshot).
+# Loads B2 credentials from /etc/oddlympics-backup.env (separate from the app
+# env so the app process cannot read the backup key).
+
+[Unit]
+Description=oddlympics SQLite backup -> Backblaze B2
+After=network-online.target oddlympics.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=oddlympics
+Group=oddlympics
+WorkingDirectory=/var/lib/oddlympics
+EnvironmentFile=/etc/oddlympics-backup.env
+
+ExecStart=/opt/oddlympics/deploy/oddlympics-backup.sh
+
+# DB is read here, snapshot tempfile written under /var/cache/oddlympics-backup
+ReadWritePaths=/var/lib/oddlympics /var/cache/oddlympics-backup
+
+# Hardening (cloned from oddlympics.service)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+MemoryDenyWriteExecute=false
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+
+# Logs go to journald; tail with: journalctl -u oddlympics-backup -f
+StandardOutput=journal
+StandardError=journal

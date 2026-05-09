@@ -1,0 +1,15 @@
+# /etc/systemd/system/oddlympics-backup.timer
+#
+# Fires daily at 03:00 UTC. Persistent=true ensures we run on next boot if
+# the droplet was offline at the scheduled time.
+
+[Unit]
+Description=Daily oddlympics SQLite backup to B2
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 UTC
+Persistent=true
+Unit=oddlympics-backup.service
+
+[Install]
+WantedBy=timers.target
