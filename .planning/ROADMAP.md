@@ -3,95 +3,91 @@
 ## Overview
 
 The teaser is live and collecting emails. This milestone turns it into the actual product before
-World Cup group stage kicks off on 2026-06-11. Phase 1 hardens the existing teaser so it's safe
-to email at scale. Phase 2 gives users a personalized match schedule. Phase 3 fires the
-kickoff notifications that close the core value loop. Phase 4 surfaces the Lightning tip jar.
-Each phase builds on the last; if time runs short, earlier phases still deliver value.
+World Cup group stage kicks off on **2026-06-11** (33 days from 2026-05-09). The roadmap is
+trimmed for the deadline: solo developer, evenings + weekends, ~60-80 hours of focused work.
+Anything not strictly required for the core value loop (pick a team → see your schedule →
+get a kickoff email) is deferred to v1.1.
+
+The core value loop ships in Phases 2 + 3. Phase 1 hardening is essentially done in-repo.
+Phase 2.5 (launch comms) is the bridge that converts the existing teaser list into actual
+Phase-2 users.
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
-
-Decimal phases appear between their surrounding integers in numeric order.
-
-- [ ] **Phase 1: Pre-launch Hardening** - Existing teaser becomes safe to mass-email real users
-- [ ] **Phase 2: Identity & Personal Schedule** - Users pick teams and see their matches in local time
-- [ ] **Phase 3: Kickoff Notifications** - Users receive email (+ optional Telegram) before every match
-- [ ] **Phase 4: Lightning Tip Jar** - Single global tip jar visible on schedule and in notification footer
+- [x] **Phase 1: Pre-launch Hardening** — fixes + safety guards on the existing teaser
+- [ ] **Phase 2: Identity & Personal Schedule** — magic-link return flow, team picker, schedule data, personal schedule page
+- [ ] **Phase 2.5: Launch Comms** — email the existing teaser list to invite them to pick teams
+- [ ] **Phase 3: Kickoff Notifications** — email ~60 min before each subscribed match (idempotent)
 
 ## Phase Details
 
-### Phase 1: Pre-launch Hardening
-**Goal**: The existing teaser app has all known bugs fixed and security/compliance gaps closed before any production email campaign runs
-**Mode:** mvp
-**Depends on**: Nothing (first phase)
-**Requirements**: HARDEN-01, HARDEN-02, HARDEN-03, HARDEN-04, HARDEN-05, HARDEN-06
-**Success Criteria** (what must be TRUE):
-  1. Production error pages render the correct copy for all `/confirmed` redirect targets (`ok`, `already`, `bad-token`, `unknown`) — a user who clicks an expired link sees an error, not a false success
-  2. Every notification email contains a working one-click unsubscribe link, and a user who clicks it is removed from future mailings
-  3. A POST to `/api/signup` with no `Origin` header is rejected with an appropriate error response
-  4. Caddy serves a `Content-Security-Policy` header on all pages that passes an automated security header scanner
-  5. The SQLite database is automatically backed up off-droplet daily, and the restore procedure is documented and tested
-  6. Magic-link tokens are revoked on first use (or expire within 24 hours), confirmed by a second-click attempt returning the appropriate error state
-**Plans**: 7 plans
+### Phase 1: Pre-launch Hardening — DONE (in-repo)
+**Goal**: Fix known bugs and close compliance gaps in the existing teaser before mass-emailing real users.
+**Requirements**: HARDEN-01, HARDEN-02, HARDEN-03, HARDEN-04, HARDEN-06
+**Status**: All in-repo work merged. Commits on `main`.
+
 Plans:
-- [x] 01-01-PLAN.md — HARDEN-01: fix confirmed.astro prerender + searchParams bug (move COPY map and status read into inline script)
-- [x] 01-02-PLAN.md — HARDEN-03: flip Origin missing default from allow to deny in /api/signup
-- [x] 01-03-PLAN.md — HARDEN-06: drop magic-link TTL from 7 days to 24 hours
-- [x] 01-04-PLAN.md — HARDEN-02: full unsubscribe slice (DB column, token purpose claim, /api/unsubscribe endpoint, /unsubscribed page, RFC 8058 helper)
-- [x] 01-05-PLAN.md — HARDEN-04 (report-only): add Content-Security-Policy-Report-Only to Caddyfile, observe 1-2 days
-- [ ] 01-06-PLAN.md — HARDEN-04 (enforce): flip CSP from report-only to enforce, verify A grade on securityheaders.com
-- [x] 01-07-PLAN.md — HARDEN-05: daily off-droplet backup to Backblaze B2 via systemd timer + restore runbook + drill
+- [x] 01-01 — HARDEN-01: confirmed.astro renders correct copy for all `?status=` values
+- [x] 01-02 — HARDEN-03: `/api/signup` rejects POSTs with no Origin header
+- [x] 01-03 — HARDEN-06: magic-link TTL 7d → 24h
+- [x] 01-04 — HARDEN-02: full unsubscribe slice (DB column, token purpose, /api/unsubscribe, /unsubscribed page, RFC 8058 helper)
+- [x] 01-05 — HARDEN-04: enforcing `Content-Security-Policy` header in Caddyfile
+
+**Operator action remaining (not a code change):**
+- Enable **DigitalOcean Backups** in the droplet dashboard (~$1.20/mo). Replaces the originally-planned Backblaze B2 setup. Click once, forget.
 
 ### Phase 2: Identity & Personal Schedule
-**Goal**: A signed-up user can identify themselves via magic-link, pick the teams they follow, and view a personal match schedule with all kickoffs in their local time
-**Mode:** mvp
+**Goal**: A signed-up user can request a magic-link, pick the teams they follow, and see their personal schedule with all kickoffs in their browser's local time zone.
 **Depends on**: Phase 1
-**Requirements**: IDENT-01, IDENT-02, IDENT-03, IDENT-04, IDENT-05, DATA-01, DATA-02, DATA-03, DATA-04
-**Success Criteria** (what must be TRUE):
-  1. A user who received the original teaser confirmation email can request a new magic-link and land on a team-selection page without creating a new account
-  2. A user can pick one or more teams from the full 48-team World Cup 2026 list and have their selection saved
-  3. A user who returns via magic-link later can change their team selection and see the update reflected immediately
-  4. The user's personal schedule page shows only matches involving their selected teams, with each kickoff displayed in the browser's local time zone
-  5. A nightly schedule refresh runs without breaking the app; a refresh failure produces a log entry and alert rather than silently serving stale data
-**Plans**: TBD
-**UI hint**: yes
+**Requirements**: IDENT-01, IDENT-02, IDENT-03, IDENT-04, IDENT-05, DATA-01, DATA-02, DATA-04
+**Success Criteria**:
+  1. A user already in the teaser list can request a new magic-link from the homepage and land on a team-selection page (no separate signup).
+  2. The team picker shows all 48 World Cup 2026 teams; selection is multi-select; selection persists.
+  3. A user who returns later via magic-link sees their previous selection and can edit it.
+  4. The personal schedule page shows only matches involving selected teams, kickoffs in browser local time.
+  5. Schedule data is ingested from a free public API (football-data.org or similar) into local SQLite, refreshed nightly. Failures log + alert; the app never serves silently-stale data.
+
+**Risk**: DATA-01's external API is the only real unknown. Spike it early — pick a provider, get a key, write a 50-line ingestor against the actual JSON. If the chosen API can't deliver World Cup 2026 fixtures, you need to know in week 1, not week 4.
+
+**UI hint**: yes (team picker + schedule are user-facing surfaces)
+
+### Phase 2.5: Launch Comms
+**Goal**: Convert the existing teaser-list signups into Phase-2 users by emailing them a "pick your teams" magic-link.
+**Depends on**: Phase 2
+**Requirements**: LAUNCH-01
+**Success Criteria**:
+  1. A single email blast goes out to all confirmed (and not-unsubscribed) rows in `vip_signups` with a one-click magic-link to the team-picker page.
+  2. The blast is throttled enough to stay inside Resend's free-tier rate limits.
+  3. Conversions are visible in Plausible (link click → team picker → schedule page funnel).
+
+**Why this is its own phase**: it's the moment v1 actually launches to real users. Worth treating as deliberate work, not an afterthought tacked onto Phase 2.
 
 ### Phase 3: Kickoff Notifications
-**Goal**: Users receive a timely kickoff notification (email, and optionally Telegram) ~60 minutes before every match they are subscribed to, with no duplicate sends
-**Mode:** mvp
+**Goal**: Subscribed users receive an email ~60 minutes before each match they care about, in their local time, with no duplicates.
 **Depends on**: Phase 2
-**Requirements**: NOTIFY-01, NOTIFY-02, NOTIFY-03, NOTIFY-04
-**Success Criteria** (what must be TRUE):
-  1. A user receives an email ~60 minutes before each subscribed match containing the teams, kickoff time in their local time zone, and a no-login link to their personal schedule
-  2. A user who links a Telegram chat ID via the deep-link in their email receives the same notification through the Telegram bot
-  3. If the notification scheduler runs twice for the same match window, the user receives exactly one notification per channel — not two
-  4. The no-login schedule link in a notification email resolves to the user's full personal schedule without requiring them to re-authenticate
-**Plans**: TBD
-**UI hint**: yes
+**Requirements**: NOTIFY-01, NOTIFY-03, NOTIFY-04
+**Success Criteria**:
+  1. A user receives an email ~60 min before each subscribed match: teams, kickoff in their TZ, no-login link to their schedule.
+  2. Re-running the scheduler does not double-send. One notification per (user, match, channel).
+  3. The no-login schedule link in the email resolves to the user's full schedule without re-authenticating.
 
-### Phase 4: Lightning Tip Jar
-**Goal**: A single global Lightning tip jar is visible to every user on their schedule page and in every notification email footer, integrated with vaultwarden
-**Mode:** mvp
-**Depends on**: Phase 3
-**Requirements**: TIP-01, TIP-02
-**Success Criteria** (what must be TRUE):
-  1. The tip jar is visible on the personal schedule page and in the footer of all notification emails
-  2. A user who clicks the tip jar link is taken to a working Lightning payment surface (LNURL, embedded widget, or invoice — integration shape decided at phase planning)
-  3. The integration uses the vaultwarden treasury and the chosen shape is documented so it can be changed in v1.1
-**Plans**: TBD
-**UI hint**: yes
+**UI hint**: only the email template; no new pages.
+
+## Deferred to v1.1 (post-launch)
+
+These were originally in the v1 scope but are not required for the World Cup launch. Re-prioritize after the first weekend of group-stage notifications has run cleanly.
+
+- **Telegram notifications** (was NOTIFY-02): bot token, /start handler, deep-link verification, webhook/polling. Real ops surface; email-only is a complete product for v1.
+- **Lightning tip jar** (was Phase 4 / TIP-01, TIP-02): the **vaultwarden** integration shape needs proper design time. Ship v1 without it; add a hardcoded LNURL or `lightning:` URI in the email footer if you want a placeholder. Real integration in v1.1.
+- **Schedule admin override** (was DATA-03): editing match rows by hand. FIFA's API isn't going to silently misreport kickoff times; if it does, the next nightly refresh fixes it. Build only if a real incident demands it.
 
 ## Progress
 
-**Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Pre-launch Hardening | 0/7 | Not started | - |
+| Phase | Plans | Status | Completed |
+|-------|-------|--------|-----------|
+| 1. Pre-launch Hardening | 5/5 | Done (in-repo) | 2026-05-09 |
 | 2. Identity & Personal Schedule | 0/TBD | Not started | - |
+| 2.5. Launch Comms | 0/TBD | Not started | - |
 | 3. Kickoff Notifications | 0/TBD | Not started | - |
-| 4. Lightning Tip Jar | 0/TBD | Not started | - |
+
+**Execution order:** 2 → 2.5 → 3
