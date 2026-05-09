@@ -12,7 +12,7 @@ const effectiveSecret = SECRET || 'dev-only-insecure-secret-do-not-use-in-prod';
 type Payload = {
   email: string;
   exp: number;
-  purpose?: 'confirm' | 'unsubscribe';
+  purpose?: 'confirm' | 'unsubscribe' | 'manage';
 };
 
 function b64url(buf: Buffer): string {
@@ -30,7 +30,7 @@ function sign(data: string): string {
 
 export function mintToken(
   email: string,
-  opts?: { purpose?: 'confirm' | 'unsubscribe' },
+  opts?: { purpose?: 'confirm' | 'unsubscribe' | 'manage' },
 ): string {
   const payload: Payload = { email, exp: Math.floor(Date.now() / 1000) + TTL_SECONDS };
   if (opts?.purpose) payload.purpose = opts.purpose;
@@ -40,7 +40,7 @@ export function mintToken(
 
 export function verifyToken(
   token: string,
-  expectedPurpose?: 'confirm' | 'unsubscribe',
+  expectedPurpose?: 'confirm' | 'unsubscribe' | 'manage',
 ): { email: string } | null {
   if (typeof token !== 'string' || !token.includes('.')) return null;
   const [body, sig] = token.split('.');

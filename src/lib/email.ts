@@ -63,3 +63,38 @@ export function buildUnsubscribeHeaders(email: string): {
     'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
   };
 }
+
+export async function sendManageLink(email: string, token: string): Promise<void> {
+  const url = `${SITE_URL}/schedule?token=${encodeURIComponent(token)}`;
+  const subject = 'Pick your World Cup teams — oddlympics';
+  const text = [
+    'Pick the teams you want kickoff notifications for.',
+    '',
+    url,
+    '',
+    "This link is good for 24 hours. Request a new one anytime.",
+    '',
+    '— oddlympics',
+  ].join('\n');
+
+  const html = `<!doctype html>
+<html><body style="font:14px ui-monospace,SFMono-Regular,Menlo,monospace;color:#111;background:#fafafa;padding:32px">
+<div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #eee;border-radius:8px;padding:28px">
+  <h1 style="font-size:18px;margin:0 0 12px">Pick your teams</h1>
+  <p style="margin:0 0 20px;line-height:1.55">Tap below to choose the World Cup teams you want kickoff notifications for. We'll send a single email about an hour before each match they play, in your local time.</p>
+  <p style="margin:0 0 24px"><a href="${url}" style="display:inline-block;background:hsl(18 70% 56%);color:#0b0b0e;text-decoration:none;padding:12px 18px;border-radius:6px;font-weight:700">Open my schedule</a></p>
+  <p style="margin:0 0 8px;color:#666;font-size:12px">Or paste this URL:</p>
+  <p style="margin:0 0 24px;word-break:break-all;color:#666;font-size:12px">${url}</p>
+  <p style="margin:0;color:#999;font-size:11px">This link is good for 24 hours. If you didn't request this, ignore this email.</p>
+</div>
+</body></html>`;
+
+  if (!resend) {
+    console.log('\n[email-dev-fallback] Manage link for', email);
+    console.log('  ', url, '\n');
+    return;
+  }
+
+  const { error } = await resend.emails.send({ from: FROM, to: email, subject, text, html });
+  if (error) throw new Error(`Resend error: ${error.message}`);
+}
