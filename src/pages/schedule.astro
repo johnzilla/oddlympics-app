@@ -2,14 +2,25 @@
 export const prerender = false;
 
 import { verifyToken } from '../lib/token';
+import { buildSessionCookie, readSessionFromCookie } from '../lib/session';
 import { db, getTeams, getByEmail, type Team, type VipSignup, type Match } from '../lib/db';
 
 const url = Astro.url;
-const token = url.searchParams.get('token') ?? '';
+const urlToken = url.searchParams.get('token') ?? '';
 const status = url.searchParams.get('status') ?? '';
 
-const result = verifyToken(token, 'manage');
+// Auth: prefer URL token (manage flow on first arrival); fall back to session cookie.
+// On URL-token success, mint a 30-day session cookie so subsequent visits skip the email step.
+let result = urlToken ? verifyToken(urlToken, 'manage') : null;
+if (result) {
+  Astro.response.headers.set('Set-Cookie', buildSessionCookie(result.email));
+}
+if (!result) {
+  result = readSessionFromCookie(Astro.request.headers.get('cookie'));
+}
+
 const valid = result !== null;
+const hadUrlToken = urlToken.length > 0;
 
 let user: VipSignup | undefined;
 let teams: Team[] = [];
@@ -71,18 +82,30 @@ const statusMsg = status ? STATUS_COPY[status] : null;
     <div class="hero-content">
       {!valid ? (
         <>
-          <span class="banner">Link expired</span>
-          <h1 class="headline">That link didn't work.</h1>
-          <p class="subhead">
-            Magic links expire after 24 hours. <a href="/manage" class="link">Request a new one</a>.
-          </p>
+          {hadUrlToken ? (
+            <>
+              <span class="banner">Link expired</span>
+              <h1 class="headline">That link didn't work.</h1>
+              <p class="subhead">
+                Magic links expire after 24 hours. <a href="/manage" class="link">Request a new one</a>.
+              </p>
+            </>
+          ) : (
+            <>
+              <span class="banner">Sign in</span>
+              <h1 class="headline">Get a link to your schedule.</h1>
+              <p class="subhead">
+                You're signed out on this device. <a href="/manage" class="link">Send me a magic link</a> to come back in.
+              </p>
+            </>
+          )}
         </>
       ) : (
         <>
           <span class="banner">Your schedule</span>
           <h1 class="headline">Pick the teams you follow.</h1>
           <p class="subhead">
-            We'll email you about an hour before each match they play, in your local time. Change anytime — just request another link.
+            We'll email you about an hour before each match they play, in your local time. Change anytime — your sign-in lasts 30 days on this device.
           </p>
 
           {statusMsg && (
@@ -90,7 +113,7 @@ const statusMsg = status ? STATUS_COPY[status] : null;
           )}
 
           <form method="post" action="/api/save-selection" class="picker-form">
-            <input type="hidden" name="token" value={token} />
+            {hadUrlToken && <input type="hidden" name="token" value={urlToken} />}
             <input type="hidden" name="timezone" id="tz" value="UTC" />
 
             <fieldset class="picker">
@@ -141,6 +164,14 @@ const statusMsg = status ? STATUS_COPY[status] : null;
 
       <p class="subhead" style="margin-top:32px">
         <a href="/" class="link">← oddlympics.app</a>
+        {valid && (
+          <>
+            {' · '}
+            <form method="post" action="/api/logout" style="display:inline">
+              <button type="submit" class="link-button">Log out</button>
+            </form>
+          </>
+        )}
       </p>
     </div>
   </main>
@@ -220,6 +251,17 @@ const statusMsg = status ? STATUS_COPY[status] : null;
   .match-stage { color: var(--fg-dim); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
   .match-teams { font-weight: 700; }
   .match-teams .dim { color: var(--fg-dim); font-weight: 400; margin: 0 4px; }
+
+  .link-button {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--accent);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
 
   @media (max-width: 640px) {
     :root { --pad: 24px; }

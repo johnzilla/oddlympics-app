@@ -1,5 +1,11 @@
 ---
-export const prerender = true;
+export const prerender = false;
+import { readSessionFromCookie } from '../lib/session';
+
+// If the user already has a valid session cookie, skip the email step entirely.
+const session = readSessionFromCookie(Astro.request.headers.get('cookie'));
+if (session) return Astro.redirect('/schedule');
+
 const title = 'Manage your schedule — oddlympics';
 ---
 <!doctype html>

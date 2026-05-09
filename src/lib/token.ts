@@ -12,7 +12,7 @@ const effectiveSecret = SECRET || 'dev-only-insecure-secret-do-not-use-in-prod';
 type Payload = {
   email: string;
   exp: number;
-  purpose?: 'confirm' | 'unsubscribe' | 'manage';
+  purpose?: 'confirm' | 'unsubscribe' | 'manage' | 'session';
 };
 
 function b64url(buf: Buffer): string {
@@ -30,9 +30,13 @@ function sign(data: string): string {
 
 export function mintToken(
   email: string,
-  opts?: { purpose?: 'confirm' | 'unsubscribe' | 'manage' },
+  opts?: {
+    purpose?: 'confirm' | 'unsubscribe' | 'manage' | 'session';
+    ttlSeconds?: number;
+  },
 ): string {
-  const payload: Payload = { email, exp: Math.floor(Date.now() / 1000) + TTL_SECONDS };
+  const ttl = opts?.ttlSeconds ?? TTL_SECONDS;
+  const payload: Payload = { email, exp: Math.floor(Date.now() / 1000) + ttl };
   if (opts?.purpose) payload.purpose = opts.purpose;
   const body = b64url(Buffer.from(JSON.stringify(payload)));
   return `${body}.${sign(body)}`;
@@ -40,7 +44,7 @@ export function mintToken(
 
 export function verifyToken(
   token: string,
-  expectedPurpose?: 'confirm' | 'unsubscribe' | 'manage',
+  expectedPurpose?: 'confirm' | 'unsubscribe' | 'manage' | 'session',
 ): { email: string } | null {
   if (typeof token !== 'string' || !token.includes('.')) return null;
   const [body, sig] = token.split('.');

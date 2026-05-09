@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { setSelection } from '../../lib/db';
 import { verifyToken } from '../../lib/token';
+import { buildSessionCookie, readSessionFromCookie } from '../../lib/session';
 
 export const prerender = false;
 
@@ -8,13 +9,12 @@ const TEAM_ID_RE = /^\d{1,8}$/;
 // IANA timezones are like "America/New_York" or "UTC" — tolerate +/-, _, /, and word chars.
 const TZ_RE = /^[A-Za-z][A-Za-z0-9_+\-/]{0,63}$/;
 
-function back(token: string, status: string): Response {
-  return new Response(null, {
-    status: 303,
-    headers: {
-      Location: `/schedule?token=${encodeURIComponent(token)}&status=${encodeURIComponent(status)}`,
-    },
-  });
+function redirectTo(token: string, status: string, setCookie?: string): Response {
+  const params = new URLSearchParams({ status });
+  if (token) params.set('token', token);
+  const headers: Record<string, string> = { Location: `/schedule?${params}` };
+  if (setCookie) headers['Set-Cookie'] = setCookie;
+  return new Response(null, { status: 303, headers });
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -25,11 +25,16 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response('bad form', { status: 400 });
   }
 
-  const token = ((form.get('token') as string) ?? '').trim();
-  if (!token) return new Response('missing token', { status: 400 });
-
-  const result = verifyToken(token, 'manage');
-  if (!result) return back(token, 'bad-token');
+  // Auth: form token (manage purpose, came from the rendered URL) OR session cookie.
+  const formToken = ((form.get('token') as string) ?? '').trim();
+  let result = formToken ? verifyToken(formToken, 'manage') : null;
+  if (!result) result = readSessionFromCookie(request.headers.get('cookie'));
+  if (!result) {
+    return new Response(null, {
+      status: 303,
+      headers: { Location: '/manage?error=bad-token' },
+    });
+  }
 
   // team_ids comes as repeated form fields: team_ids=762, team_ids=769, ...
   const rawIds = form.getAll('team_ids') as string[];
@@ -43,22 +48,23 @@ export const POST: APIRoute = async ({ request }) => {
   }
   // Cap at 48 (the entire field) just to bound the JSON size we store.
   if (teamIds.length > 48) {
-    return back(token, 'too-many');
+    return redirectTo(formToken, 'too-many');
   }
 
   const tz = ((form.get('timezone') as string) ?? '').trim();
-  if (!TZ_RE.test(tz)) return back(token, 'bad-tz');
+  if (!TZ_RE.test(tz)) return redirectTo(formToken, 'bad-tz');
 
   // Dedupe + sort for stable storage.
   const unique = Array.from(new Set(teamIds)).sort((a, b) => a - b);
 
   try {
     const updated = setSelection.get(JSON.stringify(unique), tz, result.email);
-    if (!updated) return back(token, 'unknown');
+    if (!updated) return redirectTo(formToken, 'unknown');
   } catch (err) {
     console.error('[save-selection] db error', err);
-    return back(token, 'server');
+    return redirectTo(formToken, 'server');
   }
 
-  return back(token, 'saved');
+  // Refresh the 30-day session cookie on each successful save (sliding window).
+  return redirectTo(formToken, 'saved', buildSessionCookie(result.email));
 };
