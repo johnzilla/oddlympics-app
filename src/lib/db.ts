@@ -31,9 +31,13 @@ db.exec(`
   const cols = db
     .prepare("SELECT name FROM pragma_table_info('vip_signups')")
     .all() as { name: string }[];
-  if (!cols.some((c) => c.name === 'unsubscribed_at')) {
+  const has = (n: string) => cols.some((c) => c.name === n);
+  if (!has('unsubscribed_at'))
     db.exec(`ALTER TABLE vip_signups ADD COLUMN unsubscribed_at INTEGER;`);
-  }
+  if (!has('selected_teams'))
+    db.exec(`ALTER TABLE vip_signups ADD COLUMN selected_teams TEXT;`);
+  if (!has('timezone'))
+    db.exec(`ALTER TABLE vip_signups ADD COLUMN timezone TEXT;`);
 }
 
 export type VipSignup = {
@@ -45,6 +49,8 @@ export type VipSignup = {
   ip: string | null;
   user_agent: string | null;
   unsubscribed_at: number | null;
+  selected_teams: string | null; // JSON array of team IDs, e.g. "[762,769]"
+  timezone: string | null; // IANA TZ, e.g. "America/New_York"
 };
 
 export const upsertVipSignup = db.prepare<
@@ -149,4 +155,12 @@ export const upsertMatch = db.prepare<
 
 export const getTeams = db.prepare(`
   SELECT * FROM teams ORDER BY name
+`);
+
+// Phase 2 — IDENT-03 / IDENT-05: persist team selection + timezone for a confirmed user.
+export const setSelection = db.prepare<[string, string, string]>(`
+  UPDATE vip_signups
+  SET selected_teams = ?, timezone = ?
+  WHERE email = ? AND confirmed_at IS NOT NULL AND unsubscribed_at IS NULL
+  RETURNING *
 `);
