@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { mintToken } from './token';
 
 const API_KEY = process.env.RESEND_API_KEY ?? '';
 const FROM = process.env.EMAIL_FROM ?? 'oddlympics <onboarding@resend.dev>';
@@ -49,4 +50,16 @@ export async function sendMagicLink(email: string, token: string): Promise<void>
 
   const { error } = await resend.emails.send({ from: FROM, to: email, subject, text, html });
   if (error) throw new Error(`Resend error: ${error.message}`);
+}
+
+export function buildUnsubscribeHeaders(email: string): {
+  'List-Unsubscribe': string;
+  'List-Unsubscribe-Post': string;
+} {
+  const token = mintToken(email, { purpose: 'unsubscribe' });
+  const url = `${SITE_URL}/api/unsubscribe?token=${encodeURIComponent(token)}`;
+  return {
+    'List-Unsubscribe': `<${url}>`,
+    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+  };
 }
