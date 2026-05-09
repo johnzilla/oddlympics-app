@@ -1,0 +1,230 @@
+---
+export const prerender = false;
+
+import { verifyToken } from '../lib/token';
+import { db, getTeams, getByEmail, type Team, type VipSignup, type Match } from '../lib/db';
+
+const url = Astro.url;
+const token = url.searchParams.get('token') ?? '';
+const status = url.searchParams.get('status') ?? '';
+
+const result = verifyToken(token, 'manage');
+const valid = result !== null;
+
+let user: VipSignup | undefined;
+let teams: Team[] = [];
+let selectedIds: number[] = [];
+let matches: Array<Match & { home_tla: string | null; home_name: string | null; away_tla: string | null; away_name: string | null }> = [];
+
+if (valid && result) {
+  user = getByEmail.get(result.email) as VipSignup | undefined;
+  teams = getTeams.all() as Team[];
+
+  if (user?.selected_teams) {
+    try {
+      const parsed = JSON.parse(user.selected_teams);
+      if (Array.isArray(parsed)) selectedIds = parsed.filter((n) => typeof n === 'number');
+    } catch {
+      selectedIds = [];
+    }
+  }
+
+  if (selectedIds.length > 0) {
+    const placeholders = selectedIds.map(() => '?').join(',');
+    matches = db
+      .prepare(
+        `SELECT m.*,
+                h.tla AS home_tla, h.name AS home_name,
+                a.tla AS away_tla, a.name AS away_name
+         FROM matches m
+         LEFT JOIN teams h ON m.home_team_id = h.id
+         LEFT JOIN teams a ON m.away_team_id = a.id
+         WHERE m.home_team_id IN (${placeholders})
+            OR m.away_team_id IN (${placeholders})
+         ORDER BY m.utc_date ASC`,
+      )
+      .all(...selectedIds, ...selectedIds) as typeof matches;
+  }
+}
+
+const STATUS_COPY: Record<string, { kind: 'ok' | 'err'; text: string }> = {
+  saved: { kind: 'ok', text: 'Saved. Your schedule is updated below.' },
+  'bad-token': { kind: 'err', text: 'That link is no longer valid. Request a new one.' },
+  'bad-tz': { kind: 'err', text: "Couldn't read your time zone. Try again." },
+  'too-many': { kind: 'err', text: "That's a lot of teams. Pick fewer." },
+  unknown: { kind: 'err', text: "We couldn't find your signup. Sign up at /." },
+  server: { kind: 'err', text: 'Server hiccup. Try again in a minute.' },
+};
+const statusMsg = status ? STATUS_COPY[status] : null;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Your schedule — oddlympics</title>
+</head>
+<body>
+  <main class="hero">
+    <div class="hero-content">
+      {!valid ? (
+        <>
+          <span class="banner">Link expired</span>
+          <h1 class="headline">That link didn't work.</h1>
+          <p class="subhead">
+            Magic links expire after 24 hours. <a href="/manage" class="link">Request a new one</a>.
+          </p>
+        </>
+      ) : (
+        <>
+          <span class="banner">Your schedule</span>
+          <h1 class="headline">Pick the teams you follow.</h1>
+          <p class="subhead">
+            We'll email you about an hour before each match they play, in your local time. Change anytime — just request another link.
+          </p>
+
+          {statusMsg && (
+            <p class={`flash ${statusMsg.kind}`} role="status">{statusMsg.text}</p>
+          )}
+
+          <form method="post" action="/api/save-selection" class="picker-form">
+            <input type="hidden" name="token" value={token} />
+            <input type="hidden" name="timezone" id="tz" value="UTC" />
+
+            <fieldset class="picker">
+              <legend class="legend">48 teams · pick any number</legend>
+              <div class="grid">
+                {teams.map((t) => (
+                  <label class="team">
+                    <input
+                      type="checkbox"
+                      name="team_ids"
+                      value={t.id}
+                      checked={selectedIds.includes(t.id)}
+                    />
+                    <span class="tla">{t.tla}</span>
+                    <span class="name">{t.name}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <button type="submit">Save selection</button>
+          </form>
+
+          {selectedIds.length > 0 && (
+            <section class="schedule">
+              <h2 class="section-h">Your matches ({matches.length})</h2>
+              {matches.length === 0 ? (
+                <p class="subhead">No matches yet. Once the schedule is loaded for your picks, they'll show up here.</p>
+              ) : (
+                <ol class="match-list" id="match-list">
+                  {matches.map((m) => (
+                    <li class="match" data-utc={m.utc_date}>
+                      <span class="match-time" data-utc={m.utc_date}>
+                        {new Date(m.utc_date * 1000).toISOString()}
+                      </span>
+                      <span class="match-stage">{m.group_name ?? m.stage.replace(/_/g, ' ')}</span>
+                      <span class="match-teams">
+                        {m.home_tla ?? 'TBD'} <span class="dim">vs</span> {m.away_tla ?? 'TBD'}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </section>
+          )}
+        </>
+      )}
+
+      <p class="subhead" style="margin-top:32px">
+        <a href="/" class="link">← oddlympics.app</a>
+      </p>
+    </div>
+  </main>
+
+  <script is:inline>
+    // IDENT-05: capture browser timezone and post it with the form.
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      const el = document.getElementById('tz');
+      if (el) el.value = tz;
+    } catch {}
+
+    // Render UTC kickoffs in the user's local time. The server emitted ISO
+    // UTC strings as a fallback; this overwrites them.
+    try {
+      const fmt = new Intl.DateTimeFormat(undefined, {
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit',
+        timeZoneName: 'short',
+      });
+      document.querySelectorAll('.match-time').forEach((el) => {
+        const utc = Number(el.getAttribute('data-utc'));
+        if (Number.isFinite(utc)) el.textContent = fmt.format(new Date(utc * 1000));
+      });
+    } catch {}
+  </script>
+</body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #0b0b0e;
+    --fg: #ececf1;
+    --fg-dim: #b8b8c2;
+    --line: rgba(255, 255, 255, 0.18);
+    --surface: rgba(255, 255, 255, 0.06);
+    --accent: hsl(18 70% 56%);
+    --accent-ink: #0b0b0e;
+    --ok: hsl(140 50% 60%);
+    --err: hsl(360 70% 65%);
+    --pad: 48px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--mono); -webkit-font-smoothing: antialiased; }
+  body { min-height: 100dvh; }
+  .hero { min-height: 100dvh; display: block; padding: var(--pad); }
+  .hero-content { max-width: 920px; margin: 0 auto; }
+  .banner { display: inline-block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: var(--accent); border: 1px solid var(--accent); padding: 5px 10px; border-radius: 999px; margin-bottom: 18px; }
+  .headline { font-size: 36px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 14px; }
+  .subhead { font-size: 14px; line-height: 1.55; color: var(--fg-dim); margin: 0 0 24px; max-width: 600px; }
+  .link { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+  .flash { font-size: 13px; padding: 10px 14px; border-radius: 6px; margin: 0 0 20px; max-width: 600px; }
+  .flash.ok { color: var(--ok); border: 1px solid var(--ok); background: rgba(120, 220, 140, 0.06); }
+  .flash.err { color: var(--err); border: 1px solid var(--err); background: rgba(255, 100, 100, 0.06); }
+
+  .picker-form { margin: 0 0 32px; }
+  .picker { border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin: 0 0 16px; background: var(--surface); }
+  .legend { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-dim); padding: 0 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; margin-top: 10px; }
+
+  .team { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  .team:hover { background: rgba(255,255,255,0.04); }
+  .team input { accent-color: var(--accent); }
+  .team .tla { color: var(--accent); font-weight: 700; min-width: 36px; }
+  .team .name { color: var(--fg); }
+
+  button[type="submit"] { padding: 12px 18px; font-family: var(--mono); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; }
+  button[type="submit"]:hover { filter: brightness(1.08); }
+
+  .schedule { margin-top: 16px; }
+  .section-h { font-size: 18px; font-weight: 700; margin: 0 0 12px; }
+  .match-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+  .match { display: grid; grid-template-columns: minmax(180px, 240px) minmax(80px, 110px) 1fr; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; background: var(--surface); }
+  .match-time { color: var(--fg); }
+  .match-stage { color: var(--fg-dim); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .match-teams { font-weight: 700; }
+  .match-teams .dim { color: var(--fg-dim); font-weight: 400; margin: 0 4px; }
+
+  @media (max-width: 640px) {
+    :root { --pad: 24px; }
+    .headline { font-size: 28px; }
+    .grid { grid-template-columns: 1fr 1fr; }
+    .match { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>
