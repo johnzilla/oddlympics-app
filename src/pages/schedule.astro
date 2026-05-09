@@ -114,7 +114,23 @@ const statusMsg = status ? STATUS_COPY[status] : null;
 
           <form method="post" action="/api/save-selection" class="picker-form">
             {hadUrlToken && <input type="hidden" name="token" value={urlToken} />}
-            <input type="hidden" name="timezone" id="tz" value="UTC" />
+
+            <div class="tz-row">
+              <span class="tz-prefix">Notifications in:</span>
+              <strong id="tz-display">{user?.timezone || 'UTC'}</strong>
+              <button type="button" id="tz-change" class="link-button" hidden>change</button>
+              <select
+                id="tz-select"
+                name="timezone"
+                data-saved-tz={user?.timezone ?? ''}
+                hidden
+              >
+                <option value={user?.timezone || 'UTC'} selected>{user?.timezone || 'UTC'}</option>
+              </select>
+              <noscript>
+                <span class="tz-noscript">(JavaScript disabled — timezone defaults to {user?.timezone || 'UTC'}; enable JS to change)</span>
+              </noscript>
+            </div>
 
             <fieldset class="picker">
               <legend class="legend">48 teams · pick any number</legend>
@@ -177,12 +193,53 @@ const statusMsg = status ? STATUS_COPY[status] : null;
   </main>
 
   <script is:inline>
-    // IDENT-05: capture browser timezone and post it with the form.
-    try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-      const el = document.getElementById('tz');
-      if (el) el.value = tz;
-    } catch {}
+    // IDENT-05: timezone with auto-detect + manual override.
+    // Saved TZ from DB takes precedence over auto-detected (a user who
+    // explicitly chose a zone shouldn't have it overwritten when traveling).
+    (function setupTz() {
+      const select = document.getElementById('tz-select');
+      const display = document.getElementById('tz-display');
+      const button = document.getElementById('tz-change');
+      if (!select || !display || !button) return;
+
+      const saved = select.dataset.savedTz || '';
+      let detected = 'UTC';
+      try {
+        detected = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      } catch {}
+      const initial = saved || detected;
+
+      // Populate the dropdown with all IANA zones supported by the runtime.
+      try {
+        const zones = Intl.supportedValuesOf('timeZone');
+        const frag = document.createDocumentFragment();
+        for (const z of zones) {
+          const opt = document.createElement('option');
+          opt.value = z;
+          opt.textContent = z;
+          if (z === initial) opt.selected = true;
+          frag.appendChild(opt);
+        }
+        select.replaceChildren(frag);
+      } catch {
+        // Older browser without Intl.supportedValuesOf — keep the single
+        // server-rendered option (saved TZ or UTC). Manual override unavailable.
+        return;
+      }
+
+      display.textContent = initial;
+      button.hidden = false;
+
+      button.addEventListener('click', function () {
+        select.hidden = false;
+        button.hidden = true;
+        select.focus();
+      });
+
+      select.addEventListener('change', function () {
+        display.textContent = select.value;
+      });
+    })();
 
     // Render UTC kickoffs in the user's local time. The server emitted ISO
     // UTC strings as a fallback; this overwrites them.
@@ -230,6 +287,10 @@ const statusMsg = status ? STATUS_COPY[status] : null;
   .flash.err { color: var(--err); border: 1px solid var(--err); background: rgba(255, 100, 100, 0.06); }
 
   .picker-form { margin: 0 0 32px; }
+  .tz-row { font-size: 13px; color: var(--fg-dim); margin: 0 0 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .tz-row strong { color: var(--fg); font-weight: 700; }
+  .tz-row select { padding: 6px 8px; font-family: var(--mono); font-size: 13px; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; max-width: 280px; }
+  .tz-noscript { font-size: 12px; opacity: 0.8; }
   .picker { border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin: 0 0 16px; background: var(--surface); }
   .legend { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-dim); padding: 0 8px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; margin-top: 10px; }

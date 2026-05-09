@@ -9,6 +9,17 @@ const TEAM_ID_RE = /^\d{1,8}$/;
 // IANA timezones are like "America/New_York" or "UTC" — tolerate +/-, _, /, and word chars.
 const TZ_RE = /^[A-Za-z][A-Za-z0-9_+\-/]{0,63}$/;
 
+function isValidIanaTz(tz: string): boolean {
+  if (!TZ_RE.test(tz)) return false;
+  // Real IANA validation: Node's Intl throws RangeError on unknown zones.
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function redirectTo(token: string, status: string, setCookie?: string): Response {
   const params = new URLSearchParams({ status });
   if (token) params.set('token', token);
@@ -52,7 +63,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const tz = ((form.get('timezone') as string) ?? '').trim();
-  if (!TZ_RE.test(tz)) return redirectTo(formToken, 'bad-tz');
+  if (!isValidIanaTz(tz)) return redirectTo(formToken, 'bad-tz');
 
   // Dedupe + sort for stable storage.
   const unique = Array.from(new Set(teamIds)).sort((a, b) => a - b);
