@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 const SECRET = process.env.MAGIC_LINK_SECRET ?? '';
-const TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
+const TTL_SECONDS = 60 * 60 * 24; // 24 hours
 
 if (!SECRET && process.env.NODE_ENV === 'production') {
   throw new Error('MAGIC_LINK_SECRET is required in production');
