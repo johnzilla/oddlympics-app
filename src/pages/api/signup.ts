@@ -19,7 +19,7 @@ function originOk(request: Request, siteUrl: string | undefined): boolean {
   // Block obvious cross-site POSTs. Same-origin browser submits include the
   // matching Origin header.
   const origin = request.headers.get('origin');
-  if (!origin) return true; // some same-origin form posts omit Origin; fall back to allow
+  if (!origin) return false; // modern browsers attach Origin to cross-origin form POSTs; treat absence as suspicious
   try {
     const o = new URL(origin);
     if (o.hostname === 'localhost' || o.hostname === '127.0.0.1') return true;
