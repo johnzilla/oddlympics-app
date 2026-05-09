@@ -121,6 +121,80 @@ SELECT date(created_at, "unixepoch") AS day, COUNT(*) AS signups, SUM(confirmed_
 SQL'
 ```
 
+## Backups and restore
+
+The droplet runs `oddlympics-backup.timer` daily at **03:00 UTC**, firing
+`oddlympics-backup.service` (a systemd oneshot) which:
+
+1. Takes a SQLite snapshot via `sqlite3 .backup` (atomic, WAL-safe).
+2. Runs `PRAGMA integrity_check` — aborts on failure.
+3. Uploads the snapshot to `b2:$B2_BUCKET/daily/oddlympics-<timestamp>.db`.
+4. Keeps the last 7 snapshots locally in `/var/cache/oddlympics-backup` for fast emergency restore.
+
+**Retention policy** (configured as B2 lifecycle rules in the bucket settings):
+
+- `daily/` — keep last **30 days**
+- `weekly/` — keep last **12 weeks** (84 days)
+
+**Credentials** live in `/etc/oddlympics-backup.env` (mode 640, root:oddlympics).
+Separate from `/etc/oddlympics.env` so the app process cannot read the B2 key.
+The B2 application key is scoped to the single `oddlympics-backups` bucket
+(no list-buckets, no admin) — least privilege.
+
+### Day 2 backup ops
+
+| Want to... | Command |
+|---|---|
+| See last backup run | `journalctl -u oddlympics-backup -n 50 --no-pager` |
+| Trigger a manual backup | `sudo systemctl start oddlympics-backup.service && journalctl -u oddlympics-backup -f` |
+| List all timers | `systemctl list-timers` |
+| List local snapshots | `ls -lh /var/cache/oddlympics-backup/` |
+| List B2 snapshots | `rclone ls b2:$B2_BUCKET/daily/` (run as oddlympics user, env loaded) |
+
+### Restore from B2
+
+If the droplet's DB is lost or corrupted, restore from the most recent good snapshot.
+
+```bash
+# 1. SSH into the droplet (or any machine with rclone + the B2 key configured)
+ssh root@oddlympics.app
+
+# 2. Pick a snapshot
+ls /var/cache/oddlympics-backup/                # local recent (last 7)
+sudo -u oddlympics bash -c 'set -a; . /etc/oddlympics-backup.env; set +a; \
+  export RCLONE_CONFIG_B2_TYPE=b2 RCLONE_CONFIG_B2_ACCOUNT="$B2_ACCOUNT_ID" RCLONE_CONFIG_B2_KEY="$B2_APPLICATION_KEY"; \
+  rclone ls b2:$B2_BUCKET/daily/'              # full off-droplet history
+
+# 3. Download a specific snapshot (example: 2026-05-08T03:00:00Z)
+sudo -u oddlympics bash -c 'set -a; . /etc/oddlympics-backup.env; set +a; \
+  export RCLONE_CONFIG_B2_TYPE=b2 RCLONE_CONFIG_B2_ACCOUNT="$B2_ACCOUNT_ID" RCLONE_CONFIG_B2_KEY="$B2_APPLICATION_KEY"; \
+  rclone copyto b2:$B2_BUCKET/daily/oddlympics-2026-05-08T03-00-00Z.db /tmp/restore.db'
+
+# 4. Verify integrity BEFORE swapping into prod
+sqlite3 /tmp/restore.db "PRAGMA integrity_check"          # must print 'ok'
+sqlite3 /tmp/restore.db "SELECT COUNT(*) FROM vip_signups"
+sqlite3 /tmp/restore.db "SELECT email, datetime(confirmed_at,'unixepoch') \
+  FROM vip_signups WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at DESC LIMIT 5"
+
+# 5. Stop the app, swap the DB, start the app (causes ~2s downtime)
+systemctl stop oddlympics
+cp /var/lib/oddlympics/oddlympics.db /var/lib/oddlympics/oddlympics.db.before-restore
+mv /tmp/restore.db /var/lib/oddlympics/oddlympics.db
+chown oddlympics:oddlympics /var/lib/oddlympics/oddlympics.db
+systemctl start oddlympics
+journalctl -u oddlympics -n 20 --no-pager     # confirm clean startup
+```
+
+### Restore drill (D-14 acceptance — must be performed before HARDEN-05 closes)
+
+Run the above flow on a **scratch host** (not prod) to confirm the procedure end to end:
+
+1. Fresh Ubuntu container or a separate droplet with rclone installed.
+2. Install rclone, populate /tmp/oddlympics-backup.env with the read-scoped key (or reuse the prod key for a one-time drill).
+3. Download yesterday's snapshot from B2.
+4. Run the integrity check + count + last-5-confirmed queries — record the output.
+5. Confirm the row count matches a contemporaneous `sqlite3 /var/lib/oddlympics/oddlympics.db "SELECT COUNT(*) FROM vip_signups"` taken on prod (within ±1 row, accounting for the time delta since the snapshot).
+
 ## What's in v1 today
 
 - Hero + email capture + magic-link confirm flow (Astro + SQLite + Resend)
@@ -130,7 +204,6 @@ SQL'
 
 ## What is NOT in v1 (deferred)
 
-- **DB backups** to off-droplet storage. Add a daily cron + `rclone` to S3/B2 before launch.
 - **A2P 10DLC SMS registration.** Start it in parallel if you still want SMS for v1.2.
 - **Custom Resend domain.** v1 uses your verified Resend sender. DKIM + DMARC for `oddlympics.app` is v1.1.
 - **Lightning tip jar.** Out of scope until v1 ships and the `vaultwarden` integration shape is confirmed.
