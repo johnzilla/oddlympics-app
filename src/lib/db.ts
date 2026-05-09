@@ -76,3 +76,77 @@ export const markUnsubscribed = db.prepare<[string]>(`
   WHERE email = ? AND unsubscribed_at IS NULL
   RETURNING *
 `);
+
+// World Cup schedule data (Phase 2 — DATA-01, DATA-02)
+db.exec(`
+  CREATE TABLE IF NOT EXISTS teams (
+    id INTEGER PRIMARY KEY,
+    tla TEXT NOT NULL,
+    name TEXT NOT NULL,
+    crest_url TEXT,
+    last_updated INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+  );
+  CREATE TABLE IF NOT EXISTS matches (
+    id INTEGER PRIMARY KEY,
+    utc_date INTEGER NOT NULL,
+    stage TEXT NOT NULL,
+    group_name TEXT,
+    home_team_id INTEGER,
+    away_team_id INTEGER,
+    status TEXT NOT NULL,
+    last_updated INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_matches_home_team ON matches(home_team_id);
+  CREATE INDEX IF NOT EXISTS idx_matches_away_team ON matches(away_team_id);
+  CREATE INDEX IF NOT EXISTS idx_matches_utc_date ON matches(utc_date);
+`);
+
+export type Team = {
+  id: number;
+  tla: string;
+  name: string;
+  crest_url: string | null;
+  last_updated: number;
+};
+
+export type Match = {
+  id: number;
+  utc_date: number;
+  stage: string;
+  group_name: string | null;
+  home_team_id: number | null;
+  away_team_id: number | null;
+  status: string;
+  last_updated: number;
+};
+
+export const upsertTeam = db.prepare<
+  [number, string, string, string | null]
+>(`
+  INSERT INTO teams (id, tla, name, crest_url)
+  VALUES (?, ?, ?, ?)
+  ON CONFLICT(id) DO UPDATE SET
+    tla = excluded.tla,
+    name = excluded.name,
+    crest_url = excluded.crest_url,
+    last_updated = strftime('%s','now')
+`);
+
+export const upsertMatch = db.prepare<
+  [number, number, string, string | null, number | null, number | null, string]
+>(`
+  INSERT INTO matches (id, utc_date, stage, group_name, home_team_id, away_team_id, status)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
+  ON CONFLICT(id) DO UPDATE SET
+    utc_date = excluded.utc_date,
+    stage = excluded.stage,
+    group_name = excluded.group_name,
+    home_team_id = excluded.home_team_id,
+    away_team_id = excluded.away_team_id,
+    status = excluded.status,
+    last_updated = strftime('%s','now')
+`);
+
+export const getTeams = db.prepare(`
+  SELECT * FROM teams ORDER BY name
+`);
