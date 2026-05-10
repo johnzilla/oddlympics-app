@@ -38,6 +38,8 @@ db.exec(`
     db.exec(`ALTER TABLE vip_signups ADD COLUMN selected_teams TEXT;`);
   if (!has('timezone'))
     db.exec(`ALTER TABLE vip_signups ADD COLUMN timezone TEXT;`);
+  if (!has('manage_blast_sent_at'))
+    db.exec(`ALTER TABLE vip_signups ADD COLUMN manage_blast_sent_at INTEGER;`);
 }
 
 export type VipSignup = {
@@ -51,6 +53,7 @@ export type VipSignup = {
   unsubscribed_at: number | null;
   selected_teams: string | null; // JSON array of team IDs, e.g. "[762,769]"
   timezone: string | null; // IANA TZ, e.g. "America/New_York"
+  manage_blast_sent_at: number | null; // Phase 2.5: launch-blast tracking
 };
 
 export const upsertVipSignup = db.prepare<

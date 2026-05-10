@@ -138,6 +138,31 @@ sudo -u oddlympics bash -c \
 
 Idempotent (upserts on `id` conflict). Free-tier API rate limit is 10 req/min — the script makes 2 calls per run. Once a week is plenty; once a day is fine. Add a cron if you want it automatic.
 
+## Launch blast
+
+`scripts/launch-blast.mjs` sends a "pick your teams" magic-link email to every confirmed-and-not-unsubscribed row in `vip_signups` that hasn't already been blasted. Idempotent (tracked via `vip_signups.manage_blast_sent_at`).
+
+**Defaults to dry-run.** Always preview before sending.
+
+```bash
+# Dry-run — lists eligible recipients, sends nothing
+ssh root@oddlympics.app 'sudo -u oddlympics bash -c \
+  "set -a; . /etc/oddlympics.env; set +a; \
+   cd /opt/oddlympics && node scripts/launch-blast.mjs"'
+
+# Send to one email (smoke test)
+ssh root@oddlympics.app 'sudo -u oddlympics bash -c \
+  "set -a; . /etc/oddlympics.env; set +a; \
+   cd /opt/oddlympics && node scripts/launch-blast.mjs --send --only=you@example.com"'
+
+# Real send to all eligible
+ssh root@oddlympics.app 'sudo -u oddlympics bash -c \
+  "set -a; . /etc/oddlympics.env; set +a; \
+   cd /opt/oddlympics && node scripts/launch-blast.mjs --send"'
+```
+
+Throttles 1.5s between sends. Resend free tier is 100/day, 10/sec — well inside.
+
 ## What's in v1 today
 
 - Hero + email capture + magic-link confirm flow (Astro + SQLite + Resend)
