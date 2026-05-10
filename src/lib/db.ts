@@ -108,6 +108,16 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_matches_home_team ON matches(home_team_id);
   CREATE INDEX IF NOT EXISTS idx_matches_away_team ON matches(away_team_id);
   CREATE INDEX IF NOT EXISTS idx_matches_utc_date ON matches(utc_date);
+
+  CREATE TABLE IF NOT EXISTS match_notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email TEXT NOT NULL,
+    match_id INTEGER NOT NULL,
+    channel TEXT NOT NULL DEFAULT 'email',
+    sent_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+    UNIQUE (user_email, match_id, channel)
+  );
+  CREATE INDEX IF NOT EXISTS idx_notif_match ON match_notifications(match_id);
 `);
 
 export type Team = {

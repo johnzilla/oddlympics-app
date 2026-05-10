@@ -1,0 +1,44 @@
+# /etc/systemd/system/oddlympics-notify.service
+#
+# Sends kickoff notifications ~60 minutes before each match a user is
+# subscribed to. Triggered by oddlympics-notify.timer every 5 minutes.
+# Type=oneshot — runs to completion and exits.
+#
+# Defaults to dry-run unless KICKOFF_NOTIFICATIONS_ENABLED=true is set in
+# /etc/oddlympics.env. Dry-run logs what WOULD be sent without calling Resend.
+
+[Unit]
+Description=oddlympics kickoff notification sender
+After=network-online.target oddlympics.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=oddlympics
+Group=oddlympics
+WorkingDirectory=/opt/oddlympics
+EnvironmentFile=/etc/oddlympics.env
+
+ExecStart=/usr/bin/node /opt/oddlympics/scripts/send-kickoff-notifications.mjs
+
+# SQLite lives here; needs to be readable + writable for the notification claim.
+ReadWritePaths=/var/lib/oddlympics
+
+# Hardening (cloned from oddlympics.service)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+MemoryDenyWriteExecute=false
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+
+# Logs go to journald; tail with: journalctl -u oddlympics-notify -f
+StandardOutput=journal
+StandardError=journal

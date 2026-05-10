@@ -50,6 +50,9 @@ jobs:
           rsync -az --delete \
             ./scripts/ \
             "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/scripts/"
+          rsync -az --delete \
+            ./deploy/ \
+            "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/deploy/"
           rsync -az \
             ./package.json ./package-lock.json \
             "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/"

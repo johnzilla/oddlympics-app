@@ -1,0 +1,20 @@
+# /etc/systemd/system/oddlympics-notify.timer
+#
+# Fires every 5 minutes. The script picks up matches kicking off in the
+# next 55-65 minutes; the unique constraint on (user_email, match_id, channel)
+# prevents duplicates if the window catches a match in 2-3 consecutive ticks.
+#
+# Persistent=true: if the timer was stopped while a tick was due, it fires
+# once on next start. The script's [55, 65]-minute kickoff window means a
+# late catch-up tick will simply find no matches in scope and exit cleanly.
+
+[Unit]
+Description=Run oddlympics-notify every 5 minutes
+
+[Timer]
+OnCalendar=*:0/5
+Persistent=true
+Unit=oddlympics-notify.service
+
+[Install]
+WantedBy=timers.target

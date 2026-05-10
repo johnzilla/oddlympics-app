@@ -138,6 +138,52 @@ sudo -u oddlympics bash -c \
 
 Idempotent (upserts on `id` conflict). Free-tier API rate limit is 10 req/min — the script makes 2 calls per run. Once a week is plenty; once a day is fine. Add a cron if you want it automatic.
 
+## Kickoff notifications (Phase 3)
+
+A systemd timer fires `scripts/send-kickoff-notifications.mjs` every 5 minutes. The script finds matches kicking off in the next 55-65 minutes that involve a team some user has selected, and sends each user one email per match. Idempotent (unique constraint on `user_email + match_id + channel`).
+
+**Safety switch.** The script runs in **dry-run** mode unless `KICKOFF_NOTIFICATIONS_ENABLED=true` is set in `/etc/oddlympics.env`. Dry-run logs what would have been sent without calling Resend.
+
+### One-time install on existing droplet
+
+After the next deploy lands `deploy/oddlympics-notify.{service,timer}` in `/opt/oddlympics/deploy/`:
+
+```bash
+ssh root@oddlympics.app
+sudo cp /opt/oddlympics/deploy/oddlympics-notify.service /etc/systemd/system/
+sudo cp /opt/oddlympics/deploy/oddlympics-notify.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now oddlympics-notify.timer
+sudo systemctl list-timers oddlympics-notify.timer    # confirm scheduled
+```
+
+(Fresh droplets get this automatically via `bootstrap.sh`.)
+
+### Tail the journal
+
+```bash
+journalctl -u oddlympics-notify -f
+```
+
+You'll see one entry per timer firing. While `KICKOFF_NOTIFICATIONS_ENABLED=false`, lines look like:
+```
+[notify] mode=dry-run matches-in-window=0
+```
+or, when a match is in scope:
+```
+[notify] mode=dry-run matches-in-window=1
+  match 537333 CAN vs BIH: 1 subscriber(s)
+    (dry-run) you@example.com
+```
+
+### Flip the switch when ready
+
+Edit `/etc/oddlympics.env` and set:
+```
+KICKOFF_NOTIFICATIONS_ENABLED=true
+```
+No restart needed — the next 5-minute timer firing picks up the new value (the script reads env on each invocation).
+
 ## Launch blast
 
 `scripts/launch-blast.mjs` sends a "pick your teams" magic-link email to every confirmed-and-not-unsubscribed row in `vip_signups` that hasn't already been blasted. Idempotent (tracked via `vip_signups.manage_blast_sent_at`).

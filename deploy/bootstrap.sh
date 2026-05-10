@@ -61,8 +61,10 @@ install -d -o "$APP_USER" -g "$APP_USER" -m 750 "$DATA_DIR"
 chown -R "$DEPLOY_USER":"$APP_USER" "$APP_DIR"
 chmod 750 "$APP_DIR"
 
-echo "==> systemd unit"
+echo "==> systemd units"
 install -m 644 "$REPO_DIR/oddlympics.service" /etc/systemd/system/oddlympics.service
+install -m 644 "$REPO_DIR/oddlympics-notify.service" /etc/systemd/system/oddlympics-notify.service
+install -m 644 "$REPO_DIR/oddlympics-notify.timer" /etc/systemd/system/oddlympics-notify.timer
 
 echo "==> environment file (only if missing — never overwrite)"
 if [[ ! -f /etc/oddlympics.env ]]; then
@@ -98,8 +100,9 @@ visudo -cf /etc/sudoers.d/oddlympics-deploy
 
 echo "==> reload services"
 systemctl daemon-reload
-systemctl enable oddlympics caddy
+systemctl enable oddlympics caddy oddlympics-notify.timer
 systemctl reload caddy || systemctl restart caddy
+systemctl start oddlympics-notify.timer
 
 echo
 echo "=========================================================="
