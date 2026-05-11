@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-08)
 Phase: 01 (pre-launch-hardening) — EXECUTING
 Plan: 1 of 7
 Status: Executing Phase 01
-Last activity: 2026-05-09 -- Phase 01 execution started
+Last activity: 2026-05-11 -- Completed quick task 260511-ccx: Phase 2.5 SC4 demand-capture field on /schedule
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -76,6 +76,12 @@ None yet.
 
 - Hard deadline: 2026-06-11. 34 days from 2026-05-08. Phase sequencing is deadline-resistant: if Phase 4 slips, Phases 1-3 still deliver the core value loop.
 - vaultwarden integration shape for TIP-02 is deliberately deferred to Phase 4 planning — may require vault-side work.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260511-ccx | Phase 2.5 SC4: demand-capture textarea on /schedule + feature_requests table | 2026-05-11 | 6129910 | [260511-ccx-implement-phase-2-5-success-criterion-4-](./quick/260511-ccx-implement-phase-2-5-success-criterion-4-/) |
 
 ## Deferred Items
 
