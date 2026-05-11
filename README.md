@@ -24,12 +24,17 @@ to `main` (~40 seconds end-to-end).
   (`/schedule`), browser-tz capture with manual override, World Cup schedule
   ingestor (football-data.org → `teams`/`matches` tables) with a daily 03:00
   systemd timer
-- ✅ Phase 2.5 — `scripts/launch-blast.mjs` (idempotent, dry-run by default)
+- ✅ Phase 2.5 — `scripts/launch-blast.mjs` (idempotent, dry-run by default);
+  `/schedule` also captures an optional "which other championship next?"
+  demand-signal into the `feature_requests` table (v1.1 triage input)
 - ✅ Phase 3 — kickoff notification cron every 5 min (`oddlympics-notify.timer`,
   dry-run until `KICKOFF_NOTIFICATIONS_ENABLED=true`)
-- ⏳ **Operator actions remaining:** flip the kickoff cron live, fire the launch
-  blast, install the new ingest timer on the existing droplet (one-time `cp`
-  into `/etc/systemd/system/`)
+- 🎯 Phase 4 (planned) — Launch Week Observation: watch real notifications fire
+  during the World Cup group-stage opening weekend (2026-06-11 → 2026-06-14),
+  confirm delivery health, capture early feedback
+- ⏳ **Operator actions remaining:** fire the launch blast, flip the kickoff
+  cron live (`KICKOFF_NOTIFICATIONS_ENABLED=true` in `/etc/oddlympics.env`),
+  end-to-end smoke-test one real kickoff notification before group stage opens
 - 🚫 **Deferred to v1.1:** Telegram bot, Lightning tip jar, niche-sport long tail
   (strongman, cubing, etc.), shared `Layout.astro` refactor
 
@@ -50,7 +55,7 @@ operator runbook.
 | `/api/signup` | POST | Validates email, rate-limits, writes SQLite row, mints magic-link, sends via Resend |
 | `/api/confirm` | GET | Verifies token (purpose=confirm), marks row confirmed, redirects to `/confirmed` |
 | `/api/manage` | POST | Sends a magic-link with purpose=manage; landing on `/schedule` mints a session cookie |
-| `/api/save-selection` | POST | Persists `selected_teams` + `timezone` for the authenticated user |
+| `/api/save-selection` | POST | Persists `selected_teams` + `timezone` for the authenticated user; also inserts the optional demand-capture field into `feature_requests` if non-empty (non-blocking — never gates the team-save) |
 | `/api/unsubscribe` | GET | Verifies token (purpose=unsubscribe), sets `unsubscribed_at`, redirects to `/unsubscribed` |
 | `/api/logout` | POST | Clears the session cookie |
 
@@ -97,7 +102,7 @@ src/
       unsubscribe.ts       # GET ?token → set unsubscribed_at
       logout.ts            # POST → clear session cookie
   lib/
-    db.ts                  # better-sqlite3 singleton + prepared statements + schema (incl. ALTER guards)
+    db.ts                  # better-sqlite3 singleton + prepared statements + schema (vip_signups, teams, matches, match_notifications, feature_requests; ALTER guards on existing tables)
     token.ts               # HMAC-SHA256 signed tokens, 24h TTL, 4 purposes (confirm/manage/unsubscribe/session)
     session.ts             # cookie-based 30-day sliding-window sessions
     email.ts               # Resend wrapper with dev console fallback

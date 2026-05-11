@@ -106,6 +106,7 @@ If everything works, https://oddlympics.app shows the teaser.
 | Restart manually | `systemctl restart oddlympics` |
 | Inspect the SQLite DB | `sqlite3 /var/lib/oddlympics/oddlympics.db` |
 | Export the confirmed email list | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, requested_sport, datetime(confirmed_at, "unixepoch") FROM vip_signups WHERE confirmed_at IS NOT NULL'` |
+| Export demand-capture requests (v1.1 triage) | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, request_text, datetime(created_at, "unixepoch") FROM feature_requests ORDER BY created_at DESC'` |
 | Roll Caddy config | edit `/etc/caddy/Caddyfile`, then `systemctl reload caddy` |
 | Back up the DB | `sqlite3 /var/lib/oddlympics/oddlympics.db ".backup /tmp/oddlympics-$(date +%F).db"` |
 

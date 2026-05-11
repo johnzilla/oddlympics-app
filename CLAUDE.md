@@ -34,10 +34,11 @@ Roadmap, requirements, locked decisions, and per-phase plans live under
 
 - **Astro 5** with `output: 'server'` and the **Node standalone adapter** (`@astrojs/node`)
 - **better-sqlite3** for storage. Schema (the `vip_signups` user/session table
-  + `teams` + `matches` + `match_notifications`) lives inline in `src/lib/db.ts`
-  and migrates on boot. New tables use `CREATE TABLE IF NOT EXISTS`; new columns
-  use a `pragma_table_info` probe + conditional `ALTER TABLE ADD COLUMN` (SQLite
-  has no `ADD COLUMN IF NOT EXISTS`). Re-running on a migrated DB is a no-op
+  + `teams` + `matches` + `match_notifications` + `feature_requests`) lives
+  inline in `src/lib/db.ts` and migrates on boot. New tables use
+  `CREATE TABLE IF NOT EXISTS`; new columns use a `pragma_table_info` probe +
+  conditional `ALTER TABLE ADD COLUMN` (SQLite has no `ADD COLUMN IF NOT EXISTS`).
+  Re-running on a migrated DB is a no-op
 - **Resend** for transactional email (with a dev console fallback when no API key)
 - **HMAC-SHA256 signed tokens** for both magic-links AND session cookies
   (Node built-in `crypto`, no JWT lib). Tokens carry a `purpose` claim
