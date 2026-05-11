@@ -125,18 +125,47 @@ SQL'
 
 Use **DigitalOcean Backups** (Droplet → Backups tab → Enable). Weekly snapshots, ~$1.20/mo for this droplet. Restore by spinning a new droplet from the snapshot.
 
-## Schedule data refresh
+## Schedule data refresh (Phase 2 — DATA-02)
 
-The football-data.org ingestor (`scripts/ingest-schedule.mjs`) lands on the droplet at `/opt/oddlympics/scripts/`. Run it manually after a deploy to refresh teams + matches:
+A systemd timer fires `scripts/ingest-schedule.mjs` once a day at **03:00** server-local (UTC on the droplet). The script pulls World Cup 2026 teams + matches from football-data.org and upserts into local SQLite. Idempotent (upserts on `id` conflict); a re-run just costs an extra ~2 API calls. Free-tier rate limit is 10 req/min — 2 calls per run is fine.
+
+### One-time install on existing droplet
+
+After the next deploy lands `deploy/oddlympics-ingest.{service,timer}` in `/opt/oddlympics/deploy/`:
 
 ```bash
 ssh root@oddlympics.app
+sudo cp /opt/oddlympics/deploy/oddlympics-ingest.service /etc/systemd/system/
+sudo cp /opt/oddlympics/deploy/oddlympics-ingest.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now oddlympics-ingest.timer
+sudo systemctl list-timers oddlympics-ingest.timer    # confirm scheduled
+```
+
+(Fresh droplets get this automatically via `bootstrap.sh`.)
+
+### Run an ad-hoc refresh
+
+The timer ticks once a day; if you need to refresh sooner (e.g. after a fixture change), trigger the service directly:
+
+```bash
+sudo systemctl start oddlympics-ingest
+journalctl -u oddlympics-ingest -n 50
+```
+
+Or run the script by hand:
+
+```bash
 sudo -u oddlympics bash -c \
   'set -a; . /etc/oddlympics.env; set +a; \
    cd /opt/oddlympics && node scripts/ingest-schedule.mjs'
 ```
 
-Idempotent (upserts on `id` conflict). Free-tier API rate limit is 10 req/min — the script makes 2 calls per run. Once a week is plenty; once a day is fine. Add a cron if you want it automatic.
+### Tail the journal
+
+```bash
+journalctl -u oddlympics-ingest -f
+```
 
 ## Kickoff notifications (Phase 3)
 

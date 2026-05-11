@@ -1,0 +1,20 @@
+# /etc/systemd/system/oddlympics-ingest.timer
+#
+# Fires once a day at 03:00 (server local time, which is UTC on the droplet).
+# Refreshes the World Cup 2026 teams + matches in SQLite from football-data.org.
+# Well before any match kickoffs (earliest WC 2026 kickoff is mid-day UTC).
+#
+# Persistent=true: if the timer was stopped while a tick was due, it fires
+# once on next start. The ingestor is idempotent (upserts on id conflict),
+# so a late catch-up tick is safe.
+
+[Unit]
+Description=Run oddlympics schedule ingest daily at 03:00
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+Unit=oddlympics-ingest.service
+
+[Install]
+WantedBy=timers.target

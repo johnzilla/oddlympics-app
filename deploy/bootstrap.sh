@@ -65,6 +65,8 @@ echo "==> systemd units"
 install -m 644 "$REPO_DIR/oddlympics.service" /etc/systemd/system/oddlympics.service
 install -m 644 "$REPO_DIR/oddlympics-notify.service" /etc/systemd/system/oddlympics-notify.service
 install -m 644 "$REPO_DIR/oddlympics-notify.timer" /etc/systemd/system/oddlympics-notify.timer
+install -m 644 "$REPO_DIR/oddlympics-ingest.service" /etc/systemd/system/oddlympics-ingest.service
+install -m 644 "$REPO_DIR/oddlympics-ingest.timer" /etc/systemd/system/oddlympics-ingest.timer
 
 echo "==> environment file (only if missing — never overwrite)"
 if [[ ! -f /etc/oddlympics.env ]]; then
@@ -100,9 +102,10 @@ visudo -cf /etc/sudoers.d/oddlympics-deploy
 
 echo "==> reload services"
 systemctl daemon-reload
-systemctl enable oddlympics caddy oddlympics-notify.timer
+systemctl enable oddlympics caddy oddlympics-notify.timer oddlympics-ingest.timer
 systemctl reload caddy || systemctl restart caddy
 systemctl start oddlympics-notify.timer
+systemctl start oddlympics-ingest.timer
 
 echo
 echo "=========================================================="

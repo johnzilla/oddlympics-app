@@ -1,0 +1,47 @@
+# /etc/systemd/system/oddlympics-ingest.service
+#
+# Refreshes World Cup 2026 teams + matches from football-data.org into the
+# local SQLite DB. Triggered by oddlympics-ingest.timer once a day at 03:00.
+# Type=oneshot — runs to completion and exits.
+#
+# Idempotent: upserts on (id) conflict for both teams and matches. Re-running
+# inside the same day is safe; the only cost is an extra ~2 API calls.
+#
+# Failures (network, missing API key, upstream API change) log to journald.
+# Tail with: journalctl -u oddlympics-ingest -f
+
+[Unit]
+Description=oddlympics World Cup schedule ingestor (daily refresh)
+After=network-online.target oddlympics.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=oddlympics
+Group=oddlympics
+WorkingDirectory=/opt/oddlympics
+EnvironmentFile=/etc/oddlympics.env
+
+ExecStart=/usr/bin/node /opt/oddlympics/scripts/ingest-schedule.mjs
+
+# SQLite lives here; needs to be readable + writable for the upsert.
+ReadWritePaths=/var/lib/oddlympics
+
+# Hardening (cloned from oddlympics-notify.service)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+MemoryDenyWriteExecute=false
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+
+# Logs go to journald; tail with: journalctl -u oddlympics-ingest -f
+StandardOutput=journal
+StandardError=journal
