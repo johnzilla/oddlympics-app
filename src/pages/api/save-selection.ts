@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { setSelection } from '../../lib/db';
+import { setSelection, insertFeatureRequest } from '../../lib/db';
 import { verifyToken } from '../../lib/token';
 import { buildSessionCookie, readSessionFromCookie } from '../../lib/session';
 
@@ -71,6 +71,21 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const updated = setSelection.get(JSON.stringify(unique), tz, result.email);
     if (!updated) return redirectTo(formToken, 'unknown');
+
+    // Phase 2.5 — LAUNCH-01-SC4: optional demand-capture textarea.
+    // Whitespace-only is treated as empty (no insert). Length-cap server-side
+    // (the textarea has maxlength="1000" client-side as defense-in-depth).
+    // A failing insert here must NEVER gate the team-selection conversion —
+    // the user clicked "Save selection", not "Submit feature request".
+    const rawFeatureRequest = ((form.get('feature_request') as string | null) ?? '').trim();
+    if (rawFeatureRequest.length > 0) {
+      const capped = rawFeatureRequest.slice(0, 1000);
+      try {
+        insertFeatureRequest.run(result.email, capped);
+      } catch (err) {
+        console.error('[save-selection] feature_request insert failed', err);
+      }
+    }
   } catch (err) {
     console.error('[save-selection] db error', err);
     return redirectTo(formToken, 'server');
