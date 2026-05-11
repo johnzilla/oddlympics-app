@@ -18,6 +18,7 @@ Phase-2 users.
 - [ ] **Phase 2: Identity & Personal Schedule** — magic-link return flow, team picker, schedule data, personal schedule page
 - [ ] **Phase 2.5: Launch Comms** — email the existing teaser list to invite them to pick teams
 - [ ] **Phase 3: Kickoff Notifications** — email ~60 min before each subscribed match (idempotent)
+- [ ] **Phase 4: Launch Week Observation** — watch real kickoff notifications during World Cup group-stage opening weekend (2026-06-11 → 2026-06-14)
 
 ## Phase Details
 
@@ -59,6 +60,7 @@ Plans:
   1. A single email blast goes out to all confirmed (and not-unsubscribed) rows in `vip_signups` with a one-click magic-link to the team-picker page.
   2. The blast is throttled enough to stay inside Resend's free-tier rate limits.
   3. Conversions are visible in Plausible (link click → team picker → schedule page funnel).
+  4. The team-picker page exposes an optional free-text field — "Which other championship do you want us to cover next?" — and submissions persist to the database for v1.1 prioritization. Field is optional; empty submissions are valid; the field must not gate conversion.
 
 **Why this is its own phase**: it's the moment v1 actually launches to real users. Worth treating as deliberate work, not an afterthought tacked onto Phase 2.
 
@@ -72,6 +74,21 @@ Plans:
   3. The no-login schedule link in the email resolves to the user's full schedule without re-authenticating.
 
 **UI hint**: only the email template; no new pages.
+
+### Phase 4: Launch Week Observation
+**Goal**: Watch real kickoff notifications fire during the World Cup group-stage opening weekend (2026-06-11 through 2026-06-14), confirm delivery health, and collect early user feedback before the tournament hits full stride.
+**Depends on**: Phase 3
+**Requirements**: (none — operational checkpoint, not new product surface)
+**Success Criteria**:
+  1. Notifications for the first match (Mexico vs. opening opponent, kickoff 2026-06-11) are observed to send on time; spot-check at least 3 subscribed users confirm receipt + correct local-time rendering.
+  2. `match_notifications` rows show no duplicates after the weekend; idempotency holds under real load.
+  3. Bounce / complaint rate from Resend stays under 2% across the weekend; if higher, root cause is logged and a remediation issue filed.
+  4. At least one inbound user feedback channel is monitored (Resend reply-to inbox, Plausible funnel, or a one-line "how was it?" reply prompt in the notification email); concrete feedback items are captured for v1.1 triage.
+  5. A short post-weekend writeup lands in-repo (decisions, surprises, what to fix in v1.1) — even one paragraph.
+
+**Why this is its own phase**: shipping Phase 3 is not the same as confirming it works in production. The first 72 hours of real kickoff notifications are the actual proof; treating them as a planned checkpoint (not "we're done") forces real observation and creates the feedback loop that informs v1.1 priorities.
+
+**UI hint**: none — operational/observation work.
 
 ## Deferred to v1.1 (post-launch)
 
@@ -89,5 +106,6 @@ These were originally in the v1 scope but are not required for the World Cup lau
 | 2. Identity & Personal Schedule | 0/TBD | Not started | - |
 | 2.5. Launch Comms | 0/TBD | Not started | - |
 | 3. Kickoff Notifications | 0/TBD | Not started | - |
+| 4. Launch Week Observation | 0/TBD | Not started | - |
 
-**Execution order:** 2 → 2.5 → 3
+**Execution order:** 2 → 2.5 → 3 → 4

@@ -4,10 +4,10 @@ milestone: v1.1
 milestone_name: milestone
 status: executing
 stopped_at: Roadmap and STATE created; ready to run /gsd-plan-phase 1
-last_updated: "2026-05-09T19:38:45.888Z"
+last_updated: "2026-05-11T12:43:26.627Z"
 last_activity: 2026-05-09 -- Phase 01 execution started
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 0
   total_plans: 7
   completed_plans: 5
@@ -54,6 +54,11 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 2.5 edited: added success criterion 4: optional 'which other championship' demand-capture field on team-picker page
+- Phase 4 added: Launch Week Observation — post-launch checkpoint for first weekend of World Cup group stage (2026-06-11 through 2026-06-14)
 
 ### Decisions
 
