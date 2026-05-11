@@ -17,7 +17,9 @@ for international sports fans, launching at the 2026 FIFA World Cup
   schedule ingestor (football-data.org → `teams`/`matches` SQLite tables),
   cookie-based 30-day sliding-window sessions
 - Phase 2.5: `scripts/launch-blast.mjs` ready (manual `--send` to fire the
-  "pick your teams" email to existing teaser list)
+  "pick your teams" email to existing teaser list); `/schedule` page also
+  captures an optional "which other championship next?" free-text demand signal
+  into the `feature_requests` table (v1.1 triage input)
 - Phase 3: kickoff notification cron (`oddlympics-notify.timer` every 5 min,
   dry-run until `KICKOFF_NOTIFICATIONS_ENABLED=true`)
 

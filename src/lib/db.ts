@@ -120,6 +120,20 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_notif_match ON match_notifications(match_id);
 `);
 
+// Phase 2.5 — LAUNCH-01-SC4: optional "which championship next?" demand-capture
+// field on /schedule. History-preserving (one row per submission), not a column
+// on vip_signups, so a user can submit multiple requests over time and we can
+// triage by `GROUP BY request_text` for v1.1.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS feature_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    request_text TEXT NOT NULL,
+    created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_feature_requests_email ON feature_requests(email);
+`);
+
 export type Team = {
   id: number;
   tla: string;
@@ -176,4 +190,17 @@ export const setSelection = db.prepare<[string, string, string]>(`
   SET selected_teams = ?, timezone = ?
   WHERE email = ? AND confirmed_at IS NOT NULL AND unsubscribed_at IS NULL
   RETURNING *
+`);
+
+// Phase 2.5 — LAUNCH-01-SC4: demand-capture for v1.1 prioritization.
+export type FeatureRequest = {
+  id: number;
+  email: string;
+  request_text: string;
+  created_at: number;
+};
+
+export const insertFeatureRequest = db.prepare<[string, string]>(`
+  INSERT INTO feature_requests (email, request_text)
+  VALUES (?, ?)
 `);
