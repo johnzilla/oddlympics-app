@@ -3,21 +3,22 @@
 ## Overview
 
 The teaser is live and collecting emails. This milestone turns it into the actual product before
-World Cup group stage kicks off on **2026-06-11** (33 days from 2026-05-09). The roadmap is
-trimmed for the deadline: solo developer, evenings + weekends, ~60-80 hours of focused work.
-Anything not strictly required for the core value loop (pick a team → see your schedule →
-get a kickoff email) is deferred to v1.1.
+World Cup group stage kicks off on **2026-06-11**. The roadmap is trimmed for the deadline:
+solo developer, evenings + weekends.
 
-The core value loop ships in Phases 2 + 3. Phase 1 hardening is essentially done in-repo.
-Phase 2.5 (launch comms) is the bridge that converts the existing teaser list into actual
-Phase-2 users.
+**As of 2026-05-11:** Phases 1, 2, 2.5, 3 are all shipped on `main`. Phase 1 has full GSD
+planning artifacts; Phases 2, 2.5, 3 were shipped speed-mode without going through the GSD
+discuss → plan → execute → verify workflow (see per-phase **Status** lines below for the
+implementation commits). The remaining work is operational (fire the launch blast, flip
+notifications to live) plus Phase 4 — a planned post-launch observation checkpoint during
+the first weekend of group stage.
 
 ## Phases
 
 - [x] **Phase 1: Pre-launch Hardening** — fixes + safety guards on the existing teaser
-- [ ] **Phase 2: Identity & Personal Schedule** — magic-link return flow, team picker, schedule data, personal schedule page
-- [ ] **Phase 2.5: Launch Comms** — email the existing teaser list to invite them to pick teams
-- [ ] **Phase 3: Kickoff Notifications** — email ~60 min before each subscribed match (idempotent)
+- [x] **Phase 2: Identity & Personal Schedule** — magic-link return flow, team picker, schedule data, personal schedule page *(shipped on `main`, no GSD artifact)*
+- [x] **Phase 2.5: Launch Comms** — email the existing teaser list to invite them to pick teams *(code shipped, blast unsent — no GSD artifact)*
+- [x] **Phase 3: Kickoff Notifications** — email ~60 min before each subscribed match (idempotent) *(shipped on `main` in dry-run mode, no GSD artifact)*
 - [ ] **Phase 4: Launch Week Observation** — watch real kickoff notifications during World Cup group-stage opening weekend (2026-06-11 → 2026-06-14)
 
 ## Phase Details
@@ -37,10 +38,11 @@ Plans:
 **Operator actions:**
 - [x] **DigitalOcean Backups** enabled in the droplet dashboard (~$1.20/mo) — replaces the originally-planned Backblaze B2 setup. Done 2026-05-10.
 
-### Phase 2: Identity & Personal Schedule
+### Phase 2: Identity & Personal Schedule — SHIPPED (no GSD artifact)
 **Goal**: A signed-up user can request a magic-link, pick the teams they follow, and see their personal schedule with all kickoffs in their browser's local time zone.
 **Depends on**: Phase 1
 **Requirements**: IDENT-01, IDENT-02, IDENT-03, IDENT-04, IDENT-05, DATA-01, DATA-02, DATA-04
+**Status**: Shipped on `main` without going through the GSD planning workflow — no `.planning/phases/02-*` directory exists. Implementation commits: `fa70514` (teams + matches schema), `c010531` (football-data.org ingestor), `60631cb` (selected_teams + timezone columns), `2e4799c` + `756bef5` (manage magic-link flow), `384a834` (/schedule + /api/save-selection), `b361288` (cookie sessions, 30d sliding), `381dfbb` (manual TZ override), `911b445` (nightly schedule refresh timer).
 **Success Criteria**:
   1. A user already in the teaser list can request a new magic-link from the homepage and land on a team-selection page (no separate signup).
   2. The team picker shows all 48 World Cup 2026 teams; selection is multi-select; selection persists.
@@ -52,10 +54,11 @@ Plans:
 
 **UI hint**: yes (team picker + schedule are user-facing surfaces)
 
-### Phase 2.5: Launch Comms
+### Phase 2.5: Launch Comms — SHIPPED (no GSD artifact, blast unsent)
 **Goal**: Convert the existing teaser-list signups into Phase-2 users by emailing them a "pick your teams" magic-link.
 **Depends on**: Phase 2
 **Requirements**: LAUNCH-01
+**Status**: Code shipped on `main` (`scripts/launch-blast.mjs` ready, dry-run by default, requires explicit `--send`) without going through the GSD planning workflow — no `.planning/phases/02.5-*` directory exists. Implementation commit: `cc1f47d` (launch-blast mechanism). The blast itself has not been fired yet — that's an outstanding operator action, not a coding gap. Success criterion 4 (demand-capture field) was added 2026-05-11 and is not yet implemented in code.
 **Success Criteria**:
   1. A single email blast goes out to all confirmed (and not-unsubscribed) rows in `vip_signups` with a one-click magic-link to the team-picker page.
   2. The blast is throttled enough to stay inside Resend's free-tier rate limits.
@@ -64,10 +67,11 @@ Plans:
 
 **Why this is its own phase**: it's the moment v1 actually launches to real users. Worth treating as deliberate work, not an afterthought tacked onto Phase 2.
 
-### Phase 3: Kickoff Notifications
+### Phase 3: Kickoff Notifications — SHIPPED (no GSD artifact, dry-run)
 **Goal**: Subscribed users receive an email ~60 minutes before each match they care about, in their local time, with no duplicates.
 **Depends on**: Phase 2
 **Requirements**: NOTIFY-01, NOTIFY-03, NOTIFY-04
+**Status**: Code shipped on `main` without going through the GSD planning workflow — no `.planning/phases/03-*` directory exists. Implementation commit: `f276c59` (kickoff notification cron — NOTIFY-01, 03, 04). The `oddlympics-notify.timer` is running every 5 minutes in dry-run mode; flipping `KICKOFF_NOTIFICATIONS_ENABLED=true` activates real sends. That env-var flip is an outstanding operator action.
 **Success Criteria**:
   1. A user receives an email ~60 min before each subscribed match: teams, kickoff in their TZ, no-login link to their schedule.
   2. Re-running the scheduler does not double-send. One notification per (user, match, channel).
@@ -103,9 +107,16 @@ These were originally in the v1 scope but are not required for the World Cup lau
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
 | 1. Pre-launch Hardening | 5/5 | Done (in-repo) | 2026-05-09 |
-| 2. Identity & Personal Schedule | 0/TBD | Not started | - |
-| 2.5. Launch Comms | 0/TBD | Not started | - |
-| 3. Kickoff Notifications | 0/TBD | Not started | - |
+| 2. Identity & Personal Schedule | — | Shipped (no GSD artifact) | 2026-05-10 |
+| 2.5. Launch Comms | — | Code shipped, blast unsent | 2026-05-10 |
+| 3. Kickoff Notifications | — | Shipped in dry-run | 2026-05-10 |
 | 4. Launch Week Observation | 0/TBD | Not started | - |
 
-**Execution order:** 2 → 2.5 → 3 → 4
+**Execution order:** 4 (post-launch checkpoint) — phases 2/2.5/3 already shipped without GSD planning artifacts.
+
+## Outstanding operator actions (pre-launch)
+
+- [ ] Implement Phase 2.5 success criterion 4 — demand-capture free-text field on `/schedule` (added 2026-05-11, not yet in code)
+- [ ] Fire the launch blast — `scripts/launch-blast.mjs --send` (currently dry-run)
+- [ ] Flip kickoff notifications to live — set `KICKOFF_NOTIFICATIONS_ENABLED=true` on the droplet (`/etc/oddlympics.env`) and restart `oddlympics-notify.timer`
+- [ ] End-to-end smoke test of one real kickoff notification before group stage opens 2026-06-11
