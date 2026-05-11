@@ -4,26 +4,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Teaser landing page for **oddlympics**, an upcoming personalized
-"when does MY thing happen" notifications app for international sports fans
-(launching around the 2026 FIFA World Cup). The current scope is the v1 teaser
-only: hero + email capture + double-opt-in confirm. The full personalization /
-notification engine and the Lightning tip jar are deferred to v1.x.
+**oddlympics** is a personalized "when does MY thing happen" notifications app
+for international sports fans, launching at the 2026 FIFA World Cup
+(group-stage kickoff **2026-06-11**).
 
-The full design context — original office-hours doc, premises, target metrics,
-risks register, deferred features — lives at
+**v1 MVP status (in code on `main`):**
+- v1.0 teaser shipped: public landing + double-opt-in email capture
+- Phase 1 hardening shipped: `confirmed.astro` status fix, `/api/unsubscribe`,
+  CSP enforce, default-deny on missing Origin, 24h magic-link TTL
+- Phase 2 shipped: magic-link sign-in (`/manage`), team picker + personal
+  schedule (`/schedule`), browser-tz capture with manual override, World Cup
+  schedule ingestor (football-data.org → `teams`/`matches` SQLite tables),
+  cookie-based 30-day sliding-window sessions
+- Phase 2.5: `scripts/launch-blast.mjs` ready (manual `--send` to fire the
+  "pick your teams" email to existing teaser list)
+- Phase 3: kickoff notification cron (`oddlympics-notify.timer` every 5 min,
+  dry-run until `KICKOFF_NOTIFICATIONS_ENABLED=true`)
+
+**v1.1 deferrals:** Telegram bot, Lightning tip jar (vaultwarden integration),
+niche-sport long tail (strongman, cubing), shared `Layout.astro` refactor.
+
+Roadmap, requirements, locked decisions, and per-phase plans live under
+`.planning/`. The full original design context is at
 `~/.gstack/projects/johnzilla-oddlympics-app/`.
 
 ## Stack
 
 - **Astro 5** with `output: 'server'` and the **Node standalone adapter** (`@astrojs/node`)
-- **better-sqlite3** for storage; schema migrates on boot in `src/lib/db.ts`
+- **better-sqlite3** for storage. Schema (the `vip_signups` user/session table
+  + `teams` + `matches` + `match_notifications`) lives inline in `src/lib/db.ts`
+  and migrates on boot. New tables use `CREATE TABLE IF NOT EXISTS`; new columns
+  use a `pragma_table_info` probe + conditional `ALTER TABLE ADD COLUMN` (SQLite
+  has no `ADD COLUMN IF NOT EXISTS`). Re-running on a migrated DB is a no-op
 - **Resend** for transactional email (with a dev console fallback when no API key)
-- **HMAC-SHA256 signed tokens** for magic links (Node built-in `crypto`, no JWT lib)
+- **HMAC-SHA256 signed tokens** for both magic-links AND session cookies
+  (Node built-in `crypto`, no JWT lib). Tokens carry a `purpose` claim
+  (`confirm` / `manage` / `unsubscribe` / `session`) so a confirmation link
+  can't be replayed as a sign-in
+- **Cookie-based sessions** (`src/lib/session.ts`), 30-day sliding window,
+  HttpOnly + Secure + SameSite=Lax. `/manage` and `/schedule` use the session
+  if valid; otherwise fall back to the magic-link email loop
 - Static pages set `export const prerender = true` and use small inline
-  `<script is:inline>` blocks for dynamic URL-param content (no framework)
+  `<script is:inline>` blocks for dynamic URL-param content (`index`,
+  `pending`, `confirmed`, `unsubscribed`). Server-rendered pages (`manage`,
+  `schedule`) read params + cookies in the Astro frontmatter
 - **Caddy + systemd** in front of `node ./dist/server/entry.mjs` on a single
-  DigitalOcean droplet
+  DigitalOcean droplet. Two background systemd timers run alongside:
+  `oddlympics-notify.timer` (5-min kickoff cron, dry-run by default) and
+  `oddlympics-ingest.timer` (daily 03:00 schedule refresh)
 - **GitHub Actions** auto-deploys on push to `main` (~40s end-to-end)
 
 ## Common commands
@@ -41,10 +69,12 @@ and curling endpoints; see `docs/smoke-tests` if/when extracted.
 
 ## Architecture worth understanding before editing
 
-**Hybrid static + server.** The three HTML pages (`/`, `/pending`, `/confirmed`)
-are statically prerendered and cacheable; the two API routes (`/api/signup`,
-`/api/confirm`) are server-rendered. To add a new dynamic page, set
-`export const prerender = false;` at the top.
+**Hybrid static + server.** The four prerendered pages (`/`, `/pending`,
+`/confirmed`, `/unsubscribed`) are static and cacheable; the two
+session-gated pages (`/manage`, `/schedule`) and all six API routes
+(`/api/signup`, `/api/confirm`, `/api/manage`, `/api/save-selection`,
+`/api/unsubscribe`, `/api/logout`) are server-rendered. To add a new dynamic
+page, set `export const prerender = false;` at the top.
 
 **Why `security: { checkOrigin: false }`.** Astro's adapter has a built-in CSRF
 check that compares the request's `Origin` to the configured `site` URL. That
@@ -52,20 +82,57 @@ blocks same-origin local testing because `site` points to `https://oddlympics.ap
 We disable it and do our own Origin check in `src/pages/api/signup.ts` that
 allows `localhost`/`127.0.0.1` while still blocking real cross-origin POSTs.
 
-**Magic-link flow.**
-1. POST `/api/signup` validates email + honeypot + rate limit, upserts a row
-   in `vip_signups`, mints a token (`{email, exp}` HMAC-signed), sends via
-   Resend, returns 303 → `/pending?email=...`
-2. The user clicks the link in their email → GET `/api/confirm?token=...`
-3. Token verified (timing-safe), `confirmed_at` set, 303 → `/confirmed?status=ok`
-4. Re-clicks return `status=already`; bad/expired tokens return `status=bad-token`
+**Magic-link flows (four purposes).** Tokens are `{email, exp, purpose}`
+HMAC-signed; the `purpose` claim prevents one type of link being replayed as
+another.
 
-**Static page → URL params.** Because `index.astro` and `pending.astro` are
-prerendered, `Astro.url.searchParams` returns build-time values (always empty).
-The `?error=...` and `?email=...` query params are read client-side via small
-inline scripts. **If you add a new page that needs to react to URL params at
-request time, either drop `prerender = true` or do the same client-side trick.**
-The latter is cheaper if you don't need server logic.
+*Signup* (purpose=`confirm`): POST `/api/signup` validates email + honeypot
++ rate limit + Origin, upserts a row in `vip_signups`, mints a token, sends
+via Resend, returns 303 → `/pending?email=...`. The user clicks → GET
+`/api/confirm?token=...` → token verified (timing-safe) → `confirmed_at` set
+→ 303 → `/confirmed?status=ok` (re-clicks return `status=already`,
+bad/expired return `status=bad-token`). `confirmed.astro` reads the status
+client-side via `<script is:inline>` because it's prerendered.
+
+*Sign-in* (purpose=`manage`): POST `/api/manage` (from `/manage` page) mints
+a magic-link with purpose=manage and sends it. The user clicks → lands on
+`/schedule` → token verified → session cookie minted → user is signed in for
+30 days, sliding window.
+
+*Unsubscribe* (purpose=`unsubscribe`): every outbound email contains an
+unsubscribe link. GET `/api/unsubscribe?token=...` → token verified →
+`unsubscribed_at` set → 303 → `/unsubscribed`. Also satisfies RFC 8058 via
+the helper that adds a `List-Unsubscribe-Post` header.
+
+*Session* (purpose=`session`): the session cookie itself is a signed token,
+managed by `src/lib/session.ts`. `readSessionFromCookie()` validates +
+sliding-renews on every authenticated request; `/api/logout` clears it.
+
+**Static page → URL params.** Because the four prerendered pages
+(`index`, `pending`, `confirmed`, `unsubscribed`) are baked at build time,
+`Astro.url.searchParams` returns empty. The `?error=...`, `?email=...`,
+`?status=...` query params are read client-side via small inline scripts.
+**If you add a new page that needs to react to URL params at request time,
+either drop `prerender = true` or do the same client-side trick.** The
+former pattern is demonstrated by `manage.astro` and `schedule.astro` (both
+need server-side access to cookies + tokens); the latter by the four static
+pages above. Match the pattern that fits your needs.
+
+**Background work via systemd timers, not in-process schedulers.**
+`scripts/send-kickoff-notifications.mjs` and `scripts/ingest-schedule.mjs`
+run as `oneshot` services driven by `*.timer` units. The web server
+(`oddlympics.service`) doesn't run any cron logic itself. Each script is
+idempotent + safe to re-run; failures log to journald (`journalctl -u
+oddlympics-{notify,ingest} -f`). New background jobs should follow this
+pattern — don't add an in-process scheduler.
+
+**Dry-run-by-default safety pattern for outbound side effects.** Both
+`launch-blast.mjs` and `send-kickoff-notifications.mjs` log what they
+would send instead of sending unless an explicit env var or CLI flag flips
+them on (`KICKOFF_NOTIFICATIONS_ENABLED=true` for the cron, `--send` for
+the blast). Adopt this pattern for any new mass-outbound script —
+production accidentally fires real emails to thousands of users
+otherwise.
 
 **Dev email fallback.** `src/lib/email.ts` checks `process.env.RESEND_API_KEY`.
 If unset and `NODE_ENV !== 'production'`, magic links print to the console
@@ -101,8 +168,13 @@ ops table (logs, restart, DB inspection, email-list export, backup).
 - **Accent color** is `hsl(18 70% 56%)` (a warm orange). Defined as `--accent`
   in each page's inline `<style is:global>`.
 - **Astro CSS lives inline per page** in `<style is:global>` blocks — no
-  global stylesheet, no layout component yet. Three pages doesn't justify the
-  abstraction. Refactor to a shared layout when a 4th page lands.
+  global stylesheet, no `Layout.astro` component. The original "refactor when
+  a 4th page lands" trigger has fired (we're at 6 pages: `/`, `/pending`,
+  `/confirmed`, `/manage`, `/schedule`, `/unsubscribed`), but the refactor
+  itself is **deferred to v1.1** — the deadline is hard, the duplication is
+  manageable, and any new page in the meantime should just paste the same
+  `<style is:global>` head as a copy from `index.astro`. When you do extract
+  Layout, do it as one focused commit, not bundled with feature work.
 - **Errors and pending state via URL params** (`?error=bad-email`,
   `?email=foo@bar`). Server endpoints redirect with 303; client scripts read
   the param and inject the message. Keeps pages CDN-cacheable.
