@@ -15,7 +15,7 @@ For launch on or before **2026-06-11** (World Cup group stage kickoff). Each map
 - [x] **HARDEN-04**: Caddy serves a `Content-Security-Policy` header that allows Plausible + own inline scripts and blocks everything else.
 - [x] **HARDEN-06**: Magic-link tokens expire within 24 hours.
 
-> **HARDEN-05** (off-droplet backups) was originally in this list. Replaced with the operator action "enable DigitalOcean Backups in the dashboard" — not a code requirement.
+> **HARDEN-05** (off-droplet backups) was originally in this list. Replaced with the operator action "enable DigitalOcean Backups in the dashboard" — not a code requirement. **Status: DONE — DigitalOcean Backups enabled on the droplet (2026-05-10).**
 
 ### Identity & Personalization — Phase 2
 
@@ -48,7 +48,7 @@ Originally in v1 scope; trimmed for the deadline. Re-prioritize after the first 
 - **NOTIFY-02** — Telegram bot notifications. Bot token, /start handler, deep-link verification, webhook/polling. Real ops surface; email-only ships a complete product.
 - **TIP-01, TIP-02** — Lightning tip jar with **vaultwarden** integration. Needs proper design time the deadline doesn't allow. Ship v1 without it; if you want a placeholder, hardcode an LNURL or `lightning:` URI in the email footer.
 - **DATA-03** — Admin override path for hand-editing match rows. Build only if a real upstream-data incident demands it.
-- **HARDEN-05** — Off-droplet (cross-vendor) backups via rclone/B2. Replaced by DigitalOcean Backups dashboard checkbox. Revisit if you ever feel the cross-vendor argument matters more than the simplicity argument.
+- **HARDEN-05** — Off-droplet (cross-vendor) backups via rclone/B2. ~~Replaced by DigitalOcean Backups dashboard checkbox~~ — **DO Backups enabled 2026-05-10**. Revisit only if you decide the cross-vendor argument matters more than the simplicity argument.
 
 ## v2 Requirements (acknowledged, not v1)
 

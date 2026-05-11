@@ -33,8 +33,8 @@ Plans:
 - [x] 01-04 — HARDEN-02: full unsubscribe slice (DB column, token purpose, /api/unsubscribe, /unsubscribed page, RFC 8058 helper)
 - [x] 01-05 — HARDEN-04: enforcing `Content-Security-Policy` header in Caddyfile
 
-**Operator action remaining (not a code change):**
-- Enable **DigitalOcean Backups** in the droplet dashboard (~$1.20/mo). Replaces the originally-planned Backblaze B2 setup. Click once, forget.
+**Operator actions:**
+- [x] **DigitalOcean Backups** enabled in the droplet dashboard (~$1.20/mo) — replaces the originally-planned Backblaze B2 setup. Done 2026-05-10.
 
 ### Phase 2: Identity & Personal Schedule
 **Goal**: A signed-up user can request a magic-link, pick the teams they follow, and see their personal schedule with all kickoffs in their browser's local time zone.

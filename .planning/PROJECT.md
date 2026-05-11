@@ -40,7 +40,7 @@ vs. Iran kicks off in 60 minutes (your time)" email that lands when promised.
 - [ ] Add `/api/unsubscribe` and an unsubscribe link in every email (CAN-SPAM/CASL/GDPR before sending non-confirmation email)
 - [ ] Stricter cross-origin POST handling (default-deny on missing `Origin`)
 - [ ] CSP header in Caddyfile (allowing Plausible + own inline scripts)
-- [ ] Automated daily SQLite backup off-droplet (rclone → S3/B2 or equivalent)
+- [x] Automated daily SQLite backup off-droplet — **DigitalOcean Backups** enabled in droplet dashboard (~$1.20/mo, weekly snapshots) instead of rclone → S3/B2; same cross-vendor-redundancy outcome at one click. Done 2026-05-10.
 - [ ] Magic-link TTL drop from 7 days → 24 hours, or per-token nonce revocation
 
 #### Identity + personalization
@@ -53,7 +53,7 @@ vs. Iran kicks off in 60 minutes (your time)" email that lands when promised.
 #### Schedule + data
 
 - [ ] World Cup 2026 schedule (104 matches) ingested from a free football data API (e.g. football-data.org), with manual override path for corrections
-- [ ] Local SQLite cache of schedule + per-user subscriptions; nightly refresh job
+- [x] Local SQLite cache of schedule + per-user subscriptions; nightly refresh job — `oddlympics-ingest.timer` fires daily at 03:00 (added in commit `911b445`). Schedule cache + subscriptions shipped earlier in Phase 2.
 - [ ] Personal schedule page renders only the user's selected matches in their TZ
 
 #### Notifications
