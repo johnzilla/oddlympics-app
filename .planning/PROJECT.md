@@ -1,26 +1,50 @@
-# oddlympics — v1 MVP
+# oddlympics
 
 ## What This Is
 
 **Personalized "when does MY thing happen" notifications for international sports
-fans, launching with the 2026 FIFA World Cup.** Users pick the teams they care
-about, get the matches in their own time zone, receive email + Telegram pings
-before kickoff, and can tip a single creator over Lightning. The teaser landing
-page is already live at https://oddlympics.app — this milestone turns it into
-the actual product before group stage starts on **2026-06-11**.
+fans, launching with the 2026 FIFA World Cup.** Users pick the team they care
+about and receive an email kickoff notification in their local time zone — one
+ping, one hour before each match. The teaser landing page launched at
+https://oddlympics.app; v1 MVP (magic-link sign-in, team picker, schedule,
+kickoff cron) shipped to `main`. The current milestone (**v2.0 Consumer Landing
+& Signup Flow**) replaces the indie/builder-themed public surface with a
+consumer-targeted World Cup landing before group stage kicks off on
+**2026-06-11**.
 
 ## Core Value
 
 **A user picks their team and gets a kickoff notification in their local time,
-on time, before group stage 2026.** If everything else fails — tipping breaks,
-Telegram lags, the schedule is hand-typed — the user must still get a "USA
-vs. Iran kicks off in 60 minutes (your time)" email that lands when promised.
+on time, before group stage 2026.** If everything else fails — the OG image
+renders wrong, Plausible events drop, the dropdown is ugly — the user must
+still get a "USA vs. Iran kicks off in 60 minutes (your time)" email that
+lands when promised.
+
+## Current Milestone: v2.0 Consumer Landing & Signup Flow
+
+**Goal:** Replace the indie/builder-themed teaser with a consumer-targeted
+World Cup 2026 landing page (team + email signup, browser-timezone capture,
+legal pages, Open Graph image) — paid-ad-reviewable and bot-resistant before
+group-stage kickoff on 2026-06-11. **Target completion: 2026-05-19.**
+
+**Target features:**
+- Landing page rewrite — consumer headline, JS-populated timezone label, banner pill, How it works / Why this exists / After the World Cup / FAQ sections, consumer footer (R1)
+- Two-field signup — team dropdown (48 teams, confederation-grouped) + email + hidden timezone (R2)
+- `/api/signup` payload widening — `team` allow-list + IANA `timezone` w/ fallback, additive contract (R3)
+- `/privacy` + `/terms` legal pages (R4, R5)
+- `/og-image.png` (1200×630, <300KB) + checked-in source SVG (R6)
+- Meta tags rewrite — title, description, OG, Twitter (R7)
+- Plausible `Signup Submit` event with `team` prop (R8)
+- `/manage` team + timezone editor; one-time backfill banner for legacy rows (R9, R10)
+- 12 acceptance criteria (AC1–AC12) — including Lighthouse mobile ≥90, Playwright across 3 locales, full signup→confirm→unsubscribe loop
+
+**Constraint:** No visible references to crypto, Lightning, Bitcoin, "world domination," or "personal Olympics" anywhere in the public surface (landing, /privacy, /terms, /manage, OG image, meta tags). Public copy is consumer soccer fan — not crypto, not dev Twitter.
 
 ## Requirements
 
 ### Validated
 
-<!-- Shipped in v1 teaser, confirmed working -->
+<!-- Shipped in v1 teaser + v1 MVP, in code on main -->
 
 - ✓ Public landing page at oddlympics.app — v1 teaser
 - ✓ Email capture with HMAC magic-link double-opt-in confirm — v1 teaser
@@ -29,44 +53,74 @@ vs. Iran kicks off in 60 minutes (your time)" email that lands when promised.
 - ✓ GitHub Actions auto-deploy on push to `main` (~40s end-to-end) — v1 teaser
 - ✓ Caddy with auto Let's Encrypt + HSTS + nosniff + frame-deny + referrer policy — v1 teaser
 - ✓ Plausible analytics across all pages — v1 teaser
+- ✓ `/confirmed` status routing (`ok`/`already`/`bad-token`/`unknown`) — v1 MVP Phase 1 (HARDEN-01)
+- ✓ `/api/unsubscribe` + `/unsubscribed` page + RFC 8058 list-unsubscribe headers — v1 MVP Phase 1 (HARDEN-02)
+- ✓ Default-deny on missing `Origin` for cross-origin POST — v1 MVP Phase 1 (HARDEN-03)
+- ✓ Content-Security-Policy enforced in Caddyfile — v1 MVP Phase 1 (HARDEN-04)
+- ✓ Magic-link TTL 24 h with `purpose` claim — v1 MVP Phase 1 (HARDEN-06)
+- ✓ DigitalOcean Backups enabled on droplet — v1 MVP Phase 1 operator action (2026-05-10)
+- ✓ Magic-link sign-in (`/manage`), team picker, personal schedule (`/schedule`), browser-tz capture + manual override — v1 MVP Phase 2 (IDENT-01…05, DATA-04)
+- ✓ World Cup schedule ingestor (football-data.org → `teams`/`matches` tables) + nightly `oddlympics-ingest.timer` — v1 MVP Phase 2 (DATA-01, DATA-02)
+- ✓ Cookie-based 30-day sliding sessions — v1 MVP Phase 2
+- ✓ Launch-blast mechanism (`scripts/launch-blast.mjs`, dry-run by default) — v1 MVP Phase 2.5 (LAUNCH-01, blast not yet fired — pending operator action)
+- ✓ Demand-capture free-text field on `/schedule` + `feature_requests` table — v1 MVP Phase 2.5 SC4 (commit `6129910`)
+- ✓ Kickoff notification cron (`oddlympics-notify.timer`, dry-run pending `KICKOFF_NOTIFICATIONS_ENABLED=true`) — v1 MVP Phase 3 (NOTIFY-01, NOTIFY-03, NOTIFY-04)
 
 ### Active
 
-<!-- v1 MVP scope — building toward 2026-06-11 World Cup launch -->
+<!-- v2.0 Consumer Landing scope — target 2026-05-19, before WC group stage 2026-06-11 -->
 
-#### Pre-launch hardening (Phase 1)
+#### Landing page + meta (Phase 5–6)
 
-- [ ] Fix `confirmed.astro` so error states (`bad-token`, `already`, `unknown`) render correctly (currently always shows success copy due to prerender bug)
-- [ ] Add `/api/unsubscribe` and an unsubscribe link in every email (CAN-SPAM/CASL/GDPR before sending non-confirmation email)
-- [ ] Stricter cross-origin POST handling (default-deny on missing `Origin`)
-- [ ] CSP header in Caddyfile (allowing Plausible + own inline scripts)
-- [x] Automated daily SQLite backup off-droplet — **DigitalOcean Backups** enabled in droplet dashboard (~$1.20/mo, weekly snapshots) instead of rclone → S3/B2; same cross-vendor-redundancy outcome at one click. Done 2026-05-10.
-- [ ] Magic-link TTL drop from 7 days → 24 hours, or per-token nonce revocation
+- [ ] Replace `index.astro` with consumer-targeted template: headline "Your team's matches. In your time zone. One ping before kickoff." + JS-populated tz label + WC banner pill
+- [ ] Four below-fold sections: How it works (3 steps), Why this exists, After the World Cup, FAQ (5 items)
+- [ ] Consumer footer: Manage, Privacy, Terms, Contact (`hello@oddlympics.app`), "Independent project · Not affiliated with FIFA"
+- [ ] Lighthouse mobile ≥ 90 (Performance, Accessibility, Best Practices, SEO)
+- [ ] Responsive at 390 / 768 / 1280 px
+- [ ] New `<title>` + meta description + Open Graph + Twitter card tags (no prohibited terms)
 
-#### Identity + personalization
+#### Signup flow widening (Phase 5)
 
-- [ ] User identifies via magic-link (extends existing teaser pattern; no password)
-- [ ] User picks 1+ teams from a list of all 48 World Cup 2026 teams; selection persists
-- [ ] User can edit team selection later from a magic-link-authenticated page
-- [ ] User's local time zone is captured at signup (browser-detected) and used for all notification rendering
+- [ ] Two-field signup form: `team` (48-team dropdown, confederation-grouped) + `email`, plus hidden `timezone` populated by JS
+- [ ] Team dropdown — snake_case slugs, UEFA → CONMEBOL → CONCACAF → CAF → AFC → OFC grouping, all 48 qualified teams
+- [ ] Retain honeypot (`name="website"`) and `requested_sport=world_cup` hidden field for forward compat
+- [ ] `/api/signup` accepts + validates `team` (allow-list) + `timezone` (IANA), persists alongside `email`/`requested_sport`/`created_at`, reuses `bad-form` error code
+- [ ] Invalid/empty timezone falls back to `America/Detroit` and flags row for later correction — does NOT reject
+- [ ] Confirmation email body names the team and timezone in human-readable form
 
-#### Schedule + data
+#### Legal pages (Phase 7)
 
-- [ ] World Cup 2026 schedule (104 matches) ingested from a free football data API (e.g. football-data.org), with manual override path for corrections
-- [x] Local SQLite cache of schedule + per-user subscriptions; nightly refresh job — `oddlympics-ingest.timer` fires daily at 03:00 (added in commit `911b445`). Schedule cache + subscriptions shipped earlier in Phase 2.
-- [ ] Personal schedule page renders only the user's selected matches in their TZ
+- [ ] `/privacy` page — what's collected, retention (logs ≤30 days), no third-party tracking cookies, Plausible cookie-free, GDPR/CCPA deletion path (`privacy@oddlympics.app`, 30 days), ESP named
+- [ ] `/terms` page — free service through 2026-07-19, best-effort delivery, no FIFA/ESPN/team affiliation, governing law (Michigan, USA), `hello@oddlympics.app`
+- [ ] Last-updated date in headers matches deploy date
+- [ ] Same site shell (fonts, footer) as landing — no nav menu required
 
-#### Notifications
+#### Open Graph image (Phase 8)
 
-- [ ] Email kickoff notification ~60 minutes before each match the user subscribed to (Resend)
-- [ ] Optional Telegram notification via bot — user links a chat ID via deep-link from email
-- [ ] Notifications include match metadata + a "view your schedule" link (signed token, no login needed)
-- [ ] No-spam rule: at most one notification per user per match; idempotent if scheduler re-runs
+- [ ] `references/og-image.svg` checked into repo so OG image is rebuildable from source
+- [ ] Built/rendered `/og-image.png` at exact 1200×630, <300KB — shows wordmark, banner, headline, sub, URL, "Not affiliated with FIFA" tag
+- [ ] `og:image`, `og:image:width`, `og:image:height`, `og:image:alt`, `twitter:image` meta tags point to it
+- [ ] opengraph.xyz preview, Slack share, iMessage share render cleanly
 
-#### Lightning tip jar
+#### Analytics (Phase 5)
 
-- [ ] Single global tip jar visible on schedule + notification footer
-- [ ] Integration shape with vaultwarden TBD during phase planning (LNURL link-out vs. embedded widget vs. server-to-server invoice mint — surfaced as Phase TBD)
+- [ ] Plausible script preserved unchanged
+- [ ] Submit handler fires `Signup Submit` event with `team` prop = selected slug
+- [ ] Plausible goal `Signup Submit` configured server-side before deploy
+
+#### `/manage` updates + backward compat (Phase 9)
+
+- [ ] `/manage` displays + allows editing current team and timezone (update endpoint TBD — `/api/save-selection` or new `/api/manage`; pin in plan)
+- [ ] Unsubscribe via HMAC-signed token (expires 1y, single-use per action) — no auth beyond the email link
+- [ ] Pre-milestone subscribers with NULL `team`/default `timezone` load `/manage` without errors; one-time banner prompts them to pick a team
+- [ ] No new error codes — bad-team and bad-timezone reuse `bad-form` (server-side log distinguishes)
+
+#### End-to-end + launch gate (Phase 11)
+
+- [ ] AC1–AC12 all pass on production
+- [ ] Lighthouse mobile report saved to `references/lighthouse-final.html`, all categories ≥ 90
+- [ ] Real signup test from a fresh browser profile (John's personal Gmail) delivers correctly-rendered confirmation email within 60 s
+- [ ] Release tagged `v1.0-consumer-landing` in git
 
 ### Out of Scope
 
@@ -140,6 +194,10 @@ ships Approach A — concierge MVP, World Cup-only.
 | Magic-link auth (extend teaser pattern) over email+password | Identity is solved by the existing token + Resend flow; password adds reset/session/hashing surface we don't need on this timeline | — Pending |
 | Single global Lightning tip jar via vaultwarden; integration shape TBD at phase planning | Per-event/per-creator tipping is design-doc-explicit v1.1; vault integration shape may need vault-side work, defer locking until that phase | — Pending |
 | Stay on the existing droplet/Caddy/systemd stack | Stack is shipping reliably; no rewrites mid-deadline | ✓ Good (already proven) |
+| **v2.0 consumer pivot — strip BTC/Lightning/"world domination"/"personal Olympics" from public surfaces; rewrite landing for casual soccer fans** | Existing copy is optimized for indie/builder audience and converts poorly from cold paid/organic traffic; paid-ad reviewers also require `/privacy` + `/terms`. Backend, ESP, and infra are untouched except for additive `team`/`timezone` columns on the signup payload — magic-link, kickoff cron, schedule data all stay. | — Pending (validates by 2026-05-19) |
+| **Single-team signup at intake; multi-team selection deferred to `/schedule`/`/manage`** | Cold-traffic conversion benefits from one decision per field; the existing `/schedule` page already supports multi-select for returning users, so power-user breadth is preserved post-signup. | — Pending |
+| **Bot-resistant via existing honeypot + Origin check + rate limit; no CAPTCHA in v2.0** | Adding visible CAPTCHA tanks conversion; existing controls survived the v1 teaser without spam load and the consumer audience isn't worth more than that yet. Revisit if real attack pattern emerges. | — Pending |
+| **No IP-based country preselection for the team dropdown in v2.0** | Adds geo-lookup dependency + privacy surface for marginal UX gain; defer until we see real signup data show user-team mismatch is a problem. | — Pending |
 
 ## Evolution
 
@@ -159,4 +217,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-08 after initialization*
+*Last updated: 2026-05-12 after starting milestone v2.0 Consumer Landing & Signup Flow*

@@ -1,36 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: milestone
-status: executing
-stopped_at: Roadmap and STATE created; ready to run /gsd-plan-phase 1
-last_updated: "2026-05-11T12:43:26.627Z"
-last_activity: 2026-05-09 -- Phase 01 execution started
+milestone: v2.0
+milestone_name: Consumer Landing & Signup Flow
+status: planning
+last_updated: "2026-05-13T00:36:45.403Z"
+last_activity: 2026-05-13
 progress:
-  total_phases: 5
+  total_phases: 0
   completed_phases: 0
-  total_plans: 7
-  completed_plans: 5
-  percent: 71
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-08)
+See: .planning/PROJECT.md (updated 2026-05-12)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** Phase 01 — pre-launch-hardening
+**Current focus:** Milestone v2.0 — Consumer Landing & Signup Flow (target 2026-05-19)
 
 ## Current Position
 
-Phase: 01 (pre-launch-hardening) — EXECUTING
-Plan: 1 of 7
-Status: Executing Phase 01
-Last activity: 2026-05-11 -- Completed quick task 260511-ccx: Phase 2.5 SC4 demand-capture field on /schedule
-
-Progress: [░░░░░░░░░░] 0%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-13 — Milestone v2.0 started
 
 ## Performance Metrics
 
@@ -65,8 +62,10 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Phase 1 ordered before feature work because CONCERNS.md bugs (confirmed.astro, no unsubscribe, no backup) must be resolved before mass-emailing real users
-- Magic-link token revocation (HARDEN-06): two options — drop TTL to 24h OR per-use nonce; decide at phase planning
+- v2.0 consumer pivot — strip BTC/Lightning/"world domination"/"personal Olympics" from public surfaces, rewrite landing for casual soccer fans (2026-05-12). Backend, ESP, infra untouched except additive `team`/`timezone` columns on signup payload.
+- Single-team selection at intake (multi-team retained on `/schedule` for returning users) — one decision per field for cold-traffic conversion.
+- No CAPTCHA in v2.0 — rely on existing honeypot + Origin check + rate limit; revisit only if real attack pattern emerges.
+- Phase numbering continues from v1 MVP (last phase = 4) — new milestone runs phases 5–11. v1 phase dirs preserved under `.planning/phases/` for traceability.
 
 ### Pending Todos
 
@@ -74,8 +73,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Hard deadline: 2026-06-11. 34 days from 2026-05-08. Phase sequencing is deadline-resistant: if Phase 4 slips, Phases 1-3 still deliver the core value loop.
-- vaultwarden integration shape for TIP-02 is deliberately deferred to Phase 4 planning — may require vault-side work.
+- Hard milestone deadline: **2026-05-19** (7 days from 2026-05-12). Must complete before v1 MVP launch on 2026-06-11.
+- Pending operator actions inherited from v1 MVP (must complete before launch but independent of v2.0 work): fire `scripts/launch-blast.mjs --send`, flip `KICKOFF_NOTIFICATIONS_ENABLED=true` on droplet.
+- Reference assets called out in MILESTONE doc (`references/index.html`, `og-image.svg`, copy md) do not exist in repo yet — execution phases must create them.
+- SVG → PNG rendering toolchain not present in CI; Phase 8 may need to install `rsvg-convert` or commit a pre-rendered PNG.
+- Plausible custom goal `Signup Submit` must be configured server-side before form ships or events drop silently.
 
 ### Quick Tasks Completed
 
@@ -91,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-08
-Stopped at: Roadmap and STATE created; ready to run /gsd-plan-phase 1
+Last session: 2026-05-12
+Stopped at: Milestone v2.0 initialized; requirements written; awaiting roadmap
 Resume file: None
