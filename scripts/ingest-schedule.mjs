@@ -10,7 +10,7 @@
 //               WC_COMPETITION (default WC; football-data competition code)
 
 import Database from 'better-sqlite3';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 const API_KEY = process.env.FOOTBALL_DATA_API_KEY;
@@ -25,6 +25,15 @@ const API_BASE = `https://api.football-data.org/v4/competitions/${COMP}`;
 
 const dir = dirname(DB_PATH);
 if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+
+// Phase 5 — Plan 02: label → slug map for the teams.slug column. teams.json is
+// hand-authored (48 entries) and lives at repo root; mismatched football-data.org
+// names log a warning and leave slug NULL (the backfill script will surface them).
+const TEAMS_JSON_PATH = resolve(
+  process.env.TEAMS_JSON_PATH ?? './references/teams.json',
+);
+const teamsCatalog = JSON.parse(readFileSync(TEAMS_JSON_PATH, 'utf-8'));
+const labelToSlug = new Map(teamsCatalog.map((t) => [t.label, t.slug]));
 
 async function api(path) {
   const r = await fetch(`${API_BASE}${path}`, {
@@ -66,13 +75,26 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_matches_utc_date ON matches(utc_date);
 `);
 
+// Phase 5 — Plan 02: mirror the src/lib/db.ts slug-column probe so a standalone
+// ingest run (e.g. via systemd before the web server boots) doesn't blow up on
+// the new column. Idempotent: skip if slug already present.
+{
+  const cols = db
+    .prepare("SELECT name FROM pragma_table_info('teams')")
+    .all();
+  if (!cols.some((c) => c.name === 'slug')) {
+    db.exec(`ALTER TABLE teams ADD COLUMN slug TEXT;`);
+  }
+}
+
 const upsertTeam = db.prepare(`
-  INSERT INTO teams (id, tla, name, crest_url)
-  VALUES (?, ?, ?, ?)
+  INSERT INTO teams (id, tla, name, crest_url, slug)
+  VALUES (?, ?, ?, ?, ?)
   ON CONFLICT(id) DO UPDATE SET
     tla = excluded.tla,
     name = excluded.name,
     crest_url = excluded.crest_url,
+    slug = COALESCE(excluded.slug, teams.slug),
     last_updated = strftime('%s','now')
 `);
 
@@ -97,12 +119,23 @@ const teamsResp = await api('/teams');
 const teams = teamsResp.teams ?? [];
 console.log(`[ingest] got ${teams.length} teams from API`);
 
+let noSlugCount = 0;
 const ingestTeams = db.transaction(() => {
   for (const t of teams) {
-    upsertTeam.run(t.id, t.tla, t.name, t.crest ?? null);
+    const slug = labelToSlug.get(t.name) ?? null;
+    if (slug === null) {
+      console.log(`[ingest] no-slug team-name=${t.name} id=${t.id}`);
+      noSlugCount++;
+    }
+    upsertTeam.run(t.id, t.tla, t.name, t.crest ?? null, slug);
   }
 });
 ingestTeams();
+if (noSlugCount > 0) {
+  console.log(
+    `[ingest] WARN ${noSlugCount} team(s) had no slug match in references/teams.json — edit that file to align labels with the football-data.org name`,
+  );
+}
 
 console.log('[ingest] fetching matches...');
 const matchesResp = await api('/matches');
