@@ -56,7 +56,7 @@ Plans:
 - [x] 05-05-PLAN.md — Downstream consumers: kickoff cron, schedule.astro, /api/save-selection
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 05-06-PLAN.md — scripts/smoke-signup.mjs verification (AC2/AC9/AC12 evidence)
+- [x] 05-06-PLAN.md — scripts/smoke-signup.mjs verification (AC2/AC9/AC12 evidence)
 
 **Risk note (R-2)**: Existing subscriber count is unknown. Confirm row count
 at plan time before running the backfill; if list is unexpectedly large
