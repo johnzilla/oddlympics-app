@@ -86,15 +86,16 @@ const matchesQuery = db.prepare(`
   ORDER BY m.utc_date
 `);
 
-// Find users subscribed to either team in the match who haven't been notified yet.
-// json_each expands the selected_teams JSON array into rows; we match on team id.
+// Find users subscribed via vip_signups.team (slug) joined to teams.slug;
+// match by teams.id IN (home_id, away_id) so the existing argv shape stays.
 const usersQuery = db.prepare(`
   SELECT DISTINCT v.email AS email, v.timezone AS timezone
-  FROM vip_signups v, json_each(v.selected_teams) je
+  FROM vip_signups v
+  JOIN teams t ON v.team = t.slug
   WHERE v.confirmed_at IS NOT NULL
     AND v.unsubscribed_at IS NULL
-    AND v.selected_teams IS NOT NULL
-    AND CAST(je.value AS INTEGER) IN (?, ?)
+    AND v.team IS NOT NULL
+    AND t.id IN (?, ?)
     AND NOT EXISTS (
       SELECT 1 FROM match_notifications n
       WHERE n.user_email = v.email
