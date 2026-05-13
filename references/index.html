@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Oddlympics — World Cup 2026 alerts in your time zone</title>
+  <meta name="description" content="Pick your team. Get one email one hour before every 2026 World Cup match, in your local time zone. Free. No ads. No betting odds.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="World Cup 2026 alerts in your time zone">
+  <meta property="og:description" content="Pick your team. One ping, one hour before kickoff, in your local time. Free for the whole tournament.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://oddlympics.app">
+  <meta property="og:image" content="https://oddlympics.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Oddlympics — World Cup 2026 alerts in your time zone">
+  <meta property="og:site_name" content="Oddlympics">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="World Cup 2026 alerts in your time zone">
+  <meta name="twitter:description" content="Pick your team. One ping, one hour before kickoff. Free.">
+  <meta name="twitter:image" content="https://oddlympics.app/og-image.png">
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <!-- Plausible -->
+  <script async src="https://plausible.io/js/pa-wRAab3seDWDDBnGbRbe0K.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --surface: #ffffff;
+      --fg: #14151a;
+      --fg-dim: #5a5d68;
+      --line: #e4e4dd;
+      --line-strong: #c9cbc4;
+      --accent: #d94a1f; /* warm rust, reads as "alert" without being aggressive */
+      --accent-ink: #ffffff;
+      --accent-soft: #fbe9e0;
+      --radius: 8px;
+      --max: 720px;
+      --pad-x: clamp(20px, 5vw, 48px);
+      --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
+    body {
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { filter: brightness(0.92); }
+
+    /* Container */
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad-x); }
+
+    /* Hero */
+    .hero { padding: 56px 0 40px; }
+    .banner {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      padding: 5px 10px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+    .headline {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: clamp(28px, 5vw, 40px);
+      line-height: 1.15;
+      letter-spacing: -0.015em;
+      margin: 0 0 14px;
+    }
+    .subhead {
+      font-size: 17px;
+      line-height: 1.55;
+      color: var(--fg-dim);
+      margin: 0 0 28px;
+      max-width: 560px;
+    }
+    .subhead strong { color: var(--fg); font-weight: 600; }
+
+    /* Form */
+    .cta {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      max-width: 560px;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg-dim);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .field select,
+    .field input[type="email"] {
+      width: 100%;
+      padding: 12px 14px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      color: var(--fg);
+      background: var(--bg);
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .field select:focus,
+    .field input[type="email"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(217, 74, 31, 0.15);
+    }
+    .field select {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%235a5d68' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    .submit-row { display: flex; gap: 10px; align-items: stretch; margin-top: 4px; }
+    .submit-row button {
+      flex: 1;
+      padding: 13px 18px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      color: var(--accent-ink);
+      background: var(--accent);
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .submit-row button:hover { filter: brightness(1.05); }
+    .submit-row button:active { transform: translateY(1px); }
+    .fineprint {
+      font-size: 12.5px;
+      color: var(--fg-dim);
+      margin: 10px 0 0;
+      line-height: 1.5;
+    }
+    .trust {
+      font-size: 13px;
+      color: var(--fg-dim);
+      margin: 14px 0 0;
+      max-width: 560px;
+    }
+    .error {
+      margin: 12px 0 0;
+      color: var(--accent);
+      font-size: 13.5px;
+      line-height: 1.5;
+      background: var(--accent-soft);
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+    .hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+    /* Sections */
+    section { padding: 32px 0; border-top: 1px solid var(--line); }
+    section h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fg-dim);
+      margin: 0 0 18px;
+    }
+    .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; }
+    .steps li {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+    .steps .num {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-soft);
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .steps .body strong { display: block; margin-bottom: 2px; font-weight: 600; }
+    .steps .body span { color: var(--fg-dim); font-size: 15px; }
+    .prose p { margin: 0 0 14px; max-width: 620px; color: var(--fg); }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose .muted { color: var(--fg-dim); }
+
+    /* FAQ */
+    details {
+      border-top: 1px solid var(--line);
+      padding: 14px 0;
+    }
+    details:last-of-type { border-bottom: 1px solid var(--line); }
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::after {
+      content: "+";
+      font-family: var(--font-mono);
+      font-size: 18px;
+      color: var(--fg-dim);
+      transition: transform 0.15s ease;
+    }
+    details[open] summary::after { content: "−"; }
+    details > p {
+      margin: 10px 0 0;
+      color: var(--fg-dim);
+      font-size: 15px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 32px 0 56px;
+      border-top: 1px solid var(--line);
+      font-size: 13px;
+      color: var(--fg-dim);
+    }
+    footer .links { display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 14px; }
+    footer .links a { color: var(--fg-dim); }
+    footer .copy { font-family: var(--font-mono); font-size: 12px; }
+
+    @media (max-width: 520px) {
+      .hero { padding: 36px 0 28px; }
+      .submit-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+
+    <!-- HERO -->
+    <header class="hero">
+      <span class="banner">World Cup 2026 · June 11 – July 19</span>
+      <h1 class="headline">Your team's matches. In your time zone. One ping before kickoff.</h1>
+      <p class="subhead">
+        Pick your team. We'll email you one hour before every match in
+        <strong id="tz-label">your local time</strong>. Nothing else.
+        Free, no ads, no betting odds.
+      </p>
+
+      <form class="cta" method="post" action="/api/signup" id="signup-form">
+        <div class="field">
+          <label for="team">Your team</label>
+          <select name="team" id="team" required>
+            <option value="" disabled selected>Pick your team</option>
+            <optgroup label="UEFA — Europe">
+              <option value="austria">Austria</option>
+              <option value="belgium">Belgium</option>
+              <option value="bosnia">Bosnia and Herzegovina</option>
+              <option value="croatia">Croatia</option>
+              <option value="czech_republic">Czech Republic</option>
+              <option value="england">England</option>
+              <option value="france">France</option>
+              <option value="germany">Germany</option>
+              <option value="netherlands">Netherlands</option>
+              <option value="norway">Norway</option>
+              <option value="portugal">Portugal</option>
+              <option value="scotland">Scotland</option>
+              <option value="spain">Spain</option>
+              <option value="sweden">Sweden</option>
+              <option value="switzerland">Switzerland</option>
+              <option value="turkey">Turkey</option>
+            </optgroup>
+            <optgroup label="CONMEBOL — South America">
+              <option value="argentina">Argentina</option>
+              <option value="brazil">Brazil</option>
+              <option value="colombia">Colombia</option>
+              <option value="ecuador">Ecuador</option>
+              <option value="paraguay">Paraguay</option>
+              <option value="uruguay">Uruguay</option>
+            </optgroup>
+            <optgroup label="CONCACAF — North &amp; Central America">
+              <option value="canada">Canada</option>
+              <option value="curacao">Curaçao</option>
+              <option value="haiti">Haiti</option>
+              <option value="mexico">Mexico</option>
+              <option value="panama">Panama</option>
+              <option value="united_states">United States</option>
+            </optgroup>
+            <optgroup label="CAF — Africa">
+              <option value="algeria">Algeria</option>
+              <option value="cape_verde">Cape Verde</option>
+              <option value="dr_congo">DR Congo</option>
+              <option value="egypt">Egypt</option>
+              <option value="ghana">Ghana</option>
+              <option value="ivory_coast">Ivory Coast</option>
+              <option value="morocco">Morocco</option>
+              <option value="senegal">Senegal</option>
+              <option value="south_africa">South Africa</option>
+              <option value="tunisia">Tunisia</option>
+            </optgroup>
+            <optgroup label="AFC — Asia">
+              <option value="australia">Australia</option>
+              <option value="iran">Iran</option>
+              <option value="iraq">Iraq</option>
+              <option value="japan">Japan</option>
+              <option value="jordan">Jordan</option>
+              <option value="qatar">Qatar</option>
+              <option value="saudi_arabia">Saudi Arabia</option>
+              <option value="south_korea">South Korea</option>
+              <option value="uzbekistan">Uzbekistan</option>
+            </optgroup>
+            <optgroup label="OFC — Oceania">
+              <option value="new_zealand">New Zealand</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com">
+        </div>
+
+        <!-- Hidden: timezone captured from browser, sport tag, honeypot -->
+        <input type="hidden" name="timezone" id="timezone" value="">
+        <input type="hidden" name="requested_sport" value="world_cup">
+        <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+
+        <div class="submit-row">
+          <button type="submit">Get match alerts</button>
+        </div>
+
+        <p class="fineprint">One email per match for the team you pick. Unsubscribe in one click.</p>
+        <p id="error" class="error" role="alert" hidden></p>
+      </form>
+
+      <p class="trust">Built by one person in Michigan. No app to install. We'll never sell your email.</p>
+    </header>
+
+    <!-- HOW IT WORKS -->
+    <section aria-labelledby="how">
+      <h2 id="how">How it works</h2>
+      <ol class="steps">
+        <li>
+          <span class="num">1</span>
+          <span class="body">
+            <strong>Pick your team.</strong>
+            <span>Choose one of the 48 teams in the 2026 World Cup. Add more later if you want.</span>
+          </span>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <span class="body">
+            <strong>We figure out your time zone.</strong>
+            <span>Every match time gets translated to where you actually are. Travel later? Update it in one click.</span>
+          </span>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <span class="body">
+            <strong>You get one email per match.</strong>
+            <span>One hour before kickoff. That's it. No "engagement" pings, no odds, no clickbait.</span>
+          </span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- WHY -->
+    <section aria-labelledby="why" class="prose">
+      <h2 id="why">Why this exists</h2>
+      <p>
+        The 2026 World Cup is being played across three countries and four time zones. If your team isn't from the US, Canada, or Mexico, half your matches will be at awkward local hours.
+      </p>
+      <p class="muted">
+        The big sports apps will buzz you 17 times a day with betting odds and engagement pings. I just wanted one alert for the matches I cared about. So I built it. Free for the whole tournament.
+      </p>
+    </section>
+
+    <!-- WHAT'S NEXT -->
+    <section aria-labelledby="next" class="prose">
+      <h2 id="next">After the World Cup</h2>
+      <p>
+        The plan is to do this for sports that nobody else covers properly — curling, esports, BattleBots, the Rubik's Cube World Championship, the Microsoft Excel World Championship (real, and televised on ESPN), lumberjack sports, drone racing.
+      </p>
+      <p class="muted">
+        Sign up for World Cup alerts now and you'll get a vote on what comes next.
+      </p>
+    </section>
+
+    <!-- FAQ -->
+    <section aria-labelledby="faq">
+      <h2 id="faq">Common questions</h2>
+
+      <details>
+        <summary>Is this really free?</summary>
+        <p>Free for the entire 2026 World Cup. No card required.</p>
+      </details>
+
+      <details>
+        <summary>How many emails will I get?</summary>
+        <p>One per match for the teams you pick. If you choose one team, you'll get three emails during the group stage. If they advance, more. That's the maximum.</p>
+      </details>
+
+      <details>
+        <summary>Will you sell my email?</summary>
+        <p>No. We use a single email provider to send the alerts. There's a one-click unsubscribe link in every message.</p>
+      </details>
+
+      <details>
+        <summary>Are you affiliated with FIFA, ESPN, or any team?</summary>
+        <p>No. This is an independent project. Match times are pulled from public schedules.</p>
+      </details>
+
+      <details>
+        <summary>Why should I trust this?</summary>
+        <p>You shouldn't — yet. Try it for one match. If the email doesn't show up on time, unsubscribe.</p>
+      </details>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="links">
+        <a href="/manage">Manage subscription</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="mailto:hello@oddlympics.app">Contact</a>
+      </div>
+      <div class="copy">© 2026 Oddlympics · Independent project · Not affiliated with FIFA</div>
+    </footer>
+
+  </main>
+
+  <script>
+    // Timezone detection: write a friendly label into the sub-headline, send the IANA zone with the form
+    (function () {
+      try {
+        var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+        if (tz) {
+          document.getElementById("timezone").value = tz;
+          // Friendly label: prefer city portion of the IANA name
+          var parts = tz.split("/");
+          var city = parts[parts.length - 1].replace(/_/g, " ");
+          var label = city ? (city + " time") : "your local time";
+          document.getElementById("tz-label").textContent = label;
+        }
+      } catch (e) { /* fallback already in DOM */ }
+    })();
+
+    // Surface server-side error codes in the query string (matches existing /api/signup contract)
+    (function () {
+      try {
+        var COPY = {
+          "bad-email": "That email looks off — try again.",
+          "bad-form": "Something went wrong with the form. Try again.",
+          "bad-origin": "Submission blocked. Please use the form on this page.",
+          "rate-limited": "Too many tries. Wait an hour and try again.",
+          "email": "We couldn't send the confirmation email. Try again in a minute.",
+          "server": "Server hiccup. Try again in a minute."
+        };
+        var code = new URL(location.href).searchParams.get("error");
+        if (code) {
+          var el = document.getElementById("error");
+          el.textContent = COPY[code] || "Something went wrong.";
+          el.hidden = false;
+        }
+      } catch (e) {}
+    })();
+
+    // Plausible signup goal — fires on submit so we can attribute by source even before /thanks
+    (function () {
+      var form = document.getElementById("signup-form");
+      if (!form) return;
+      form.addEventListener("submit", function () {
+        try {
+          var team = document.getElementById("team").value || "unknown";
+          window.plausible && window.plausible("Signup Submit", { props: { team: team } });
+        } catch (e) {}
+      });
+    })();
+  </script>
+</body>
+</html>
