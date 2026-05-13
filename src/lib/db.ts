@@ -70,15 +70,21 @@ export type VipSignup = {
   manage_blast_sent_at: number | null; // Phase 2.5: launch-blast tracking
 };
 
+// Phase 5 — SIGNUP-01/02/03: writes team + timezone alongside the existing
+// teaser columns. team is COALESCE-protected (a future re-signup without a
+// team must not clobber a previously-set slug); timezone is always overwritten
+// because validation+fallback guarantees the incoming value is good.
 export const upsertVipSignup = db.prepare<
-  [string, string, string | null, string | null]
+  [string, string, string | null, string | null, string | null, string]
 >(`
-  INSERT INTO vip_signups (email, requested_sport, ip, user_agent)
-  VALUES (?, ?, ?, ?)
+  INSERT INTO vip_signups (email, requested_sport, ip, user_agent, team, timezone)
+  VALUES (?, ?, ?, ?, ?, ?)
   ON CONFLICT(email) DO UPDATE SET
     requested_sport = excluded.requested_sport,
     ip = COALESCE(excluded.ip, vip_signups.ip),
-    user_agent = COALESCE(excluded.user_agent, vip_signups.user_agent)
+    user_agent = COALESCE(excluded.user_agent, vip_signups.user_agent),
+    team = COALESCE(excluded.team, vip_signups.team),
+    timezone = excluded.timezone
   RETURNING *
 `);
 
