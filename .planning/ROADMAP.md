@@ -52,7 +52,7 @@ Plans:
 - [x] 05-03-PLAN.md — vip_signups migration: add team, drop selected_teams; pre-migration backup
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 05-04-PLAN.md — Widen /api/signup: VALID_TEAMS, VALID_TZ allow-lists + persist team/timezone
+- [x] 05-04-PLAN.md — Widen /api/signup: VALID_TEAMS, VALID_TZ allow-lists + persist team/timezone
 - [ ] 05-05-PLAN.md — Downstream consumers: kickoff cron, schedule.astro, /api/save-selection
 
 **Wave 4** *(blocked on Wave 3 completion)*
