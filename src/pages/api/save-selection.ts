@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { setSelection, insertFeatureRequest } from '../../lib/db';
+import { db, setSelection, insertFeatureRequest } from '../../lib/db';
 import { verifyToken } from '../../lib/token';
 import { buildSessionCookie, readSessionFromCookie } from '../../lib/session';
 
@@ -47,29 +47,31 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  // team_ids comes as repeated form fields: team_ids=762, team_ids=769, ...
+  // Phase 5 — D-01: single-team semantics. Form still POSTs team_ids[] as integer
+  // football-data IDs (Phase 9 will redesign /manage as a dedicated single-team editor).
+  // Take the FIRST checked ID, resolve to the matching teams.slug, persist that.
   const rawIds = form.getAll('team_ids') as string[];
-  const teamIds: number[] = [];
+  let teamSlug: string | null = null;
   for (const raw of rawIds) {
     const s = (raw ?? '').trim();
-    if (TEAM_ID_RE.test(s)) {
-      const n = Number(s);
-      if (n > 0) teamIds.push(n);
+    if (!TEAM_ID_RE.test(s)) continue;
+    const n = Number(s);
+    if (n <= 0) continue;
+    const row = db.prepare('SELECT slug FROM teams WHERE id = ?').get(n) as { slug: string | null } | undefined;
+    if (row?.slug) {
+      teamSlug = row.slug;
+      break;
     }
   }
-  // Cap at 48 (the entire field) just to bound the JSON size we store.
-  if (teamIds.length > 48) {
+  if (!teamSlug) {
     return redirectTo(formToken, 'too-many');
   }
 
   const tz = ((form.get('timezone') as string) ?? '').trim();
   if (!isValidIanaTz(tz)) return redirectTo(formToken, 'bad-tz');
 
-  // Dedupe + sort for stable storage.
-  const unique = Array.from(new Set(teamIds)).sort((a, b) => a - b);
-
   try {
-    const updated = setSelection.get(JSON.stringify(unique), tz, result.email);
+    const updated = setSelection.get(teamSlug, tz, result.email);
     if (!updated) return redirectTo(formToken, 'unknown');
 
     // Phase 2.5 — LAUNCH-01-SC4: optional demand-capture textarea.
