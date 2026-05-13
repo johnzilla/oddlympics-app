@@ -53,7 +53,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [x] 05-04-PLAN.md — Widen /api/signup: VALID_TEAMS, VALID_TZ allow-lists + persist team/timezone
-- [ ] 05-05-PLAN.md — Downstream consumers: kickoff cron, schedule.astro, /api/save-selection
+- [x] 05-05-PLAN.md — Downstream consumers: kickoff cron, schedule.astro, /api/save-selection
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 05-06-PLAN.md — scripts/smoke-signup.mjs verification (AC2/AC9/AC12 evidence)
