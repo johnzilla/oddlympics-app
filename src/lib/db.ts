@@ -54,6 +54,10 @@ db.exec(`
     db.exec(`ALTER TABLE vip_signups ADD COLUMN team TEXT;`);
   if (has('selected_teams'))
     db.exec(`ALTER TABLE vip_signups DROP COLUMN selected_teams;`);
+  // COMPAT-01: pre-milestone rows must end up with timezone='America/New_York',
+  // not NULL. The ADD COLUMN above creates the column nullable; this UPDATE
+  // backfills it once. Idempotent — second boot finds zero rows with NULL.
+  db.exec(`UPDATE vip_signups SET timezone = 'America/New_York' WHERE timezone IS NULL;`);
 }
 
 export type VipSignup = {
