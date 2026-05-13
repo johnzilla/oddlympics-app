@@ -120,6 +120,19 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_notif_match ON match_notifications(match_id);
 `);
 
+// Phase 5 — Plan 02 (D-06 path b): teams.slug is the runtime-join key linking
+// vip_signups.team (snake_case slug) → teams.id (football-data.org integer id)
+// for the kickoff cron. Probe + ALTER pattern mirrors the vip_signups block
+// above; SQLite lacks ADD COLUMN IF NOT EXISTS.
+{
+  const cols = db
+    .prepare("SELECT name FROM pragma_table_info('teams')")
+    .all() as { name: string }[];
+  const has = (n: string) => cols.some((c) => c.name === n);
+  if (!has('slug'))
+    db.exec(`ALTER TABLE teams ADD COLUMN slug TEXT;`);
+}
+
 // Phase 2.5 — LAUNCH-01-SC4: optional "which championship next?" demand-capture
 // field on /schedule. History-preserving (one row per submission), not a column
 // on vip_signups, so a user can submit multiple requests over time and we can
@@ -139,6 +152,7 @@ export type Team = {
   tla: string;
   name: string;
   crest_url: string | null;
+  slug: string | null; // snake_case key for vip_signups.team JOIN; nullable until backfill
   last_updated: number;
 };
 
@@ -153,15 +167,19 @@ export type Match = {
   last_updated: number;
 };
 
+// Phase 5 — Plan 02: slug is the 5th column. COALESCE preserves a previously-set
+// slug when an ingest run passes NULL (e.g. football-data.org name didn't match
+// any teams.json label) — otherwise re-ingest would clobber backfilled values.
 export const upsertTeam = db.prepare<
-  [number, string, string, string | null]
+  [number, string, string, string | null, string | null]
 >(`
-  INSERT INTO teams (id, tla, name, crest_url)
-  VALUES (?, ?, ?, ?)
+  INSERT INTO teams (id, tla, name, crest_url, slug)
+  VALUES (?, ?, ?, ?, ?)
   ON CONFLICT(id) DO UPDATE SET
     tla = excluded.tla,
     name = excluded.name,
     crest_url = excluded.crest_url,
+    slug = COALESCE(excluded.slug, teams.slug),
     last_updated = strftime('%s','now')
 `);
 
