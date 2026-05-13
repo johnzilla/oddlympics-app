@@ -149,7 +149,12 @@ Wave 3's kickoff cron rewrite (Plan 05) can rely on `JOIN matches.home_team_id =
 
 None — no new network endpoints, auth paths, or trust boundaries introduced. The backfill script is operator-only (no HTTP surface); the ingestor's threat model is unchanged from Phase 2.
 
-## Self-Check: PENDING (post-write verification below)
+## Self-Check: PASSED
+
+All five files created/modified by this plan exist on disk. All four commits
+(9cc95b9, 84645a5, a94fd4f, 52dff67) exist in `git log`. `.planning/STATE.md`
+and `.planning/ROADMAP.md` are untouched in this worktree (the orchestrator
+owns those writes after the wave completes).
 
 ---
 *Phase: 05-schema-signup-payload*
