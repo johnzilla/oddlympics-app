@@ -31,13 +31,12 @@ if (valid && result) {
   user = getByEmail.get(result.email) as VipSignup | undefined;
   teams = getTeams.all() as Team[];
 
-  if (user?.selected_teams) {
-    try {
-      const parsed = JSON.parse(user.selected_teams);
-      if (Array.isArray(parsed)) selectedIds = parsed.filter((n) => typeof n === 'number');
-    } catch {
-      selectedIds = [];
-    }
+  // Phase 5 — D-01: user.team is a single snake_case slug. Resolve to teams.id
+  // for the matches query below; backfill rows with team=NULL render the empty
+  // state (no crash). The form's checkbox grid stays — Phase 9 owns the redesign.
+  if (user?.team) {
+    const row = db.prepare('SELECT id FROM teams WHERE slug = ?').get(user.team) as { id: number } | undefined;
+    if (row) selectedIds = [row.id];
   }
 
   if (selectedIds.length > 0) {
