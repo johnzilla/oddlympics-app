@@ -23,6 +23,25 @@ for international sports fans, launching at the 2026 FIFA World Cup
 - Phase 3: kickoff notification cron (`oddlympics-notify.timer` every 5 min,
   dry-run until `KICKOFF_NOTIFICATIONS_ENABLED=true`)
 
+**v2.0 milestone — Consumer Landing & Signup Flow (in code on `main`):**
+- Phase 5 shipped: `vip_signups.team` (single snake_case slug from
+  `references/teams.json`, 48 World Cup 2026 teams) + `timezone` columns. First
+  non-additive SQLite migration in project history — `selected_teams` dropped,
+  guarded by `pragma_table_info` probe + SQLite ≥ 3.35 version assert. NULL-tz
+  backfill `UPDATE` runs once. `POST /api/signup` widened (team allow-list
+  validation, tz validation with `America/New_York` fallback per CONTEXT D-03).
+  Two new lib helpers: `src/lib/teams.ts` (VALID_TEAMS Set from teams.json),
+  `src/lib/timezones.ts` (VALID_TZ from `Intl.supportedValuesOf('timeZone')`,
+  FALLBACK_TZ). Downstream consumers rewritten: kickoff cron JOINs
+  `vip_signups.team → teams.slug`, `/schedule` reads `user.team`,
+  `/api/save-selection` writes a single slug. Phase 5 verification:
+  `scripts/smoke-signup.mjs` (8/8 PASS end-to-end against the built server).
+  Pre-deploy operator action: `scripts/backup-pre-05.mjs` snapshots
+  `data/oddlympics.db` → `.pre-05.bak` (see `DEPLOY.md`).
+- Phases 6–11 (planned): landing page + form + meta + analytics; legal pages;
+  Open Graph image; `/manage` editor redesign; confirmation email update; E2E
+  launch gate. Target ship 2026-05-19. Full roadmap in `.planning/ROADMAP.md`.
+
 **v1.1 deferrals:** Telegram bot, Lightning tip jar (vaultwarden integration),
 niche-sport long tail (strongman, cubing), shared `Layout.astro` refactor.
 
@@ -34,11 +53,14 @@ Roadmap, requirements, locked decisions, and per-phase plans live under
 
 - **Astro 5** with `output: 'server'` and the **Node standalone adapter** (`@astrojs/node`)
 - **better-sqlite3** for storage. Schema (the `vip_signups` user/session table
-  + `teams` + `matches` + `match_notifications` + `feature_requests`) lives
-  inline in `src/lib/db.ts` and migrates on boot. New tables use
-  `CREATE TABLE IF NOT EXISTS`; new columns use a `pragma_table_info` probe +
-  conditional `ALTER TABLE ADD COLUMN` (SQLite has no `ADD COLUMN IF NOT EXISTS`).
-  Re-running on a migrated DB is a no-op
+  with `team` + `timezone` columns, plus `teams` with a `slug` column,
+  `matches`, `match_notifications`, `feature_requests`) lives inline in
+  `src/lib/db.ts` and migrates on boot. New tables use `CREATE TABLE IF NOT
+  EXISTS`; new columns use a `pragma_table_info` probe + conditional `ALTER
+  TABLE ADD COLUMN` (SQLite has no `ADD COLUMN IF NOT EXISTS`). The Phase 5
+  migration extends this with the inverse direction — `has('selected_teams')`
+  guards a `DROP COLUMN`, gated by a SQLite ≥ 3.35 version assert so an old
+  runtime aborts cleanly. Re-running on a migrated DB is a no-op
 - **Resend** for transactional email (with a dev console fallback when no API key)
 - **HMAC-SHA256 signed tokens** for both magic-links AND session cookies
   (Node built-in `crypto`, no JWT lib). Tokens carry a `purpose` claim
@@ -67,8 +89,13 @@ npm run serve            # node --env-file=.env ./dist/server/entry.mjs (prod-eq
 npx astro check          # type-check + lint .astro files (installs @astrojs/check on first run)
 ```
 
-There is no formal test suite yet. Smoke tests are done by booting `npm run serve`
-and curling endpoints; see `docs/smoke-tests` if/when extracted.
+There is no formal test suite yet. Smoke tests are done by booting `npm run
+serve` and curling endpoints. **Phase 5 ships an end-to-end smoke at
+`scripts/smoke-signup.mjs`** — run `npm run dev` (or `npm run build && node
+./dist/server/entry.mjs`) in one terminal, then `node scripts/smoke-signup.mjs`
+in another. Exit 0 = all 8 cases PASS (AC2/AC9/AC12 evidence). The smoke
+defaults to `http://localhost:4321` and `./data/oddlympics.db`; override via
+`SMOKE_BASE_URL` and `DATABASE_PATH`.
 
 ## Architecture worth understanding before editing
 
@@ -89,13 +116,19 @@ allows `localhost`/`127.0.0.1` while still blocking real cross-origin POSTs.
 HMAC-signed; the `purpose` claim prevents one type of link being replayed as
 another.
 
-*Signup* (purpose=`confirm`): POST `/api/signup` validates email + honeypot
-+ rate limit + Origin, upserts a row in `vip_signups`, mints a token, sends
-via Resend, returns 303 → `/pending?email=...`. The user clicks → GET
-`/api/confirm?token=...` → token verified (timing-safe) → `confirmed_at` set
-→ 303 → `/confirmed?status=ok` (re-clicks return `status=already`,
-bad/expired return `status=bad-token`). `confirmed.astro` reads the status
-client-side via `<script is:inline>` because it's prerendered.
+*Signup* (purpose=`confirm`): POST `/api/signup` runs a pre-flight chain in
+this exact order: Origin → formData parse → honeypot → email regex →
+rate-limit → team allow-list (`VALID_TEAMS` Set from `src/lib/teams.ts`) →
+timezone (`VALID_TZ` from `src/lib/timezones.ts`, with `FALLBACK_TZ =
+'America/New_York'` when empty/invalid — does NOT reject). On the happy
+path, upserts a row in `vip_signups` (including `team` + `timezone`), mints
+a token, sends via Resend, returns 303 → `/pending?email=...`. Bad team →
+303 `/?error=bad-form` (no row); bad/empty tz → silent fallback + log line.
+The user clicks → GET `/api/confirm?token=...` → token verified
+(timing-safe) → `confirmed_at` set → 303 → `/confirmed?status=ok`
+(re-clicks return `status=already`, bad/expired return `status=bad-token`).
+`confirmed.astro` reads the status client-side via `<script is:inline>`
+because it's prerendered.
 
 *Sign-in* (purpose=`manage`): POST `/api/manage` (from `/manage` page) mints
 a magic-link with purpose=manage and sends it. The user clicks → lands on

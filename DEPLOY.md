@@ -105,10 +105,12 @@ If everything works, https://oddlympics.app shows the teaser.
 | See live logs | `journalctl -u oddlympics -f` |
 | Restart manually | `systemctl restart oddlympics` |
 | Inspect the SQLite DB | `sqlite3 /var/lib/oddlympics/oddlympics.db` |
-| Export the confirmed email list | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, requested_sport, datetime(confirmed_at, "unixepoch") FROM vip_signups WHERE confirmed_at IS NOT NULL'` |
+| Export the confirmed email list | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, team, timezone, requested_sport, datetime(confirmed_at, "unixepoch") FROM vip_signups WHERE confirmed_at IS NOT NULL'` |
 | Export demand-capture requests (v1.1 triage) | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, request_text, datetime(created_at, "unixepoch") FROM feature_requests ORDER BY created_at DESC'` |
+| See team distribution (post-Phase-5) | `sqlite3 -column -header /var/lib/oddlympics/oddlympics.db 'SELECT COALESCE(team, "(unset)") AS team, COUNT(*) AS n FROM vip_signups WHERE confirmed_at IS NOT NULL AND unsubscribed_at IS NULL GROUP BY team ORDER BY n DESC'` |
 | Roll Caddy config | edit `/etc/caddy/Caddyfile`, then `systemctl reload caddy` |
 | Back up the DB | `sqlite3 /var/lib/oddlympics/oddlympics.db ".backup /tmp/oddlympics-$(date +%F).db"` |
+| Pre-Phase-5-deploy backup (one-shot) | see [Pre-deploy SQLite backup (Phase 5 / v2.0)](#pre-deploy-sqlite-backup-phase-5--v20) below |
 
 ### From your laptop (one-shot signal pull)
 
@@ -213,6 +215,59 @@ Edit `/etc/oddlympics.env` and set:
 KICKOFF_NOTIFICATIONS_ENABLED=true
 ```
 No restart needed — the next 5-minute timer firing picks up the new value (the script reads env on each invocation).
+
+## Pre-deploy SQLite backup (Phase 5 / v2.0)
+
+The Phase 5 migration is the **first non-additive change** in project history
+— it drops the `vip_signups.selected_teams` column. Re-runs are a no-op
+(idempotent via `has('selected_teams')` probe), but the drop itself is
+destructive. Always snapshot the live DB once on the droplet immediately
+before the deploy that lands the Phase 5 commits.
+
+```bash
+ssh root@oddlympics.app 'sudo -u oddlympics bash -c \
+  "set -a; . /etc/oddlympics.env; set +a; \
+   cd /opt/oddlympics && node scripts/backup-pre-05.mjs"'
+```
+
+Expected output:
+```
+[backup] copying /var/lib/oddlympics/oddlympics.db -> /var/lib/oddlympics/oddlympics.db.pre-05.bak
+[backup] done size=NNNNN
+```
+
+The script uses `better-sqlite3`'s online-backup API (WAL-safe, won't tear)
+and **refuses to overwrite** an existing `.pre-05.bak` file — re-running it
+exits 1 with `[backup] refusing to overwrite ...`. If you need to redo the
+backup, rename or delete the existing file explicitly first.
+
+After the deploy lands and you've confirmed `/api/signup` accepts team +
+timezone (see "Phase 5 post-deploy smoke" below) and the operator's `team`
+slug is set via `/schedule`, the `.pre-05.bak` file can be removed
+(~1 week post-deploy). DigitalOcean Backups remain as the DR floor.
+
+## Phase 5 post-deploy smoke (v2.0)
+
+After the Phase 5 deploy completes (and ideally before flipping the kickoff
+cron live), run the end-to-end smoke against production. The script defaults
+to `http://localhost:4321` for safety — point it at production explicitly:
+
+```bash
+# From the droplet (uses prod DB readonly to assert side effects)
+ssh root@oddlympics.app 'sudo -u oddlympics bash -c \
+  "set -a; . /etc/oddlympics.env; set +a; \
+   cd /opt/oddlympics && SMOKE_BASE_URL=http://127.0.0.1:4321 \
+   DATABASE_PATH=/var/lib/oddlympics/oddlympics.db \
+   node scripts/smoke-signup.mjs"'
+```
+
+Expect 8/8 PASS and exit 0. The 7 HTTP cases use `smoke-*@example.com`
+emails — clean them up with:
+
+```bash
+sudo -u oddlympics sqlite3 /var/lib/oddlympics/oddlympics.db \
+  "DELETE FROM vip_signups WHERE email LIKE 'smoke-%@example.com'"
+```
 
 ## Launch blast
 
