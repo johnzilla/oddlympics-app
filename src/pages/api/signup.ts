@@ -3,6 +3,8 @@ import { upsertVipSignup } from '../../lib/db';
 import { mintToken } from '../../lib/token';
 import { sendMagicLink } from '../../lib/email';
 import { checkRateLimit } from '../../lib/rate-limit';
+import { VALID_TEAMS } from '../../lib/teams';
+import { VALID_TZ, FALLBACK_TZ } from '../../lib/timezones';
 
 export const prerender = false;
 
@@ -70,12 +72,31 @@ export const POST: APIRoute = async ({ request, site }) => {
   if (!checkRateLimit(`ip:${ip}`)) return back('rate-limited');
   if (!checkRateLimit(`email:${rawEmail}`)) return back('rate-limited');
 
+  // Phase 5 — SIGNUP-01 / COMPAT-02: team must be a known slug from references/teams.json.
+  const rawTeam = ((form.get('team') as string | null) ?? '').trim().toLowerCase();
+  if (!VALID_TEAMS.has(rawTeam)) {
+    console.log(`[signup] bad-team rejected email=${rawEmail} input=${JSON.stringify(rawTeam)}`);
+    return back('bad-form');
+  }
+
+  // Phase 5 — SIGNUP-02: timezone fallback (does NOT reject).
+  const rawTz = ((form.get('timezone') as string | null) ?? '').trim();
+  let tz: string;
+  if (rawTz && VALID_TZ.has(rawTz)) {
+    tz = rawTz;
+  } else {
+    tz = FALLBACK_TZ;
+    console.log(`[signup] tz-fallback email=${rawEmail} input=${JSON.stringify(rawTz)}`);
+  }
+
   try {
     upsertVipSignup.get(
       rawEmail,
       requestedSport,
       ip === 'unknown' ? null : ip,
       request.headers.get('user-agent'),
+      rawTeam,
+      tz,
     );
   } catch (err) {
     console.error('[signup] db error', err);
