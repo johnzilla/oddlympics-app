@@ -41,7 +41,22 @@ inline scripts, or inline styles).
   3. A `POST /api/signup` with empty or invalid `timezone` falls back to `America/Detroit`, persists the row, and flags it for later IP-based correction — does NOT reject.
   4. Pre-milestone subscriber rows (no `team`, no `timezone`) load from the DB without error after migration; their backfilled values are `team=NULL`, `timezone='America/Detroit'`.
   5. Existing honeypot, Origin check, rate limit, and email-format-validation behavior are preserved — programmatic POST with `website` field set returns no row; no new error codes are introduced.
-**Plans**: TBD
+**Plans:** 6 plans
+
+Plans:
+**Wave 1**
+- [ ] 05-01-PLAN.md — Docs sweep (America/Detroit → America/New_York in ROADMAP/REQUIREMENTS/MILESTONE)
+- [ ] 05-02-PLAN.md — references/teams.json (48 entries) + teams.slug column + ingestor + backfill
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 05-03-PLAN.md — vip_signups migration: add team, drop selected_teams; pre-migration backup
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 05-04-PLAN.md — Widen /api/signup: VALID_TEAMS, VALID_TZ allow-lists + persist team/timezone
+- [ ] 05-05-PLAN.md — Downstream consumers: kickoff cron, schedule.astro, /api/save-selection
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 05-06-PLAN.md — scripts/smoke-signup.mjs verification (AC2/AC9/AC12 evidence)
 
 **Risk note (R-2)**: Existing subscriber count is unknown. Confirm row count
 at plan time before running the backfill; if list is unexpectedly large
@@ -158,7 +173,7 @@ verification.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 5. Schema + signup payload | 0/TBD | Not started | - |
+| 5. Schema + signup payload | 0/6 | Not started | - |
 | 6. Landing page + form + meta + analytics | 0/TBD | Not started | - |
 | 7. Legal pages | 0/TBD | Not started | - |
 | 8. Open Graph image | 0/TBD | Not started | - |
