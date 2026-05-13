@@ -82,7 +82,7 @@ per R-5 (pin Node 22 in the unit + CI).
 **UI hint**: yes
 
 Plans:
-- [ ] 06-01-PLAN.md — Full rewrite of `src/pages/index.astro` (consumer copy + 48-team confederation-grouped <select> + OG/Twitter meta tags + retuned `<style is:global>`); covers LAND-01/02/04, FORM-01/02/03, META-01.
+- [x] 06-01-PLAN.md — Full rewrite of `src/pages/index.astro` (consumer copy + 48-team confederation-grouped <select> + OG/Twitter meta tags + retuned `<style is:global>`); covers LAND-01/02/04, FORM-01/02/03, META-01.
 - [ ] 06-02-PLAN.md — Inline JS (tz-label swap + retained `?error=` swap + Plausible `Signup Submit` listener); covers ANLTC-01.
 - [ ] 06-03-PLAN.md — `scripts/smoke-landing.mjs` + `npm run smoke:landing` + Lighthouse mobile manual gate + Plausible dashboard operator action + DEPLOY.md Day-2-ops row; covers LAND-03.
 

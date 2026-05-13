@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: executing
-stopped_at: Phase 6 UI-SPEC approved
-last_updated: "2026-05-13T23:32:23.758Z"
-last_activity: 2026-05-13 -- Phase 06 planning complete
+stopped_at: Phase 06 Plan 01 complete; ready to execute Plan 02 (inline JS — tz-label swap + ?error= swap + Plausible Signup Submit listener)
+last_updated: "2026-05-13T23:43:33.668Z"
+last_activity: 2026-05-13
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 9
-  completed_plans: 6
-  percent: 67
+  completed_plans: 7
+  percent: 78
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-12)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** Phase 05 — schema-signup-payload
+**Current focus:** Phase 06 — landing-page-form-meta-analytics
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
+Phase: 06 (landing-page-form-meta-analytics) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-05-13 -- Phase 06 planning complete
+Last activity: 2026-05-13
 
-Progress: `[░░░░░░░░░░] 0/7 phases (0%)`
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: `[░░░░░░░░░░] 0/7 phases (0%)`
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 06 P01 | 5min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,9 @@ Recent decisions affecting current work:
 - Single-team selection at intake (multi-team retained on `/schedule` for returning users) — one decision per field for cold-traffic conversion.
 - No CAPTCHA in v2.0 — rely on existing honeypot + Origin check + rate limit; revisit only if real attack pattern emerges.
 - Phase numbering continues from v1 MVP (last phase = 4) — new milestone runs phases 5–11. v1 phase dirs preserved under `.planning/phases/` for traceability.
+- [Phase ?]: Phase 6 Plan 1: Hardcoded https://oddlympics.app/* meta-tag URLs (not Astro.site) per CONTEXT D-08 — canonical-copy precedent outranks DRY when copy doc is URL source of truth.
+- [Phase ?]: Phase 6 Plan 1: Empty-host-element cross-plan DOM contract pattern — Plan 01 ships <span id=tz-label>fallback</span> + <input id=timezone value=''> + <p id=error hidden> for Plan 02 inline JS targets. Page remains JS-off readable.
+- [Phase ?]: Phase 6 Plan 1: ASCII apostrophe (0x27) throughout body copy — canonical sources + AC grep -F strings use ASCII; plan prose mention of curly U+2019 was inconsistent. Followed canonical sources (Rule 1 deviation).
 
 ### Pending Todos
 
@@ -97,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-13T22:09:08.620Z
-Stopped at: Phase 6 UI-SPEC approved
-Resume file: .planning/phases/06-landing-page-form-meta-analytics/06-UI-SPEC.md
+Last session: 2026-05-13T23:43:33.663Z
+Stopped at: Phase 06 Plan 01 complete; ready to execute Plan 02 (inline JS — tz-label swap + ?error= swap + Plausible Signup Submit listener)
+Resume file: .planning/phases/06-landing-page-form-meta-analytics/06-02-PLAN.md

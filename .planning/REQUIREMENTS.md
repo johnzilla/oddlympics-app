@@ -13,16 +13,16 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 
 ### Landing page
 
-- [ ] **LAND-01**: Replace landing page (`index.astro`) with consumer template — headline "Your team's matches. In your time zone. One ping before kickoff."; sub-headline with JS-populated tz label (e.g., "Detroit time"), fallback "your local time" when JS is disabled or `Intl.DateTimeFormat().resolvedOptions().timeZone` is unavailable; banner pill `WORLD CUP 2026 · JUNE 11 – JULY 19`; four below-fold sections in order (How it works / Why this exists / After the World Cup / FAQ with 5 items); consumer footer (Manage, Privacy, Terms, Contact `hello@oddlympics.app`, "Independent project · Not affiliated with FIFA").
-- [ ] **LAND-02**: Zero occurrences (case-insensitive) of `bitcoin`, `lightning`, `crypto`, `world domination`, or `personal olympics` in any public surface — `/`, `/privacy`, `/terms`, `/manage`, meta tags, OG image, inline scripts, or inline styles.
+- [x] **LAND-01**: Replace landing page (`index.astro`) with consumer template — headline "Your team's matches. In your time zone. One ping before kickoff."; sub-headline with JS-populated tz label (e.g., "Detroit time"), fallback "your local time" when JS is disabled or `Intl.DateTimeFormat().resolvedOptions().timeZone` is unavailable; banner pill `WORLD CUP 2026 · JUNE 11 – JULY 19`; four below-fold sections in order (How it works / Why this exists / After the World Cup / FAQ with 5 items); consumer footer (Manage, Privacy, Terms, Contact `hello@oddlympics.app`, "Independent project · Not affiliated with FIFA").
+- [x] **LAND-02**: Zero occurrences (case-insensitive) of `bitcoin`, `lightning`, `crypto`, `world domination`, or `personal olympics` in any public surface — `/`, `/privacy`, `/terms`, `/manage`, meta tags, OG image, inline scripts, or inline styles.
 - [ ] **LAND-03**: Landing page passes Lighthouse mobile ≥ 90 across Performance, Accessibility, Best Practices, SEO.
-- [ ] **LAND-04**: Landing page renders correctly at 390 / 768 / 1280 px viewports without horizontal scroll or text overlap.
+- [x] **LAND-04**: Landing page renders correctly at 390 / 768 / 1280 px viewports without horizontal scroll or text overlap.
 
 ### Signup form
 
-- [ ] **FORM-01**: Form submits three fields — `team` (required, dropdown), `email` (required, `type="email"`), `timezone` (hidden, populated by JS from `Intl.DateTimeFormat().resolvedOptions().timeZone`). Retains existing honeypot (`name="website"`) and `requested_sport=world_cup` hidden field for forward compat.
-- [ ] **FORM-02**: Team dropdown contains all 48 qualified teams, grouped by confederation (UEFA → CONMEBOL → CONCACAF → CAF → AFC → OFC). `value` attributes are snake_case slugs (`united_states`, `south_korea`, `ivory_coast`, `dr_congo`, `cape_verde`, `bosnia`, `czech_republic`, `new_zealand`, `saudi_arabia`, `south_africa`). Display labels use natural English with diacritics ("Curaçao"). Canonical list checked into the repo at `references/teams.json`.
-- [ ] **FORM-03**: Form POSTs to `/api/signup` with same content-type and HTTP semantics as today — no breaking changes to the existing endpoint contract. Client-side `?error=...` rendering and the existing error code → message mapping continue to work.
+- [x] **FORM-01**: Form submits three fields — `team` (required, dropdown), `email` (required, `type="email"`), `timezone` (hidden, populated by JS from `Intl.DateTimeFormat().resolvedOptions().timeZone`). Retains existing honeypot (`name="website"`) and `requested_sport=world_cup` hidden field for forward compat.
+- [x] **FORM-02**: Team dropdown contains all 48 qualified teams, grouped by confederation (UEFA → CONMEBOL → CONCACAF → CAF → AFC → OFC). `value` attributes are snake_case slugs (`united_states`, `south_korea`, `ivory_coast`, `dr_congo`, `cape_verde`, `bosnia`, `czech_republic`, `new_zealand`, `saudi_arabia`, `south_africa`). Display labels use natural English with diacritics ("Curaçao"). Canonical list checked into the repo at `references/teams.json`.
+- [x] **FORM-03**: Form POSTs to `/api/signup` with same content-type and HTTP semantics as today — no breaking changes to the existing endpoint contract. Client-side `?error=...` rendering and the existing error code → message mapping continue to work.
 
 ### `/api/signup` payload
 
@@ -42,7 +42,7 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 
 ### Meta tags
 
-- [ ] **META-01**: Public `<head>` includes new `<title>` "Oddlympics — World Cup 2026 alerts in your time zone", meta description "Pick your team. Get one email one hour before every 2026 World Cup match, in your local time zone. Free. No ads. No betting odds.", Open Graph (`og:title`, `og:description`, `og:type=website`, `og:url=https://oddlympics.app`, `og:site_name=Oddlympics`, image tags from OG-01), and Twitter card (`twitter:card=summary_large_image`, `twitter:title`, `twitter:description`, `twitter:image`). No meta tag references prohibited terms per LAND-02.
+- [x] **META-01**: Public `<head>` includes new `<title>` "Oddlympics — World Cup 2026 alerts in your time zone", meta description "Pick your team. Get one email one hour before every 2026 World Cup match, in your local time zone. Free. No ads. No betting odds.", Open Graph (`og:title`, `og:description`, `og:type=website`, `og:url=https://oddlympics.app`, `og:site_name=Oddlympics`, image tags from OG-01), and Twitter card (`twitter:card=summary_large_image`, `twitter:title`, `twitter:description`, `twitter:image`). No meta tag references prohibited terms per LAND-02.
 
 ### Analytics
 
@@ -181,13 +181,13 @@ Each v2.0 REQ-ID maps to exactly one phase. Filled by `/gsd-new-milestone` roadm
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LAND-01 | Phase 6 | Pending |
-| LAND-02 | Phase 6 | Pending |
+| LAND-01 | Phase 6 | Complete |
+| LAND-02 | Phase 6 | Complete |
 | LAND-03 | Phase 6 | Pending |
-| LAND-04 | Phase 6 | Pending |
-| FORM-01 | Phase 6 | Pending |
-| FORM-02 | Phase 6 | Pending |
-| FORM-03 | Phase 6 | Pending |
+| LAND-04 | Phase 6 | Complete |
+| FORM-01 | Phase 6 | Complete |
+| FORM-02 | Phase 6 | Complete |
+| FORM-03 | Phase 6 | Complete |
 | SIGNUP-01 | Phase 5 | Pending |
 | SIGNUP-02 | Phase 5 | Pending |
 | SIGNUP-03 | Phase 5 | Pending |
@@ -195,7 +195,7 @@ Each v2.0 REQ-ID maps to exactly one phase. Filled by `/gsd-new-milestone` roadm
 | LEGAL-01 | Phase 7 | Pending |
 | LEGAL-02 | Phase 7 | Pending |
 | OG-01 | Phase 8 | Pending |
-| META-01 | Phase 6 | Pending |
+| META-01 | Phase 6 | Complete |
 | ANLTC-01 | Phase 6 | Pending |
 | MANAGE-01 | Phase 9 | Pending |
 | MANAGE-02 | Phase 9 | Pending |
