@@ -38,8 +38,8 @@ inline scripts, or inline styles).
 **Success Criteria** (what must be TRUE):
   1. A `POST /api/signup` with valid `team` (in the 48-team allow-list) + `email` + valid IANA `timezone` returns 303 → `/pending?email=...` and persists a row with all four fields (`email`, `team`, `timezone`, `requested_sport=world_cup`) plus `created_at`.
   2. A `POST /api/signup` with missing or unknown `team` is rejected with 303 → `/?error=bad-form` and no row is written; server log distinguishes "bad team" from other `bad-form` causes.
-  3. A `POST /api/signup` with empty or invalid `timezone` falls back to `America/Detroit`, persists the row, and flags it for later IP-based correction — does NOT reject.
-  4. Pre-milestone subscriber rows (no `team`, no `timezone`) load from the DB without error after migration; their backfilled values are `team=NULL`, `timezone='America/Detroit'`.
+  3. A `POST /api/signup` with empty or invalid `timezone` falls back to `America/New_York`, persists the row, and flags it for later IP-based correction — does NOT reject.
+  4. Pre-milestone subscriber rows (no `team`, no `timezone`) load from the DB without error after migration; their backfilled values are `team=NULL`, `timezone='America/New_York'`.
   5. Existing honeypot, Origin check, rate limit, and email-format-validation behavior are preserved — programmatic POST with `website` field set returns no row; no new error codes are introduced.
 **Plans:** 6 plans
 
@@ -133,7 +133,7 @@ when copy changes." Option (b) is faster to ship; option (a) closes the
 **Requirements**: MANAGE-01, MANAGE-02
 **Success Criteria** (what must be TRUE):
   1. A signed-in user visiting `/manage` sees their current team + current timezone displayed, can change both via a form, and after save sees the updated values reflected on a re-load. Auth continues to use the existing magic-link/session mechanism — no new auth surface.
-  2. A pre-milestone subscriber row (`team=NULL`, `timezone='America/Detroit'` from Phase 5 backfill) loads `/manage` without error and sees a one-time banner prompting "Pick a team" — the banner dismisses once `team` is set to a non-NULL value.
+  2. A pre-milestone subscriber row (`team=NULL`, `timezone='America/New_York'` from Phase 5 backfill) loads `/manage` without error and sees a one-time banner prompting "Pick a team" — the banner dismisses once `team` is set to a non-NULL value.
   3. Clicking the unsubscribe link in an outbound email reaches `/api/unsubscribe?token=...` and removes the user from active sending, with no authentication beyond the signed token. Token is HMAC-signed, expires after 1 year, single-use per unsubscribe action; second click on the same token does not error but is a no-op.
   4. Re-subscribing a previously-unsubscribed user via a fresh signup is supported (existing teaser behavior preserved).
 **Plans**: TBD
