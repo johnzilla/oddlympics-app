@@ -21,7 +21,7 @@ inline scripts, or inline styles).
 
 ## Phases
 
-- [ ] **Phase 5: Schema + signup payload** — additive `team`/`timezone` columns, allow-list validation, backfill, `/api/signup` widened without breaking the existing contract
+- [x] **Phase 5: Schema + signup payload** — additive `team`/`timezone` columns, allow-list validation, backfill, `/api/signup` widened without breaking the existing contract
 - [ ] **Phase 6: Landing page + form + meta + analytics** — replace `index.astro` with the consumer template, wire 48-team dropdown + tz-label JS + Plausible `Signup Submit` event, swap meta tags
 - [ ] **Phase 7: Legal pages** — `/privacy` and `/terms` routes serving canonical copy, same site shell as landing
 - [ ] **Phase 8: Open Graph image** — source SVG + rendered 1200×630 PNG + OG/Twitter image meta tags wired to it
@@ -173,7 +173,7 @@ verification.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 5. Schema + signup payload | 0/6 | Not started | - |
+| 5. Schema + signup payload | 6/6 | Complete | 2026-05-13 |
 | 6. Landing page + form + meta + analytics | 0/TBD | Not started | - |
 | 7. Legal pages | 0/TBD | Not started | - |
 | 8. Open Graph image | 0/TBD | Not started | - |
