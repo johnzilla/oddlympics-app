@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: planning
-last_updated: "2026-05-13T00:36:45.403Z"
+last_updated: "2026-05-13T01:00:00.000Z"
 last_activity: 2026-05-13
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -24,10 +24,12 @@ See: .planning/PROJECT.md (updated 2026-05-12)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 5 — Schema + signup payload (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-13 — Milestone v2.0 started
+Status: Roadmap approved; ready to discuss/plan Phase 5
+Last activity: 2026-05-13 — v2.0 roadmap written (Phases 5–11, 20 v2.0 reqs mapped)
+
+Progress: `[░░░░░░░░░░] 0/7 phases (0%)`
 
 ## Performance Metrics
 
@@ -56,6 +58,7 @@ Last activity: 2026-05-13 — Milestone v2.0 started
 
 - Phase 2.5 edited: added success criterion 4: optional 'which other championship' demand-capture field on team-picker page
 - Phase 4 added: Launch Week Observation — post-launch checkpoint for first weekend of World Cup group stage (2026-06-11 through 2026-06-14)
+- 2026-05-13: v2.0 roadmap written. Phases 5–11 (7 phases, coarse granularity). All 20 v2.0 REQ-IDs mapped to exactly one phase. v1 phases 1–4 preserved under `.planning/phases/` and summarized in ROADMAP.md "Previous milestones".
 
 ### Decisions
 
@@ -93,6 +96,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-12
-Stopped at: Milestone v2.0 initialized; requirements written; awaiting roadmap
-Resume file: None
+Last session: 2026-05-13
+Stopped at: v2.0 roadmap written (Phases 5–11); ready to discuss/plan Phase 5
+Resume file: .planning/ROADMAP.md

@@ -177,36 +177,36 @@ Explicitly excluded; documented to prevent scope creep.
 
 ## Traceability
 
-Filled by `/gsd-new-milestone` roadmapper after roadmap approval. Each v2.0 REQ-ID maps to exactly one phase.
+Each v2.0 REQ-ID maps to exactly one phase. Filled by `/gsd-new-milestone` roadmapper after roadmap approval.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LAND-01 | TBD | Pending |
-| LAND-02 | TBD | Pending |
-| LAND-03 | TBD | Pending |
-| LAND-04 | TBD | Pending |
-| FORM-01 | TBD | Pending |
-| FORM-02 | TBD | Pending |
-| FORM-03 | TBD | Pending |
-| SIGNUP-01 | TBD | Pending |
-| SIGNUP-02 | TBD | Pending |
-| SIGNUP-03 | TBD | Pending |
-| SIGNUP-04 | TBD | Pending |
-| LEGAL-01 | TBD | Pending |
-| LEGAL-02 | TBD | Pending |
-| OG-01 | TBD | Pending |
-| META-01 | TBD | Pending |
-| ANLTC-01 | TBD | Pending |
-| MANAGE-01 | TBD | Pending |
-| MANAGE-02 | TBD | Pending |
-| COMPAT-01 | TBD | Pending |
-| COMPAT-02 | TBD | Pending |
+| LAND-01 | Phase 6 | Pending |
+| LAND-02 | Phase 6 | Pending |
+| LAND-03 | Phase 6 | Pending |
+| LAND-04 | Phase 6 | Pending |
+| FORM-01 | Phase 6 | Pending |
+| FORM-02 | Phase 6 | Pending |
+| FORM-03 | Phase 6 | Pending |
+| SIGNUP-01 | Phase 5 | Pending |
+| SIGNUP-02 | Phase 5 | Pending |
+| SIGNUP-03 | Phase 5 | Pending |
+| SIGNUP-04 | Phase 10 | Pending |
+| LEGAL-01 | Phase 7 | Pending |
+| LEGAL-02 | Phase 7 | Pending |
+| OG-01 | Phase 8 | Pending |
+| META-01 | Phase 6 | Pending |
+| ANLTC-01 | Phase 6 | Pending |
+| MANAGE-01 | Phase 9 | Pending |
+| MANAGE-02 | Phase 9 | Pending |
+| COMPAT-01 | Phase 5 | Pending |
+| COMPAT-02 | Phase 5 | Pending |
 
 **Coverage (v2.0):**
 - v2.0 requirements: 20 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 20 ⚠️ (will be 0 after roadmapper runs)
+- Mapped to phases: 20 ✓
+- Unmapped: 0 ✓
 
 ---
 
-*Defined: 2026-05-08 (v1 MVP) · Trimmed: 2026-05-09 (v1 MVP) · v2.0 added: 2026-05-12 (Consumer Landing & Signup Flow)*
+*Defined: 2026-05-08 (v1 MVP) · Trimmed: 2026-05-09 (v1 MVP) · v2.0 added: 2026-05-12 (Consumer Landing & Signup Flow) · Traceability filled: 2026-05-13*
