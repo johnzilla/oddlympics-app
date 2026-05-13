@@ -111,6 +111,7 @@ If everything works, https://oddlympics.app shows the teaser.
 | Roll Caddy config | edit `/etc/caddy/Caddyfile`, then `systemctl reload caddy` |
 | Back up the DB | `sqlite3 /var/lib/oddlympics/oddlympics.db ".backup /tmp/oddlympics-$(date +%F).db"` |
 | Pre-Phase-5-deploy backup (one-shot) | see [Pre-deploy SQLite backup (Phase 5 / v2.0)](#pre-deploy-sqlite-backup-phase-5--v20) below |
+| Plausible custom-goal management (on-demand, when adding new custom events; Phase 6 added `Signup Submit`) | Visit `https://plausible.io/oddlympics.app/settings/goals` → "+ Add goal" → "Custom event" → name = exact event name (case-sensitive) → Save. Verify the goal appears in the list. The custom event name in the goal MUST match the string passed to `window.plausible('<name>', ...)` in source. Per CONTEXT D-10 / Phase 11 AC11. Required before merging any phase that adds a new Plausible custom event. |
 
 ### From your laptop (one-shot signal pull)
 
