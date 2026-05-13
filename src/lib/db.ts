@@ -27,6 +27,9 @@ db.exec(`
 
 // SQLite does not support `ADD COLUMN IF NOT EXISTS` (that's a Postgres-ism).
 // Probe pragma_table_info instead and run ALTER only when the column is absent.
+// Phase 5 — Plan 03 (D-01): also DROPS selected_teams. SQLite needs >= 3.35 for
+// DROP COLUMN; assert before mutating so an old runtime fails with a clear
+// message instead of a half-applied migration.
 {
   const cols = db
     .prepare("SELECT name FROM pragma_table_info('vip_signups')")
@@ -34,12 +37,23 @@ db.exec(`
   const has = (n: string) => cols.some((c) => c.name === n);
   if (!has('unsubscribed_at'))
     db.exec(`ALTER TABLE vip_signups ADD COLUMN unsubscribed_at INTEGER;`);
-  if (!has('selected_teams'))
-    db.exec(`ALTER TABLE vip_signups ADD COLUMN selected_teams TEXT;`);
   if (!has('timezone'))
     db.exec(`ALTER TABLE vip_signups ADD COLUMN timezone TEXT;`);
   if (!has('manage_blast_sent_at'))
     db.exec(`ALTER TABLE vip_signups ADD COLUMN manage_blast_sent_at INTEGER;`);
+  const sqliteVersion = db
+    .prepare('SELECT sqlite_version() AS v')
+    .get() as { v: string };
+  const [vMajor, vMinor] = sqliteVersion.v.split('.').slice(0, 2).map(Number);
+  if (vMajor < 3 || (vMajor === 3 && vMinor < 35)) {
+    throw new Error(
+      `SQLite ${sqliteVersion.v} too old; need >= 3.35 for DROP COLUMN`,
+    );
+  }
+  if (!has('team'))
+    db.exec(`ALTER TABLE vip_signups ADD COLUMN team TEXT;`);
+  if (has('selected_teams'))
+    db.exec(`ALTER TABLE vip_signups DROP COLUMN selected_teams;`);
 }
 
 export type VipSignup = {
@@ -51,7 +65,7 @@ export type VipSignup = {
   ip: string | null;
   user_agent: string | null;
   unsubscribed_at: number | null;
-  selected_teams: string | null; // JSON array of team IDs, e.g. "[762,769]"
+  team: string | null; // Phase 5: snake_case slug from references/teams.json
   timezone: string | null; // IANA TZ, e.g. "America/New_York"
   manage_blast_sent_at: number | null; // Phase 2.5: launch-blast tracking
 };
@@ -203,9 +217,10 @@ export const getTeams = db.prepare(`
 `);
 
 // Phase 2 — IDENT-03 / IDENT-05: persist team selection + timezone for a confirmed user.
+// Phase 5 — SIGNUP-03: writes single slug to vip_signups.team (replaces v1's selected_teams JSON-array column).
 export const setSelection = db.prepare<[string, string, string]>(`
   UPDATE vip_signups
-  SET selected_teams = ?, timezone = ?
+  SET team = ?, timezone = ?
   WHERE email = ? AND confirmed_at IS NOT NULL AND unsubscribed_at IS NULL
   RETURNING *
 `);
