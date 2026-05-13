@@ -33,7 +33,7 @@ Out of scope (other phases own):
 
 ### Reference assets and source of truth
 
-- **D-01:** Pre-plan docs sweep (single commit) before `/gsd-plan-phase 6`:
+- **D-01** *[informational — precondition completed before /gsd-plan-phase 6, not tracked as a plan-time decision]*: Pre-plan docs sweep (single commit) before `/gsd-plan-phase 6`:
   1. Move `index.html` → `references/index.html`.
   2. Move `oddlympics_landing_copy.md` → `references/oddlympics_landing_copy.md`.
   3. Move `og-image.svg` → `references/og-image.svg`.

@@ -78,8 +78,13 @@ per R-5 (pin Node 22 in the unit + CI).
   3. The page renders without horizontal scroll or text overlap at 390 / 768 / 1280 px viewports and scores ≥ 90 on Lighthouse mobile (Performance, Accessibility, Best Practices, SEO).
   4. The page's `<head>` carries the new `<title>`, meta description, Open Graph (`og:title`, `og:description`, `og:type=website`, `og:url=https://oddlympics.app`, `og:site_name=Oddlympics`), and Twitter card (`twitter:card=summary_large_image`, `twitter:title`, `twitter:description`) tags — with zero occurrences of `bitcoin`, `lightning`, `crypto`, `world domination`, `personal olympics` anywhere in the served HTML or inline assets.
   5. Submitting the form fires a `Signup Submit` Plausible event with `team` prop = selected slug; the existing Plausible script + init call is unchanged.
-**Plans**: TBD
+**Plans:** 3 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 06-01-PLAN.md — Full rewrite of `src/pages/index.astro` (consumer copy + 48-team confederation-grouped <select> + OG/Twitter meta tags + retuned `<style is:global>`); covers LAND-01/02/04, FORM-01/02/03, META-01.
+- [ ] 06-02-PLAN.md — Inline JS (tz-label swap + retained `?error=` swap + Plausible `Signup Submit` listener); covers ANLTC-01.
+- [ ] 06-03-PLAN.md — `scripts/smoke-landing.mjs` + `npm run smoke:landing` + Lighthouse mobile manual gate + Plausible dashboard operator action + DEPLOY.md Day-2-ops row; covers LAND-03.
 
 **Risk note (R-4)**: Plausible custom goal `Signup Submit` must be configured
 server-side in the Plausible dashboard BEFORE this phase ships, or the
@@ -174,7 +179,7 @@ verification.
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 5. Schema + signup payload | 6/6 | Complete | 2026-05-13 |
-| 6. Landing page + form + meta + analytics | 0/TBD | Not started | - |
+| 6. Landing page + form + meta + analytics | 0/3 | Not started | - |
 | 7. Legal pages | 0/TBD | Not started | - |
 | 8. Open Graph image | 0/TBD | Not started | - |
 | 9. `/manage` editor + unsubscribe | 0/TBD | Not started | - |
