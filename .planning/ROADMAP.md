@@ -49,7 +49,7 @@ Plans:
 - [x] 05-02-PLAN.md — references/teams.json (48 entries) + teams.slug column + ingestor + backfill
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 05-03-PLAN.md — vip_signups migration: add team, drop selected_teams; pre-migration backup
+- [x] 05-03-PLAN.md — vip_signups migration: add team, drop selected_teams; pre-migration backup
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 05-04-PLAN.md — Widen /api/signup: VALID_TEAMS, VALID_TZ allow-lists + persist team/timezone
