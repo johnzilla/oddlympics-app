@@ -38,8 +38,8 @@ inline scripts, or inline styles).
 **Success Criteria** (what must be TRUE):
   1. A `POST /api/signup` with valid `team` (in the 48-team allow-list) + `email` + valid IANA `timezone` returns 303 → `/pending?email=...` and persists a row with all four fields (`email`, `team`, `timezone`, `requested_sport=world_cup`) plus `created_at`.
   2. A `POST /api/signup` with missing or unknown `team` is rejected with 303 → `/?error=bad-form` and no row is written; server log distinguishes "bad team" from other `bad-form` causes.
-  3. A `POST /api/signup` with empty or invalid `timezone` falls back to `America/Detroit`, persists the row, and flags it for later IP-based correction — does NOT reject.
-  4. Pre-milestone subscriber rows (no `team`, no `timezone`) load from the DB without error after migration; their backfilled values are `team=NULL`, `timezone='America/Detroit'`.
+  3. A `POST /api/signup` with empty or invalid `timezone` falls back to `America/New_York`, persists the row, and flags it for later IP-based correction — does NOT reject.
+  4. Pre-milestone subscriber rows (no `team`, no `timezone`) load from the DB without error after migration; their backfilled values are `team=NULL`, `timezone='America/New_York'`.
   5. Existing honeypot, Origin check, rate limit, and email-format-validation behavior are preserved — programmatic POST with `website` field set returns no row; no new error codes are introduced.
 **Plans:** 6 plans
 
