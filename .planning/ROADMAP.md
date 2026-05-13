@@ -45,8 +45,8 @@ inline scripts, or inline styles).
 
 Plans:
 **Wave 1**
-- [ ] 05-01-PLAN.md — Docs sweep (America/Detroit → America/New_York in ROADMAP/REQUIREMENTS/MILESTONE)
-- [ ] 05-02-PLAN.md — references/teams.json (48 entries) + teams.slug column + ingestor + backfill
+- [x] 05-01-PLAN.md — Docs sweep (America/Detroit → America/New_York in ROADMAP/REQUIREMENTS/MILESTONE)
+- [x] 05-02-PLAN.md — references/teams.json (48 entries) + teams.slug column + ingestor + backfill
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 05-03-PLAN.md — vip_signups migration: add team, drop selected_teams; pre-migration backup
