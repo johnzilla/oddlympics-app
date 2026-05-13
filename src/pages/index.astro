@@ -1,7 +1,42 @@
 ---
+import { TEAMS } from '../lib/teams';
+
 export const prerender = true;
-const title = 'oddlympics — World domination. Your world.';
-const description = 'Your personal Olympics, translated to your time zone. Personal World Cup 2026 notifications and more, on Bitcoin/Lightning rails.';
+
+const TITLE = 'Oddlympics — World Cup 2026 alerts in your time zone';
+const DESCRIPTION =
+  'Pick your team. Get one email one hour before every 2026 World Cup match, in your local time zone. Free. No ads. No betting odds.';
+const OG_TITLE = 'World Cup 2026 alerts in your time zone';
+const OG_DESCRIPTION =
+  'Pick your team. One ping, one hour before kickoff, in your local time. Free for the whole tournament.';
+const TWITTER_DESCRIPTION = 'Pick your team. One ping, one hour before kickoff. Free.';
+const SITE_URL = 'https://oddlympics.app';
+const OG_IMAGE = 'https://oddlympics.app/og-image.png';
+const OG_IMAGE_ALT = 'Oddlympics — World Cup 2026 alerts in your time zone';
+
+const CONFEDERATION_ORDER = [
+  'UEFA',
+  'CONMEBOL',
+  'CONCACAF',
+  'CAF',
+  'AFC',
+  'OFC',
+] as const;
+
+const CONFEDERATION_LABEL: Record<(typeof CONFEDERATION_ORDER)[number], string> = {
+  UEFA: 'UEFA — Europe',
+  CONMEBOL: 'CONMEBOL — South America',
+  CONCACAF: 'CONCACAF — North & Central America',
+  CAF: 'CAF — Africa',
+  AFC: 'AFC — Asia',
+  OFC: 'OFC — Oceania',
+};
+
+const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
+  conf,
+  label: CONFEDERATION_LABEL[conf],
+  teams: TEAMS.filter((t) => t.confederation === conf),
+}));
 ---
 
 <!doctype html>
@@ -9,13 +44,22 @@ const description = 'Your personal Olympics, translated to your time zone. Perso
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content={description} />
-  <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
+  <title>{TITLE}</title>
+  <meta name="description" content={DESCRIPTION} />
+  <meta property="og:title" content={OG_TITLE} />
+  <meta property="og:description" content={OG_DESCRIPTION} />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content={SITE_URL} />
+  <meta property="og:site_name" content="Oddlympics" />
+  <meta property="og:image" content={OG_IMAGE} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content={OG_IMAGE_ALT} />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={OG_TITLE} />
+  <meta name="twitter:description" content={TWITTER_DESCRIPTION} />
+  <meta name="twitter:image" content={OG_IMAGE} />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <title>{title}</title>
   <!-- Privacy-friendly analytics by Plausible -->
   <script async src="https://plausible.io/js/pa-wRAab3seDWDDBnGbRbe0K.js"></script>
   <script is:inline>
@@ -24,81 +68,150 @@ const description = 'Your personal Olympics, translated to your time zone. Perso
   </script>
 </head>
 <body>
-  <main class="hero">
-    <div class="hero-content">
-      <span class="banner">World Cup 2026 · Launching June</span>
-      <h1 class="headline">World domination. Your world.</h1>
-      <p class="subhead">Your personal Olympics, translated to your time zone.</p>
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <p class="banner">WORLD CUP 2026 · JUNE 11 – JULY 19</p>
+        <h1 class="headline">Your team's matches. In your time zone. One ping before kickoff.</h1>
+        <p class="subhead">
+          Pick your team. We'll email you one hour before every match in <span id="tz-label">your local time</span>. Nothing else. Free, no ads, no betting odds.
+        </p>
 
-      <form class="cta-form" method="post" action="/api/signup">
-        <input
-          type="email"
-          name="email"
-          required
-          autocomplete="email"
-          placeholder="you@example.com"
-          aria-label="Email address"
-        />
-        <input type="hidden" name="requested_sport" value="world_cup" />
-        {/* honeypot — humans don't fill this */}
-        <input
-          type="text"
-          name="website"
-          tabindex="-1"
-          autocomplete="off"
-          class="hp"
-          aria-hidden="true"
-        />
-        <button type="submit">Get early access</button>
-      </form>
+        <form method="post" action="/api/signup" id="signup-form" class="form-card">
+          <div class="field">
+            <label for="team">Your team</label>
+            <select name="team" id="team" required>
+              <option value="" disabled selected>Pick your team</option>
+              {groupedTeams.map(({ label, teams }) => (
+                <optgroup label={label}>
+                  {teams.map((t) => (
+                    <option value={t.slug}>{t.label}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </div>
 
-      <p id="error" class="error" role="alert" hidden></p>
+          <div class="field">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              autocomplete="email"
+              placeholder="you@example.com"
+            />
+          </div>
 
-      <p class="vip-cue">
-        Watching something stranger? Tell us what — we'll send VIP access.
-      </p>
+          <input type="hidden" name="timezone" id="timezone" value="" />
+          <input type="hidden" name="requested_sport" value="world_cup" />
+          <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
 
-      <p class="manage-cue">
-        Already signed up? <a href="/manage" class="link">Manage your schedule</a>.
-      </p>
+          <div class="cta">
+            <button type="submit">Get match alerts</button>
+          </div>
 
-      <script is:inline>
-        try {
-          const COPY = {
-            'bad-email': 'That email looks off — try again.',
-            'bad-form': 'Something went wrong with the form. Try again.',
-            'bad-origin': 'Submission blocked. Please use the form on this page.',
-            'rate-limited': 'Too many tries. Wait an hour and try again.',
-            email: "We couldn't send the confirmation email. Try again in a minute.",
-            server: 'Server hiccup. Try again in a minute.',
-          };
-          const code = new URL(location.href).searchParams.get('error');
-          if (code) {
-            const el = document.getElementById('error');
-            el.textContent = COPY[code] || 'Something went wrong.';
-            el.hidden = false;
-          }
-        } catch {}
-      </script>
-    </div>
+          <p class="fineprint">One email per match for the team you pick. Unsubscribe in one click.</p>
+          <p id="error" class="error" role="alert" hidden></p>
+        </form>
+
+        <p class="trust">Built by one person in Michigan. No app to install. We'll never sell your email.</p>
+      </div>
+    </section>
+
+    <section class="below">
+      <div class="wrap">
+        <h2 class="eyebrow">How it works</h2>
+        <ol class="steps">
+          <li>
+            <span class="num">1</span>
+            <div class="body"><strong>Pick your team.</strong> Choose one of the 48 teams in the 2026 World Cup. Add more later if you want.</div>
+          </li>
+          <li>
+            <span class="num">2</span>
+            <div class="body"><strong>We figure out your time zone.</strong> Every match time gets translated to where you actually are. Travel later? Update it in one click.</div>
+          </li>
+          <li>
+            <span class="num">3</span>
+            <div class="body"><strong>You get one email per match.</strong> One hour before kickoff. That's it. No "engagement" pings, no odds, no clickbait.</div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="below">
+      <div class="wrap">
+        <h2 class="eyebrow">Why this exists</h2>
+        <p>The 2026 World Cup is being played across three countries and four time zones. If your team isn't from the US, Canada, or Mexico, half your matches will be at awkward local hours.</p>
+        <p class="muted">The big sports apps will buzz you 17 times a day with betting odds and engagement pings. I just wanted one alert for the matches I cared about. So I built it. Free for the whole tournament.</p>
+      </div>
+    </section>
+
+    <section class="below">
+      <div class="wrap">
+        <h2 class="eyebrow">After the World Cup</h2>
+        <p>The plan is to do this for sports that nobody else covers properly — curling, esports, BattleBots, the Rubik's Cube World Championship, the Microsoft Excel World Championship (real, and televised on ESPN), lumberjack sports, drone racing.</p>
+        <p class="muted">Sign up for World Cup alerts now and you'll get a vote on what comes next.</p>
+      </div>
+    </section>
+
+    <section class="below">
+      <div class="wrap">
+        <h2 class="eyebrow">Common questions</h2>
+        <details>
+          <summary>Is this really free?</summary>
+          <p>Free for the entire 2026 World Cup. No card required.</p>
+        </details>
+        <details>
+          <summary>How many emails will I get?</summary>
+          <p>One per match for the teams you pick. If you choose one team, you'll get three emails during the group stage. If they advance, more. That's the maximum.</p>
+        </details>
+        <details>
+          <summary>Will you sell my email?</summary>
+          <p>No. We use a single email provider to send the alerts. There's a one-click unsubscribe link in every message.</p>
+        </details>
+        <details>
+          <summary>Are you affiliated with FIFA, ESPN, or any team?</summary>
+          <p>No. This is an independent project. Match times are pulled from public schedules.</p>
+        </details>
+        <details>
+          <summary>Why should I trust this?</summary>
+          <p>You shouldn't — yet. Try it for one match. If the email doesn't show up on time, unsubscribe.</p>
+        </details>
+      </div>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <nav class="links">
+        <a href="/manage">Manage subscription</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="mailto:hello@oddlympics.app">Contact</a>
+      </nav>
+      <p class="copy">© 2026 Oddlympics · Independent project · Not affiliated with FIFA</p>
+    </div>
+  </footer>
 </body>
 </html>
 
 <style is:global>
   :root {
-    --bg: #0b0b0e;
-    --fg: #ececf1;
-    --fg-dim: #b8b8c2;
-    --line: rgba(255, 255, 255, 0.18);
-    --surface: rgba(255, 255, 255, 0.06);
-    --accent: hsl(18 70% 56%);
-    --accent-ink: #0b0b0e;
-    --pad: 48px;
-    --gap-banner: 18px;
-    --gap-headline: 14px;
-    --gap-cta: 28px;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --bg: #fafaf7;
+    --fg: #14151a;
+    --fg-dim: #5a5d68;
+    --line: #e4e4dd;
+    --line-strong: #c9cbc4;
+    --surface: #ffffff;
+    --accent: #d94a1f;
+    --accent-ink: #ffffff;
+    --accent-soft: #fbe9e0;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --max: 720px;
+    --pad-x: clamp(20px, 5vw, 48px);
   }
 
   * { box-sizing: border-box; }
@@ -107,129 +220,164 @@ const description = 'Your personal Olympics, translated to your time zone. Perso
     margin: 0;
     background: var(--bg);
     color: var(--fg);
-    font-family: var(--mono);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   body { min-height: 100dvh; }
 
-  .hero {
-    min-height: 100dvh;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding: var(--pad);
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding-left: var(--pad-x);
+    padding-right: var(--pad-x);
   }
 
-  .hero-content {
-    max-width: 720px;
-    text-align: left;
+  /* Hero */
+  .hero {
+    padding-top: 64px;
+    padding-bottom: 32px;
   }
 
   .banner {
     display: inline-block;
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+    margin: 0 0 24px;
+    padding: 6px 12px;
+    font-family: var(--font-mono);
     font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
     color: var(--accent);
+    background: var(--accent-soft);
     border: 1px solid var(--accent);
-    padding: 5px 10px;
     border-radius: 999px;
-    margin-bottom: var(--gap-banner);
   }
 
   .headline {
-    font-family: var(--mono);
-    font-size: 36px;
+    margin: 0 0 16px;
+    font-family: var(--font-sans);
+    font-size: clamp(28px, 5vw, 40px);
     font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.01em;
-    margin: 0 0 var(--gap-headline);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--fg);
   }
 
   .subhead {
-    font-family: var(--mono);
-    font-size: 14px;
+    margin: 0 0 32px;
+    font-size: 17px;
     line-height: 1.55;
     color: var(--fg-dim);
-    margin: 0 0 var(--gap-cta);
-    max-width: 540px;
+    max-width: 620px;
   }
 
-  .cta-form {
-    display: flex;
-    gap: 8px;
-    max-width: 460px;
-  }
-
-  .cta-form input[type="email"] {
-    flex: 1;
-    min-width: 0;
-    padding: 12px 14px;
-    font-family: var(--mono);
-    font-size: 14px;
-    color: var(--fg);
+  /* Form card — primary focal point */
+  .form-card {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
-  .cta-form input[type="email"]:focus {
-    outline: none;
-    border-color: var(--accent);
+  .field {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
-  .cta-form input[type="email"]::placeholder { color: var(--fg-dim); }
-
-  .cta-form button {
-    padding: 12px 18px;
-    font-family: var(--mono);
-    font-size: 14px;
+  .field label {
+    font-family: var(--font-sans);
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.02em;
+    color: var(--fg-dim);
+  }
+
+  .form-card input[type="email"],
+  .form-card select {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .form-card select {
+    /* Inline SVG chevron stroked in --fg-dim */
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%235a5d68' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 8 10 13 15 8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px 16px;
+    padding-right: 40px;
+  }
+
+  .form-card input[type="email"]::placeholder { color: var(--fg-dim); }
+
+  .form-card input[type="email"]:focus-visible,
+  .form-card select:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(217, 74, 31, 0.15);
+  }
+
+  .cta {
+    margin-top: 4px;
+  }
+
+  button[type="submit"] {
+    width: 100%;
+    padding: 12px 16px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 700;
     color: var(--accent-ink);
     background: var(--accent);
-    border: 0;
+    border: none;
     border-radius: 6px;
     cursor: pointer;
-    white-space: nowrap;
   }
 
-  .cta-form button:hover { filter: brightness(1.08); }
-  .cta-form button:active { transform: translateY(1px); }
+  button[type="submit"]:hover { filter: brightness(1.05); }
+  button[type="submit"]:active { transform: translateY(1px); }
+  button[type="submit"]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 74, 31, 0.35);
+  }
 
-  .vip-cue {
-    font-size: 12px;
-    line-height: 1.5;
+  .fineprint {
+    margin: 12px 0 0;
+    font-size: 13px;
     color: var(--fg-dim);
-    margin: 14px 0 0;
-    max-width: 460px;
-  }
-
-  .manage-cue {
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--fg-dim);
-    margin: 8px 0 0;
-    max-width: 460px;
-  }
-
-  .link {
-    color: var(--accent);
-    text-decoration: underline;
-    text-underline-offset: 3px;
   }
 
   .error {
     margin: 12px 0 0;
-    color: var(--accent);
+    padding: 8px;
     font-size: 13px;
-    line-height: 1.5;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 6px;
   }
 
-  /* Honeypot: visually + assistively hidden, but still in the DOM for bots */
+  .trust {
+    margin: 16px 0 0;
+    font-size: 13px;
+    color: var(--fg-dim);
+  }
+
+  /* Honeypot — keep verbatim from v1 */
   .hp {
     position: absolute;
     left: -10000px;
@@ -239,16 +387,169 @@ const description = 'Your personal Olympics, translated to your time zone. Perso
     pointer-events: none;
   }
 
-  /* Mobile: stack the form so the email field doesn't get crushed */
-  @media (max-width: 520px) {
-    :root { --pad: 28px; }
-    .headline { font-size: 30px; }
-    .cta-form { flex-direction: column; }
-    .cta-form button { width: 100%; }
+  /* Below-fold sections */
+  section.below {
+    padding: 32px 0;
+    border-top: 1px solid var(--line);
   }
 
-  /* Reduce motion */
+  .eyebrow {
+    margin: 0 0 16px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+
+  section.below p {
+    margin: 0 0 12px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--fg);
+  }
+
+  section.below p.muted {
+    color: var(--fg-dim);
+  }
+
+  section.below a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  section.below a:hover { filter: brightness(0.92); }
+
+  /* Steps */
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .steps .num {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+  }
+
+  .steps .body {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--fg);
+  }
+
+  /* FAQ accordions */
+  details {
+    border-top: 1px solid var(--line);
+    padding: 12px 0;
+  }
+
+  details:last-of-type {
+    border-bottom: 1px solid var(--line);
+  }
+
+  details summary {
+    list-style: none;
+    cursor: pointer;
+    position: relative;
+    padding-right: 24px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  details summary::-webkit-details-marker { display: none; }
+
+  details summary::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    color: var(--fg-dim);
+    transition: transform 0.15s ease;
+  }
+
+  details[open] summary::after { content: '−'; }
+
+  details p {
+    margin: 16px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--fg-dim);
+  }
+
+  details summary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 74, 31, 0.15);
+    border-radius: 4px;
+  }
+
+  /* Footer */
+  .site-footer {
+    border-top: 1px solid var(--line);
+    padding: 32px 0 64px;
+  }
+
+  .site-footer .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .site-footer a {
+    font-size: 13px;
+    color: var(--fg-dim);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .site-footer a:hover { filter: brightness(0.92); }
+
+  .site-footer a:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 74, 31, 0.15);
+    border-radius: 4px;
+  }
+
+  .site-footer .copy {
+    margin: 16px 0 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-dim);
+  }
+
+  /* Mobile breakpoint */
+  @media (max-width: 520px) {
+    .hero { padding-top: 36px; }
+  }
+
+  /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    .cta-form button:active { transform: none; }
+    details summary::after { transition: none; }
+    button[type="submit"]:active { transform: none; }
   }
 </style>
