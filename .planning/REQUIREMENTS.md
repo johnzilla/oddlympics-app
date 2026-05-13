@@ -46,7 +46,7 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 
 ### Analytics
 
-- [ ] **ANLTC-01**: Plausible script and init call preserved unchanged. Submit handler fires a `Signup Submit` Plausible event with a `team` prop equal to the selected slug. Plausible goal `Signup Submit` is configured server-side in the Plausible dashboard before the form ships.
+- [x] **ANLTC-01**: Plausible script and init call preserved unchanged. Submit handler fires a `Signup Submit` Plausible event with a `team` prop equal to the selected slug. Plausible goal `Signup Submit` is configured server-side in the Plausible dashboard before the form ships.
 
 ### `/manage` flow
 
@@ -196,7 +196,7 @@ Each v2.0 REQ-ID maps to exactly one phase. Filled by `/gsd-new-milestone` roadm
 | LEGAL-02 | Phase 7 | Pending |
 | OG-01 | Phase 8 | Pending |
 | META-01 | Phase 6 | Complete |
-| ANLTC-01 | Phase 6 | Pending |
+| ANLTC-01 | Phase 6 | Complete |
 | MANAGE-01 | Phase 9 | Pending |
 | MANAGE-02 | Phase 9 | Pending |
 | COMPAT-01 | Phase 5 | Pending |

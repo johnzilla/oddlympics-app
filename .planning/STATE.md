@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: executing
-stopped_at: Phase 06 Plan 01 complete; ready to execute Plan 02 (inline JS — tz-label swap + ?error= swap + Plausible Signup Submit listener)
-last_updated: "2026-05-13T23:43:33.668Z"
+stopped_at: Phase 06 Plan 02 complete; ready to execute Plan 03 (verification — smoke script + Lighthouse + LAND-02/03 final gate + Plausible custom-goal operator action)
+last_updated: "2026-05-13T23:49:27.720Z"
 last_activity: 2026-05-13
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 9
-  completed_plans: 7
-  percent: 78
+  completed_plans: 8
+  percent: 89
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-12)
 ## Current Position
 
 Phase: 06 (landing-page-form-meta-analytics) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-05-13
 
-Progress: [████████░░] 78%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [████████░░] 78%
 
 *Updated after each plan completion*
 | Phase 06 P01 | 5min | 1 tasks | 1 files |
+| Phase 06 P02 | 2min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Phase 6 Plan 1: Hardcoded https://oddlympics.app/* meta-tag URLs (not Astro.site) per CONTEXT D-08 — canonical-copy precedent outranks DRY when copy doc is URL source of truth.
 - [Phase ?]: Phase 6 Plan 1: Empty-host-element cross-plan DOM contract pattern — Plan 01 ships <span id=tz-label>fallback</span> + <input id=timezone value=''> + <p id=error hidden> for Plan 02 inline JS targets. Page remains JS-off readable.
 - [Phase ?]: Phase 6 Plan 1: ASCII apostrophe (0x27) throughout body copy — canonical sources + AC grep -F strings use ASCII; plan prose mention of curly U+2019 was inconsistent. Followed canonical sources (Rule 1 deviation).
+- [Phase ?]: Phase 6 Plan 2: Three-concern try-isolated inline <script is:inline> block pattern — single block holding tz capture + URL-param swap + analytics event, each concern in its own try{}catch{} so one exception does not block the others. Adopt for any future page with >1 inline-script concern.
+- [Phase ?]: Phase 6 Plan 2: ASCII apostrophe (0x27) in COPY map 'email' key matches v1 source bytes + AC grep -F search bytes + Plan 01 precedent — plan AC parenthetical mention of curly U+2019 was inconsistent with its own grep -F search string. Rule 1 deviation (same class as Plan 01 deviation 1).
+- [Phase ?]: Phase 6 Plan 2: Fire-and-forget Plausible submit listener — no preventDefault, relies on pa-*.js sendBeacon path for unload-safe transmission (D-09). Phase 11 AC11 verifies dashboard side; if drop rate is unacceptable, swap to preventDefault + setTimeout(form.submit, 0) per RESEARCH §Pitfall 1.
 
 ### Pending Todos
 
@@ -101,6 +105,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-13T23:43:33.663Z
-Stopped at: Phase 06 Plan 01 complete; ready to execute Plan 02 (inline JS — tz-label swap + ?error= swap + Plausible Signup Submit listener)
-Resume file: .planning/phases/06-landing-page-form-meta-analytics/06-02-PLAN.md
+Last session: 2026-05-13T23:49:27.714Z
+Stopped at: Phase 06 Plan 02 complete; ready to execute Plan 03 (verification — smoke script + Lighthouse + LAND-02/03 final gate + Plausible custom-goal operator action)
+Resume file: .planning/phases/06-landing-page-form-meta-analytics/06-03-PLAN.md
