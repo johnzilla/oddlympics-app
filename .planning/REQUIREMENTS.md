@@ -27,7 +27,7 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 ### `/api/signup` payload
 
 - [ ] **SIGNUP-01**: `/api/signup` accepts new `team` field, validates against the 48-team allow-list, rejects with `?error=bad-form` (303 redirect, no row written) when missing, empty, or unknown.
-- [ ] **SIGNUP-02**: `/api/signup` accepts new `timezone` field, validates against the IANA timezone database (`Intl.supportedValuesOf('timeZone')` or equivalent allow-list). On invalid or empty: fall back to `America/Detroit` and flag the row for later IP-based correction. Does NOT reject on bad timezone.
+- [ ] **SIGNUP-02**: `/api/signup` accepts new `timezone` field, validates against the IANA timezone database (`Intl.supportedValuesOf('timeZone')` or equivalent allow-list). On invalid or empty: fall back to `America/New_York` and flag the row for later IP-based correction. Does NOT reject on bad timezone.
 - [ ] **SIGNUP-03**: `team` and `timezone` persist on the subscriber record alongside `email`, `created_at`, and existing `requested_sport`. Existing rate-limit, honeypot, Origin-check, and email-format-validation behavior preserved unchanged.
 - [ ] **SIGNUP-04**: Confirmation email body names the team and a human-readable timezone (e.g., "We'll email you 1 hour before every England match in Detroit time.").
 
@@ -55,7 +55,7 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 
 ### Backward compatibility
 
-- [ ] **COMPAT-01**: Pre-milestone subscribers (rows with no `team` and no `timezone`) do not break `/manage` or the kickoff cron. Backfill at migration time: set `team = NULL`, `timezone = 'America/Detroit'`. A one-time banner on `/manage` prompts them to pick a team.
+- [ ] **COMPAT-01**: Pre-milestone subscribers (rows with no `team` and no `timezone`) do not break `/manage` or the kickoff cron. Backfill at migration time: set `team = NULL`, `timezone = 'America/New_York'`. A one-time banner on `/manage` prompts them to pick a team.
 - [ ] **COMPAT-02**: Existing `/api/signup` error-code contract unchanged — no new error codes introduced. Bad-team and bad-timezone both reuse `bad-form` (with a server-side log line distinguishing them).
 
 ---

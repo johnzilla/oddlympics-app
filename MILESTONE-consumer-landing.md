@@ -69,7 +69,7 @@ Out of scope for this milestone: ads, GTM, content creation, social, email conte
 ### R3 — `/api/signup` payload handling
 
 - R3.1 Accept new `team` field. Validate against the 48-team allow-list. Reject with `?error=bad-form` if missing, empty, or not in the allow-list.
-- R3.2 Accept new `timezone` field. Validate against the IANA timezone database (use the runtime's `Intl.supportedValuesOf('timeZone')` or an equivalent allow-list). On invalid or empty, fall back to `America/Detroit` and flag the row for later IP-based correction. Do not reject.
+- R3.2 Accept new `timezone` field. Validate against the IANA timezone database (use the runtime's `Intl.supportedValuesOf('timeZone')` or an equivalent allow-list). On invalid or empty, fall back to `America/New_York` and flag the row for later IP-based correction. Do not reject.
 - R3.3 Persist `team` and `timezone` on the subscriber record alongside `email`, `created_at`, and the existing `requested_sport`.
 - R3.4 Existing rate limit, honeypot check, origin check, and email validation behavior is preserved.
 - R3.5 Confirmation email must include the team name and a human-readable timezone in the body (e.g., "We'll email you 1 hour before every England match in Detroit time.").
@@ -116,7 +116,7 @@ Out of scope for this milestone: ads, GTM, content creation, social, email conte
 
 ### R10 — Backward compatibility
 
-- R10.1 Existing subscribers (who signed up before this milestone, with no `team` or `timezone` on record) must not break the `/manage` page or the future kickoff-alert job. Backfill: set `team = NULL`, `timezone = 'America/Detroit'`, and surface a one-time banner on `/manage` prompting them to pick a team.
+- R10.1 Existing subscribers (who signed up before this milestone, with no `team` or `timezone` on record) must not break the `/manage` page or the future kickoff-alert job. Backfill: set `team = NULL`, `timezone = 'America/New_York'`, and surface a one-time banner on `/manage` prompting them to pick a team.
 - R10.2 The existing `/api/signup` error-code contract is unchanged. No new error codes introduced; bad-team and bad-timezone reuse `bad-form` (with a server-side log line distinguishing them).
 
 ---
@@ -146,7 +146,7 @@ Phases are sized so each one is a single `/gsd-plan-phase` → `/gsd-execute-pha
 
 ### Phase 1 — Schema + payload
 
-- Migrate subscribers table to add `team TEXT`, `timezone TEXT` (default `'America/Detroit'`).
+- Migrate subscribers table to add `team TEXT`, `timezone TEXT` (default `'America/New_York'`).
 - Update `/api/signup` to parse, validate, and persist `team` and `timezone`.
 - Backfill existing rows per R10.1.
 - Add team allow-list and IANA-timezone allow-list as data files committed to the repo.
