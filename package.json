@@ -9,7 +9,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "serve": "node --env-file=.env ./dist/server/entry.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "smoke:landing": "node scripts/smoke-landing.mjs",
+    "check:land-02": "! grep -iE 'bitcoin|lightning|crypto|world domination|personal olympics' dist/client/index.html"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.5",
