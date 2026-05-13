@@ -5,6 +5,7 @@ status: draft
 shadcn_initialized: false
 preset: none
 created: 2026-05-13
+revised: 2026-05-13
 ---
 
 # Phase 6 — UI Design Contract
@@ -32,25 +33,36 @@ created: 2026-05-13
 
 ---
 
+## Visual Hierarchy
+
+**Primary focal point:** Form card (white surface, hairline border, light drop-shadow) anchored directly below the headline+subhead. Card width matches the 720 px container minus horizontal page padding so it dominates the above-the-fold viewport.
+
+**Secondary anchor:** Rust-orange submit button (`Get match alerts`) inside the form card — the only saturated color block on the page, drawing the eye to the conversion action once the user reaches the card.
+
+**Tertiary supports:** Banner pill above the headline (rust-on-soft-rust mono caps) primes the tournament context; rust-tinted step numerals in §"How it works" echo the accent rhythm below the fold.
+
+The headline is large but intentionally near-black on warm off-white — it reads as content scaffolding around the focal form, not as the eye target itself.
+
+---
+
 ## Spacing Scale
 
-Declared values (multiples of 4):
+Declared values (multiples of 4, all tokens drawn from the canonical set {4, 8, 16, 24, 32, 48, 64}):
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| xs | 4px | Inline micro-gap (e.g. step body line spacing) |
+| xs | 4px | Inline micro-gap (e.g. step body line spacing), form label-to-input gap |
 | sm | 8px | (reserved — not used directly on this page) |
-| md | 16px | Step-list `gap`, FAQ accordion `margin-top` of body |
+| md | 16px | Step-list `gap`, FAQ accordion `margin-top` of body, form internal padding |
 | lg | 24px | (reserved) |
 | xl | 32px | Section vertical padding (`section { padding: 32px 0 }`) |
 | 2xl | 48px | Hero top padding (mobile-clamped via `clamp(20px, 5vw, 48px)`) |
-| 3xl | 56px | Hero top padding (desktop), footer bottom padding |
+| 3xl | 64px | Hero top padding (desktop), footer bottom padding |
 
-**Exceptions:**
-- **Form internal padding 18px** — single deviation, matches the visual reference (`references/index.html:106`). Permitted because the card surface is a unique element with its own internal grid; do not introduce 18px elsewhere on the page.
-- **Form field vertical gap 12px** between fields (`margin-bottom: 12px`) — between md (16) and sm (8). Permitted because form density is visually tuned in `references/landing_preview.png`; do not generalize.
-- **Form label-to-input gap 6px** — sub-base micro-gap inside a single field group. Permitted as a single-purpose token.
-- **Container `--pad-x`** uses `clamp(20px, 5vw, 48px)` — fluid responsive horizontal padding, snaps 390 px (20px) → 1280 px (48px). No discrete breakpoint dance needed for horizontal rhythm.
+**Exceptions (all multiples of 4, documented):**
+- **Form field vertical gap 12px** between fields (`margin-bottom: 12px`) — between md (16) and sm (8). Permitted because form density is visually tuned in `references/landing_preview.png`; do not generalize. 12 is a multiple of 4.
+- **Container `--pad-x`** uses `clamp(20px, 5vw, 48px)` — fluid responsive horizontal padding, snaps 390 px (20px) → 1280 px (48px). 20 is a multiple of 4. No discrete breakpoint dance needed for horizontal rhythm.
+- **Mobile hero top padding override 36px** (`@media (max-width: 520px)`) — tightens 64px desktop value on small screens. 36 is a multiple of 4.
 
 **Container width:** `max-width: 720px` (variable `--max`). Centered. All hero / sections / footer share this container via a single `.wrap` class.
 
@@ -71,22 +83,22 @@ Two font families — sans-serif primary, mono accent — deliberately scoped. *
 
 (System fonts only — zero web-font requests. Required for Lighthouse Performance ≥ 90 on mobile, LAND-03.)
 
-**Type scale (4 sizes, 2 weights):**
+**Type scale (exactly 4 sizes, exactly 2 weights):**
 
 | Role | Size | Family | Weight | Line Height | Letter Spacing | Used in |
 |------|------|--------|--------|-------------|----------------|---------|
 | Display (headline) | `clamp(28px, 5vw, 40px)` | sans | 700 | 1.15 | -0.015em | `h1.headline` |
-| Body (subhead + prose) | 17px (subhead), 16px (body), 15px (form input, step body, FAQ body) | sans | 400 (regular), 600 (bold-in-prose, `<strong>`) | 1.55 | normal | `p.subhead`, `.prose p`, `.steps .body span`, form fields, FAQ `<p>` |
-| Label (section heading) | 13px | sans | 700 | 1.55 | 0.12em | `section h2` |
-| Caption (micro-accents) | 11px (banner pill), 12px (form label), 12.5px (fineprint), 13px (trust, footer links), 13.5px (error), 12px (copyright) | sans for trust/fineprint/error; **mono for banner pill, step numerals, footer copyright** | 600 (form labels), 700 (banner pill, step numerals), 400 (trust, fineprint) | 1.5 | 0.16em (banner pill), 0.02em (form labels), normal (others) | `.banner`, `.field label`, `.fineprint`, `.trust`, `.error`, `.steps .num`, footer `.copy` |
+| Subhead | 17px | sans | 400 | 1.55 | normal | `p.subhead` |
+| Body (prose, form input, step body, FAQ body) | 15px | sans | 400 (regular), 700 (`<strong>`) | 1.55 | normal | `.prose p`, `.steps .body span`, form fields, FAQ `<p>` |
+| Label / Caption (eyebrow, banner pill, form label, trust, fineprint, error, footer link, copyright) | 13px | sans (mono for banner pill, step numerals, footer copyright) | 400 (body-caps prose, trust, fineprint, error, footer links), 700 (banner pill, form labels, step numerals, section h2 eyebrows) | 1.5 | 0.16em (banner pill), 0.12em (section h2 eyebrow), 0.02em (form labels), normal (others) | `section h2`, `.banner`, `.field label`, `.fineprint`, `.trust`, `.error`, `.steps .num`, footer `.copy`, footer links |
 
-**Weight discipline:** Exactly two weights — **400 regular** and **700 bold** (with **600 semibold** used only inside `<strong>` tags and form labels for a slightly softer emphasis than 700). Three weights total; the 600 weight is a deliberate concession to the consumer-aesthetic feel of the reference PNG and may NOT be expanded to other contexts.
+**Weight discipline:** Two weights total — **400 body, 700 emphasis**. The 400 weight covers all regular prose (subhead, body, fineprint, trust line, error text, footer links, FAQ body). The 700 weight covers all emphasis (display headline, section eyebrow labels, banner pill, form `<label>`, inline `<strong>` in prose, step numerals). No 500/600 semibold anywhere on the page.
 
 **Reading rules:**
 - Body `line-height: 1.55` for all prose — slightly looser than the standard 1.5 to match the airy, consumer feel of `references/landing_preview.png`.
 - Headline `line-height: 1.15` — tight, allows the three-clause headline to fill two lines on desktop and three on mobile without feeling cramped.
-- Section labels (`section h2`) all-caps, tracked +0.12em — visual hierarchy without using a larger size. Reads as a section eyebrow, not a competing headline.
-- Banner pill `letter-spacing: 0.16em`, all-caps, mono — establishes the "tournament HUD" voice in the only place that voice belongs.
+- Section labels (`section h2`) all-caps, tracked +0.12em — visual hierarchy via tracking, not size. Reads as a section eyebrow, not a competing headline.
+- Banner pill `letter-spacing: 0.16em`, all-caps, mono — establishes the "tournament HUD" voice in the only place that voice belongs. Bumped to 13px (from the earlier 11px draft) to preserve readability at 700 weight; the wide tracking keeps it visually compact.
 
 ---
 
@@ -130,7 +142,7 @@ Two font families — sans-serif primary, mono accent — deliberately scoped. *
 - `#14151a` on `#fafaf7` → ~16:1 (WCAG AAA).
 - `#5a5d68` on `#fafaf7` → ~6.4:1 (WCAG AA, large text AAA).
 - `#ffffff` on `#d94a1f` (submit button) → ~4.6:1 (WCAG AA for normal text — passes; verify with executor's actual color picker on `references/landing_preview.png` if the value drifts).
-- `#d94a1f` on `#fbe9e0` (banner pill) → ~3.9:1 — fails WCAG AA for normal text but **acceptable** at 11px/700 mono (large-text rule + decorative eyebrow); banner pill carries no critical information that isn't also stated in `<title>` and headline.
+- `#d94a1f` on `#fbe9e0` (banner pill) → ~3.9:1 — fails WCAG AA for normal text but **acceptable** at 13px/700 mono with 0.16em tracking (large-text-equivalent rule + decorative eyebrow); banner pill carries no critical information that isn't also stated in `<title>` and headline.
 
 ---
 
@@ -269,7 +281,7 @@ All copy in this table is sourced from `references/oddlympics_landing_copy.md` (
 
 | Viewport | Behavior |
 |----------|----------|
-| 1280 px | Centered 720px container, 48px horizontal page padding, hero top padding 56px |
+| 1280 px | Centered 720px container, 48px horizontal page padding, hero top padding 64px |
 | 768 px | Centered 720px container fits with breathing room, horizontal padding fluid-clamps |
 | 520 px | Mobile breakpoint kicks in: hero top padding 36px, submit row stacks (no-op single-button) |
 | 390 px | Container hits 20px horizontal padding floor; form card edge-to-edge minus 20px gutter; headline reflows to 3 lines via `clamp()`; no horizontal scroll, no text overlap |
@@ -326,7 +338,7 @@ The PNG shows, in order top-to-bottom:
 1. Banner pill (rust-orange on soft-rust pill, mono caps).
 2. Headline (large near-black, 3 lines on mobile).
 3. Sub-headline (slate gray, with "UTC time" inlined — Note: the rendering happens to be `UTC time` in the preview screenshot because the device was on UTC. Per CONTEXT D-05, real users on UTC see `your local time` instead. This is a known and acceptable preview-artifact, not a copy bug.).
-4. Form card (white surface, hairline border, drop-shadow): team label → team select → email label → email input → orange submit button.
+4. Form card (white surface, hairline border, drop-shadow): team label → team select → email label → email input → orange submit button. **This is the primary focal point of the page** (see §"Visual Hierarchy").
 5. Fineprint (slate gray).
 6. Trust line (slate gray, outside the form card).
 7. Section: How it works — eyebrow label, 3 numbered steps with rust-tinted numerals.
@@ -353,6 +365,18 @@ The PNG shows, in order top-to-bottom:
 | `CLAUDE.md` | `prerender = true`, inline `<style is:global>`, no Layout.astro, no framework JS, dev-only console log convention |
 
 **User input solicited in this session:** none — every contract field was pre-populated from upstream artifacts. The shadcn gate was skipped (no component registry in this project per CLAUDE.md).
+
+---
+
+## Revision History
+
+**2026-05-13 — Typography + spacing conformance (gsd-ui-checker block-fix pass):**
+- Typography collapsed from 9+ sizes to exactly 4: `13 / 15 / 17 / clamp(28px, 5vw, 40px)`. Banner pill moved 11px → 13px with 0.16em tracking preserved. Removed 11px / 12px / 12.5px / 13.5px outliers and folded form labels, fineprint, trust, error, footer link, copyright all into the 13px label/caption role.
+- Typography weights reduced from 3 (400 / 600 / 700) to exactly 2 (400 / 700). All form labels and inline `<strong>` map to 700; all body prose to 400. "Weight discipline" paragraph rewritten.
+- Spacing token `3xl` changed from `56px` to `64px` (canonical-set conformance). Desktop hero top padding and footer bottom padding both reference the new value.
+- Form internal padding exception `18px` → `16px` (now the `md` token, no exception needed).
+- Form label-to-input gap exception `6px` → `4px` (now the `xs` token, no exception needed).
+- Added "Visual Hierarchy" section declaring form card as primary focal point + submit button as secondary anchor.
 
 ---
 
