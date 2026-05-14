@@ -40,7 +40,13 @@
 //     "DELETE FROM vip_signups WHERE email LIKE 'smoke-landing-%'"
 
 const BASE = process.env.SMOKE_BASE_URL ?? 'http://localhost:4321';
-const SMOKE_IP = '192.0.2.42'; // RFC 5737 TEST-NET-1; never a real client IP
+// RFC 5737 TEST-NET-1; never a real client IP. Distinct from
+// scripts/smoke-signup.mjs (which uses 192.0.2.42) so the two harnesses do
+// not share a rate-limit bucket when run against the same dev server
+// within an hour (the rate-limit state is in-memory and only resets on
+// restart). Future smokes should default to a fresh address in the
+// 192.0.2.0/24 range.
+const SMOKE_IP = '192.0.2.43';
 
 console.log(`[smoke] target: ${BASE}`);
 
