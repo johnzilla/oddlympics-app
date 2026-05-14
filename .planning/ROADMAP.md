@@ -84,7 +84,7 @@ per R-5 (pin Node 22 in the unit + CI).
 Plans:
 - [x] 06-01-PLAN.md — Full rewrite of `src/pages/index.astro` (consumer copy + 48-team confederation-grouped <select> + OG/Twitter meta tags + retuned `<style is:global>`); covers LAND-01/02/04, FORM-01/02/03, META-01.
 - [x] 06-02-PLAN.md — Inline JS (tz-label swap + retained `?error=` swap + Plausible `Signup Submit` listener); covers ANLTC-01.
-- [ ] 06-03-PLAN.md — `scripts/smoke-landing.mjs` + `npm run smoke:landing` + Lighthouse mobile manual gate + Plausible dashboard operator action + DEPLOY.md Day-2-ops row; covers LAND-03.
+- [x] 06-03-PLAN.md — `scripts/smoke-landing.mjs` + `npm run smoke:landing` + Lighthouse mobile manual gate + Plausible dashboard operator action + DEPLOY.md Day-2-ops row; covers LAND-03.
 
 **Risk note (R-4)**: Plausible custom goal `Signup Submit` must be configured
 server-side in the Plausible dashboard BEFORE this phase ships, or the

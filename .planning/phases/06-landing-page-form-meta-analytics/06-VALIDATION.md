@@ -1,10 +1,11 @@
 ---
 phase: 6
 slug: landing-page-form-meta-analytics
-status: draft
+status: green
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-05-13
+completed: 2026-05-14
 ---
 
 # Phase 6 — Validation Strategy
@@ -40,11 +41,11 @@ created: 2026-05-13
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 06-01-T1 | 01 | 1 | LAND-01, LAND-02, LAND-04, FORM-01, FORM-02, FORM-03, META-01 | T-06-01..09 | Full rewrite of src/pages/index.astro: new frontmatter + head (META-01 tags) + body (banner + headline + sub-headline with SSR span + form with 48-team confederation-grouped select + 4 below-fold sections + footer) + retuned <style is:global>. Honeypot retained verbatim. Prohibited terms scrubbed. | grep build output | `npm run build && npx astro check && ! grep -iE 'bitcoin\|lightning\|crypto\|world domination\|personal olympics' dist/client/index.html && [ "$(grep -c '<optgroup ' dist/client/index.html)" = "6" ] && grep -F "Your team's matches" dist/client/index.html` | ✅ src/pages/index.astro exists | ⬜ pending |
-| 06-02-T1 | 02 | 2 | ANLTC-01, FORM-03 (retained) | T-06-10..16 | Append one inline `<script is:inline>` block to src/pages/index.astro implementing tz-label swap + ?error= COPY-map verbatim + Plausible Signup Submit listener (D-09/11/12). XSS-safe via textContent. Fire-and-forget submit (no preventDefault). | grep + build | `npm run build && grep -F 'Signup Submit' dist/client/index.html && grep -F 'tz-label' dist/client/index.html && ! grep -F 'innerHTML' src/pages/index.astro && ! grep -F 'preventDefault' src/pages/index.astro` | ✅ src/pages/index.astro exists | ⬜ pending |
-| 06-03-T1 | 03 | 3 | LAND-01..04, FORM-01..03, META-01, ANLTC-01 (all assertions) | T-06-17..21 | Author scripts/smoke-landing.mjs (~80-120 LOC, Node-native, mirrors scripts/smoke-signup.mjs harness): GET / + body grep across 15+ evidence tags; POST /api/signup with valid + bad-team payloads to verify 303 redirects. Add `smoke:landing` and `check:land-02` to package.json scripts. | smoke harness | `npm run build && node scripts/smoke-landing.mjs` | ❌ Wave 0 (scripts/smoke-landing.mjs new in this task) | ⬜ pending |
-| 06-03-T2 | 03 | 3 | ANLTC-01 (R-4 / D-10) | T-06-19, T-06-20 | Pre-deploy operator action: configure Plausible custom goal `Signup Submit` at https://plausible.io/oddlympics.app/settings/goals; add Day-2-ops row to DEPLOY.md citing CONTEXT D-10. | manual (dashboard) + grep DEPLOY.md | `grep -F "Plausible custom-goal" DEPLOY.md` (post-merge sanity grep) | manual + ✅ DEPLOY.md exists | ⬜ pending |
-| 06-03-T3 | 03 | 3 | LAND-03, LAND-04, CONTEXT D-03..D-05 (AC3 dry run) | — | Manual: Lighthouse mobile ≥ 90 across Perf/A11y/Best Practices/SEO (soft gate; Phase 11 AC8 hard gate). 3-viewport visual at 390/768/1280px. 3-zone tz spoof (America/Detroit → "Detroit time" / Europe/London → "London time" / Africa/Lagos → "Lagos time"). `?error=bad-email` URL renders FORM-03 verbatim copy. | manual + Lighthouse CLI | `npx --yes lighthouse http://localhost:4321 --form-factor=mobile --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=./references/lighthouse-phase-06.json --chrome-flags="--headless --no-sandbox"` then node assertion that all four `categories.*.score >= 0.9` | manual artifact: references/lighthouse-phase-06.json | ⬜ pending |
+| 06-01-T1 | 01 | 1 | LAND-01, LAND-02, LAND-04, FORM-01, FORM-02, FORM-03, META-01 | T-06-01..09 | Full rewrite of src/pages/index.astro: new frontmatter + head (META-01 tags) + body (banner + headline + sub-headline with SSR span + form with 48-team confederation-grouped select + 4 below-fold sections + footer) + retuned <style is:global>. Honeypot retained verbatim. Prohibited terms scrubbed. | grep build output | `npm run build && npx astro check && ! grep -iE 'bitcoin\|lightning\|crypto\|world domination\|personal olympics' dist/client/index.html && [ "$(grep -c '<optgroup ' dist/client/index.html)" = "6" ] && grep -F "Your team's matches" dist/client/index.html` | ✅ src/pages/index.astro exists | ✅ green |
+| 06-02-T1 | 02 | 2 | ANLTC-01, FORM-03 (retained) | T-06-10..16 | Append one inline `<script is:inline>` block to src/pages/index.astro implementing tz-label swap + ?error= COPY-map verbatim + Plausible Signup Submit listener (D-09/11/12). XSS-safe via textContent. Fire-and-forget submit (no preventDefault). | grep + build | `npm run build && grep -F 'Signup Submit' dist/client/index.html && grep -F 'tz-label' dist/client/index.html && ! grep -F 'innerHTML' src/pages/index.astro && ! grep -F 'preventDefault' src/pages/index.astro` | ✅ src/pages/index.astro exists | ✅ green |
+| 06-03-T1 | 03 | 3 | LAND-01..04, FORM-01..03, META-01, ANLTC-01 (all assertions) | T-06-17..21 | Author scripts/smoke-landing.mjs (~80-120 LOC, Node-native, mirrors scripts/smoke-signup.mjs harness): GET / + body grep across 15+ evidence tags; POST /api/signup with valid + bad-team payloads to verify 303 redirects. Add `smoke:landing` and `check:land-02` to package.json scripts. | smoke harness | `npm run build && node scripts/smoke-landing.mjs` | ✅ scripts/smoke-landing.mjs shipped (commit ffa627b) | ✅ green (18/18 PASS) |
+| 06-03-T2 | 03 | 3 | ANLTC-01 (R-4 / D-10) | T-06-19, T-06-20 | Pre-deploy operator action: configure Plausible custom goal `Signup Submit` at https://plausible.io/oddlympics.app/settings/goals; add Day-2-ops row to DEPLOY.md citing CONTEXT D-10. | manual (dashboard) + grep DEPLOY.md | `grep -F "Plausible custom-goal" DEPLOY.md` (post-merge sanity grep) | manual + ✅ DEPLOY.md row at line 114 (commit 17dfbc5) | ✅ green (operator confirmed goal exists) |
+| 06-03-T3 | 03 | 3 | LAND-03, LAND-04, CONTEXT D-03..D-05 (AC3 dry run) | — | Manual: Lighthouse mobile ≥ 90 across Perf/A11y/Best Practices/SEO (soft gate; Phase 11 AC8 hard gate). 3-viewport visual at 390/768/1280px. 3-zone tz spoof (America/Detroit → "Detroit time" / Europe/London → "London time" / Africa/Lagos → "Lagos time"). `?error=bad-email` URL renders FORM-03 verbatim copy. | manual + Lighthouse CLI | `npx --yes lighthouse http://localhost:4321 --form-factor=mobile --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=./references/lighthouse-phase-06.json --chrome-flags="--headless --no-sandbox"` then node assertion that all four `categories.*.score >= 0.9` | ✅ references/lighthouse-phase-06.json + 3 viewport screenshots (commit 4c49148) | ✅ green (Perf 1.00 / A11y 0.94 / BP 1.00 / SEO 1.00; all 4 tz zones + 3 viewports + ?error= render verified via headless puppeteer) |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -71,11 +72,11 @@ created: 2026-05-13
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references (smoke-landing.mjs)
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter (after planner per-task verification map is filled)
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (smoke-landing.mjs)
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s
+- [x] `nyquist_compliant: true` set in frontmatter (after planner per-task verification map is filled)
 
-**Approval:** pending
+**Approval:** green (all 9 phase requirement IDs evidenced via smoke + Lighthouse JSON + headless-puppeteer + operator-confirmed dashboard goal — see 06-03-SUMMARY.md §Self-Check)

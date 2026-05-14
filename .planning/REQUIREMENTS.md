@@ -15,7 +15,7 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 
 - [x] **LAND-01**: Replace landing page (`index.astro`) with consumer template — headline "Your team's matches. In your time zone. One ping before kickoff."; sub-headline with JS-populated tz label (e.g., "Detroit time"), fallback "your local time" when JS is disabled or `Intl.DateTimeFormat().resolvedOptions().timeZone` is unavailable; banner pill `WORLD CUP 2026 · JUNE 11 – JULY 19`; four below-fold sections in order (How it works / Why this exists / After the World Cup / FAQ with 5 items); consumer footer (Manage, Privacy, Terms, Contact `hello@oddlympics.app`, "Independent project · Not affiliated with FIFA").
 - [x] **LAND-02**: Zero occurrences (case-insensitive) of `bitcoin`, `lightning`, `crypto`, `world domination`, or `personal olympics` in any public surface — `/`, `/privacy`, `/terms`, `/manage`, meta tags, OG image, inline scripts, or inline styles.
-- [ ] **LAND-03**: Landing page passes Lighthouse mobile ≥ 90 across Performance, Accessibility, Best Practices, SEO.
+- [x] **LAND-03**: Landing page passes Lighthouse mobile ≥ 90 across Performance, Accessibility, Best Practices, SEO.
 - [x] **LAND-04**: Landing page renders correctly at 390 / 768 / 1280 px viewports without horizontal scroll or text overlap.
 
 ### Signup form
@@ -183,7 +183,7 @@ Each v2.0 REQ-ID maps to exactly one phase. Filled by `/gsd-new-milestone` roadm
 |-------------|-------|--------|
 | LAND-01 | Phase 6 | Complete |
 | LAND-02 | Phase 6 | Complete |
-| LAND-03 | Phase 6 | Pending |
+| LAND-03 | Phase 6 | Complete |
 | LAND-04 | Phase 6 | Complete |
 | FORM-01 | Phase 6 | Complete |
 | FORM-02 | Phase 6 | Complete |
