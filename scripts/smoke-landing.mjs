@@ -35,9 +35,11 @@
 //   FORM-01-hidden-fields, FORM-01-post-303, FORM-01-bad-team-303-error
 //
 // Cleanup (operator, post-run, optional — the two POST cases write rows
-// with @example.invalid addresses per RFC 6761):
+// with @example.com addresses; matches the smoke-%@example.com pattern
+// used by scripts/smoke-signup.mjs so one cleanup command covers both
+// harnesses):
 //   sqlite3 data/oddlympics.db \
-//     "DELETE FROM vip_signups WHERE email LIKE 'smoke-landing-%'"
+//     "DELETE FROM vip_signups WHERE email LIKE 'smoke-landing-%@example.com'"
 
 const BASE = process.env.SMOKE_BASE_URL ?? 'http://localhost:4321';
 // RFC 5737 TEST-NET-1; never a real client IP. Distinct from
@@ -191,7 +193,7 @@ await runCase('FORM-01-hidden-fields', () =>
 await runCase('FORM-01-post-303', async () => {
   const { status, location } = await post({
     team: 'england',
-    email: `smoke-landing-${Date.now()}@example.invalid`,
+    email: `smoke-landing-${Date.now()}@example.com`,
     timezone: 'America/Detroit',
     requested_sport: 'world_cup',
     website: '',
@@ -203,7 +205,7 @@ await runCase('FORM-01-post-303', async () => {
 await runCase('FORM-01-bad-team-303-error', async () => {
   const { status, location } = await post({
     team: 'not_a_real_team',
-    email: `smoke-landing-${Date.now()}@example.invalid`,
+    email: `smoke-landing-${Date.now()}@example.com`,
     timezone: 'America/Detroit',
     requested_sport: 'world_cup',
     website: '',
@@ -215,7 +217,7 @@ console.log(`[smoke] result: pass=${pass} fail=${fail}`);
 
 if (fail > 0) {
   console.log(
-    "[smoke] cleanup hint: sqlite3 data/oddlympics.db \"DELETE FROM vip_signups WHERE email LIKE 'smoke-landing-%'\"",
+    "[smoke] cleanup hint: sqlite3 data/oddlympics.db \"DELETE FROM vip_signups WHERE email LIKE 'smoke-landing-%@example.com'\"",
   );
 }
 
