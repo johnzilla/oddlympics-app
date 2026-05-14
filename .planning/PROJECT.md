@@ -81,12 +81,12 @@ group-stage kickoff on 2026-06-11. **Target completion: 2026-05-19.**
 - [ ] Invalid/empty timezone falls back to `America/Detroit` and flags row for later correction — does NOT reject
 - [ ] Confirmation email body names the team and timezone in human-readable form
 
-#### Legal pages (Phase 7)
+#### Legal pages (Phase 7) — Complete (2026-05-14)
 
-- [ ] `/privacy` page — what's collected, retention (logs ≤30 days), no third-party tracking cookies, Plausible cookie-free, GDPR/CCPA deletion path (`privacy@oddlympics.app`, 30 days), ESP named
-- [ ] `/terms` page — free service through 2026-07-19, best-effort delivery, no FIFA/ESPN/team affiliation, governing law (Michigan, USA), `hello@oddlympics.app`
-- [ ] Last-updated date in headers matches deploy date
-- [ ] Same site shell (fonts, footer) as landing — no nav menu required
+- [x] `/privacy` page — what's collected, retention (logs ≤30 days), no third-party tracking cookies, Plausible cookie-free, GDPR/CCPA deletion path (`privacy@oddlympics.app`, 30 days), ESP named
+- [x] `/terms` page — free service through 2026-07-19, best-effort delivery, no FIFA/ESPN/team affiliation, governing law (Michigan, USA), `hello@oddlympics.app`
+- [x] Last-updated date in headers matches deploy date
+- [x] Same site shell (fonts, footer) as landing — no nav menu required
 
 #### Open Graph image (Phase 8)
 
@@ -204,4 +204,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-14 after Phase 6 (landing-page-form-meta-analytics) verified passed*
+*Last updated: 2026-05-14 after Phase 7 (legal-pages) verified passed*
