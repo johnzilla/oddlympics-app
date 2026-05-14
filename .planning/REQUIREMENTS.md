@@ -34,7 +34,7 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 ### Legal pages
 
 - [x] **LEGAL-01**: `/privacy` route renders canonical privacy copy from `references/privacy.md`. Declares: what is collected (email, team, timezone, server logs), retention (logs ≤ 30 days), no sale of data, no third-party tracking cookies, Plausible cookie-free, GDPR/CCPA deletion path (`privacy@oddlympics.app`, 30 days), ESP named. Last-updated date matches deploy date. Same site shell (fonts, footer) as landing; no nav menu required.
-- [ ] **LEGAL-02**: `/terms` route renders canonical terms copy from `references/terms.md`. Declares: free service through 2026-07-19, best-effort delivery (no liability for FIFA reschedules or delivery failures), no FIFA/ESPN/team affiliation, prohibition on submitting fake or others' emails, governing law (Michigan, USA), `hello@oddlympics.app` for questions. Last-updated date matches deploy date. Same site shell as landing.
+- [x] **LEGAL-02**: `/terms` route renders canonical terms copy from `references/terms.md`. Declares: free service through 2026-07-19, best-effort delivery (no liability for FIFA reschedules or delivery failures), no FIFA/ESPN/team affiliation, prohibition on submitting fake or others' emails, governing law (Michigan, USA), `hello@oddlympics.app` for questions. Last-updated date matches deploy date. Same site shell as landing.
 
 ### Open Graph image
 
@@ -193,7 +193,7 @@ Each v2.0 REQ-ID maps to exactly one phase. Filled by `/gsd-new-milestone` roadm
 | SIGNUP-03 | Phase 5 | Pending |
 | SIGNUP-04 | Phase 10 | Pending |
 | LEGAL-01 | Phase 7 | Complete |
-| LEGAL-02 | Phase 7 | Pending |
+| LEGAL-02 | Phase 7 | Complete |
 | OG-01 | Phase 8 | Pending |
 | META-01 | Phase 6 | Complete |
 | ANLTC-01 | Phase 6 | Complete |

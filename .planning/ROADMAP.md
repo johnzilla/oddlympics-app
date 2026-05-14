@@ -110,7 +110,7 @@ Phase 8 — OR Phase 8 ships first. Plan-time decision; either order is fine.
 
 Plans:
 - [x] 07-01-PLAN.md — Create `src/pages/privacy.astro` (prerendered, verbatim site shell from index.astro, canonical body from references/privacy.md) + build & 200 OK verification; covers LEGAL-01.
-- [ ] 07-02-PLAN.md — Create `src/pages/terms.astro` (prerendered, verbatim site shell from index.astro, canonical body from references/terms.md) + build & 200 OK verification; covers LEGAL-02.
+- [x] 07-02-PLAN.md — Create `src/pages/terms.astro` (prerendered, verbatim site shell from index.astro, canonical body from references/terms.md) + build & 200 OK verification; covers LEGAL-02.
 
 **Canonical copy**: lives at `references/privacy.md` and `references/terms.md`,
 checked into the repo at plan time. Pages can be Astro static (`prerender = true`)
