@@ -1,0 +1,217 @@
+---
+export const prerender = true;
+
+const TITLE = 'Privacy Policy — Oddlympics';
+const DESCRIPTION = 'How Oddlympics handles your data: what we collect, what we don\'t, and your GDPR/CCPA rights.';
+const LAST_UPDATED = 'May 13, 2026';
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{TITLE}</title>
+  <meta name="description" content={DESCRIPTION} />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+</head>
+<body>
+  <main>
+    <section class="content">
+      <div class="wrap">
+        <h1>Privacy Policy</h1>
+        <p class="last-updated">Last updated: {LAST_UPDATED}</p>
+
+        <p>Oddlympics is operated by an individual developer in Michigan, USA. This is a free, ad-free service for sending World Cup match notifications.</p>
+
+        <h2>What we collect</h2>
+        <ul>
+          <li>Your email address (so we can send you alerts)</li>
+          <li>The team(s) you select</li>
+          <li>Your time zone (detected from your browser, used only to calculate match times)</li>
+          <li>Standard server logs (IP, user agent) retained for 30 days for abuse prevention</li>
+        </ul>
+
+        <h2>What we don't collect</h2>
+        <ul>
+          <li>Your name, address, phone number, or any payment info</li>
+          <li>Any third-party tracking cookies — we use Plausible Analytics, which is cookie-free and GDPR-compliant</li>
+        </ul>
+
+        <h2>What we never do</h2>
+        <ul>
+          <li>Sell or share your email with anyone</li>
+          <li>Send marketing emails unrelated to your subscription</li>
+          <li>Use your data for advertising</li>
+        </ul>
+
+        <h2>Your rights</h2>
+        <ul>
+          <li>One-click unsubscribe in every email</li>
+          <li>Email <a href="mailto:privacy@oddlympics.app"><code>privacy@oddlympics.app</code></a> to request full deletion of your data. Requests honored within 30 days.</li>
+          <li>GDPR / CCPA requests honored within 30 days</li>
+        </ul>
+
+        <h2>Email delivery is handled by</h2>
+        <p>Email delivery is handled by Resend. Their privacy policy also applies to message delivery.</p>
+
+        <p>Questions: <a href="mailto:hello@oddlympics.app"><code>hello@oddlympics.app</code></a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <nav class="links">
+        <a href="/manage">Manage subscription</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="mailto:hello@oddlympics.app">Contact</a>
+      </nav>
+      <p class="copy">© 2026 Oddlympics · Independent project · Not affiliated with FIFA</p>
+    </div>
+  </footer>
+</body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #fafaf7;
+    --fg: #14151a;
+    --fg-dim: #5a5d68;
+    --line: #e4e4dd;
+    --line-strong: #c9cbc4;
+    --surface: #ffffff;
+    --accent: #d94a1f;
+    --accent-ink: #ffffff;
+    --accent-soft: #fbe9e0;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --max: 720px;
+    --pad-x: clamp(20px, 5vw, 48px);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body { min-height: 100dvh; }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding-left: var(--pad-x);
+    padding-right: var(--pad-x);
+  }
+
+  .content {
+    padding-top: 64px;
+    padding-bottom: 32px;
+  }
+
+  .last-updated {
+    margin: 0 0 24px;
+    font-size: 13px;
+    color: var(--fg-dim);
+  }
+
+  h1 {
+    margin: 0 0 8px;
+    font-family: var(--font-sans);
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--fg);
+  }
+
+  h2 {
+    margin: 32px 0 12px;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  p {
+    margin: 0 0 12px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--fg);
+  }
+
+  ul {
+    margin: 0 0 16px;
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 6px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--fg);
+  }
+
+  strong { font-weight: 700; }
+
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  a:hover { filter: brightness(0.92); }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.95em;
+  }
+
+  /* Footer */
+  .site-footer {
+    border-top: 1px solid var(--line);
+    padding: 32px 0 64px;
+  }
+
+  .site-footer .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .site-footer a {
+    font-size: 13px;
+    color: var(--fg-dim);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .site-footer a:hover { filter: brightness(0.92); }
+
+  .site-footer a:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 74, 31, 0.15);
+    border-radius: 4px;
+  }
+
+  .site-footer .copy {
+    margin: 16px 0 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-dim);
+  }
+
+  /* Mobile breakpoint */
+  @media (max-width: 520px) {
+    .content { padding-top: 36px; }
+  }
+</style>
