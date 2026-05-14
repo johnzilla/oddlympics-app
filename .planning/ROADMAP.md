@@ -105,8 +105,12 @@ Phase 8 — OR Phase 8 ships first. Plan-time decision; either order is fine.
   2. `GET /terms` returns 200 with copy declaring: free service through 2026-07-19, best-effort delivery, no FIFA/ESPN/team affiliation, prohibition on submitting fake/others' emails, Michigan (USA) governing law, `hello@oddlympics.app` for questions. Last-updated date matches the deploy date.
   3. Both pages match the landing page shell (same fonts, same consumer footer); no nav menu required.
   4. Both pages pass LAND-02 — zero occurrences (case-insensitive) of `bitcoin`, `lightning`, `crypto`, `world domination`, `personal olympics` anywhere in the rendered HTML or inline assets.
-**Plans**: TBD
+**Plans:** 2 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 07-01-PLAN.md — Create `src/pages/privacy.astro` (prerendered, verbatim site shell from index.astro, canonical body from references/privacy.md) + build & 200 OK verification; covers LEGAL-01.
+- [ ] 07-02-PLAN.md — Create `src/pages/terms.astro` (prerendered, verbatim site shell from index.astro, canonical body from references/terms.md) + build & 200 OK verification; covers LEGAL-02.
 
 **Canonical copy**: lives at `references/privacy.md` and `references/terms.md`,
 checked into the repo at plan time. Pages can be Astro static (`prerender = true`)
@@ -180,7 +184,7 @@ verification.
 |-------|----------------|--------|-----------|
 | 5. Schema + signup payload | 6/6 | Complete | 2026-05-13 |
 | 6. Landing page + form + meta + analytics | 0/3 | Not started | - |
-| 7. Legal pages | 0/TBD | Not started | - |
+| 7. Legal pages | 0/2 | Not started | - |
 | 8. Open Graph image | 0/TBD | Not started | - |
 | 9. `/manage` editor + unsubscribe | 0/TBD | Not started | - |
 | 10. Confirmation email update | 0/TBD | Not started | - |

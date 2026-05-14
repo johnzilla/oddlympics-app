@@ -35,7 +35,7 @@ Out of scope (other phases own):
 
 - **D-01:** Hand-author HTML in `privacy.astro` and `terms.astro` (no markdown→HTML build pipeline). Mirrors Phase 6 D-02 precedent — `references/*.md` is the editorial canonical source; the `.astro` file is a hand-translation. Rationale: pages are ~200 / ~150 words; a Content-Collections layer adds frontmatter wiring + body CSS scoping for marginal benefit. Editing the `.md` is a docs commit; the `.astro` update follows in the same Phase 7 PR.
 
-- **D-02:** Pre-plan docs sweep — single commit before `/gsd-plan-phase 7`:
+- **D-02 [informational]:** Pre-plan docs sweep — single commit before `/gsd-plan-phase 7` (completed in commit `08c4d4a` before this plan ran; not a Phase 7 plan task):
   1. Create `references/privacy.md` by extracting the `## /privacy stub` blockquote from `references/oddlympics_landing_copy.md` (lines 125–155).
   2. Create `references/terms.md` by extracting the `## /terms stub` blockquote (lines 159–173).
   3. Gap-fill the ESP placeholder `[Your ESP — Resend, Buttondown, ConvertKit, etc.]` (copy doc line 153) → "Resend".
