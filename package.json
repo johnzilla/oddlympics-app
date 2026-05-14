@@ -11,7 +11,7 @@
     "serve": "node --env-file=.env ./dist/server/entry.mjs",
     "astro": "astro",
     "smoke:landing": "node scripts/smoke-landing.mjs",
-    "check:land-02": "! grep -iE 'bitcoin|lightning|crypto|world domination|personal olympics' dist/client/index.html"
+    "check:land-02": "! grep -iE '[b]itcoin|[l]ightning|[c]rypto|[w]orld domination|[p]ersonal olympics' dist/client/index.html"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.5",
