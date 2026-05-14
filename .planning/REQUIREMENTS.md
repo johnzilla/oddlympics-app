@@ -38,7 +38,7 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 
 ### Open Graph image
 
-- [ ] **OG-01**: `/og-image.png` served at exact 1200×630, content-type `image/png`, file size < 300 KB. Image shows wordmark, banner text "WORLD CUP 2026 · JUNE 11 – JULY 19", headline, one-line sub, URL `oddlympics.app`, and "Independent project · Not affiliated with FIFA" tag. Source SVG (`references/og-image.svg`) checked into repo so the asset is rebuildable after copy changes.
+- [x] **OG-01**: `/og-image.png` served at exact 1200×630, content-type `image/png`, file size < 300 KB. Image shows wordmark, banner text "WORLD CUP 2026 · JUNE 11 – JULY 19", headline, one-line sub, URL `oddlympics.app`, and "Independent project · Not affiliated with FIFA" tag. Source SVG (`references/og-image.svg`) checked into repo so the asset is rebuildable after copy changes.
 
 ### Meta tags
 
@@ -194,7 +194,7 @@ Each v2.0 REQ-ID maps to exactly one phase. Filled by `/gsd-new-milestone` roadm
 | SIGNUP-04 | Phase 10 | Pending |
 | LEGAL-01 | Phase 7 | Complete |
 | LEGAL-02 | Phase 7 | Complete |
-| OG-01 | Phase 8 | Pending |
+| OG-01 | Phase 8 | Complete |
 | META-01 | Phase 6 | Complete |
 | ANLTC-01 | Phase 6 | Complete |
 | MANAGE-01 | Phase 9 | Pending |

@@ -24,7 +24,7 @@ inline scripts, or inline styles).
 - [x] **Phase 5: Schema + signup payload** — additive `team`/`timezone` columns, allow-list validation, backfill, `/api/signup` widened without breaking the existing contract
 - [ ] **Phase 6: Landing page + form + meta + analytics** — replace `index.astro` with the consumer template, wire 48-team dropdown + tz-label JS + Plausible `Signup Submit` event, swap meta tags
 - [ ] **Phase 7: Legal pages** — `/privacy` and `/terms` routes serving canonical copy, same site shell as landing
-- [ ] **Phase 8: Open Graph image** — source SVG + rendered 1200×630 PNG + OG/Twitter image meta tags wired to it
+- [x] **Phase 8: Open Graph image** — source SVG + rendered 1200×630 PNG + OG/Twitter image meta tags wired to it (completed 2026-05-14)
 - [ ] **Phase 9: `/manage` editor + unsubscribe** — show + edit team and timezone, one-time banner for backfilled rows, confirm unsubscribe token semantics
 - [ ] **Phase 10: Confirmation email update** — name team + timezone in the body, deliverability cross-client + spam-score check
 - [ ] **Phase 11: End-to-end + launch gate** — AC1–AC12 on production, Lighthouse run, real signup test, tag `v1.0-consumer-landing`
@@ -125,11 +125,11 @@ since they're pure content.
   2. The rendered image shows wordmark, banner text `WORLD CUP 2026 · JUNE 11 – JULY 19`, the headline, a one-line sub, the URL `oddlympics.app`, and the "Independent project · Not affiliated with FIFA" tag — with zero prohibited terms (LAND-02).
   3. The source SVG (`references/og-image.svg`) is committed to the repo so the asset can be re-rendered after copy changes.
   4. opengraph.xyz preview for `https://oddlympics.app`, a Slack share, and an iMessage share each render the card cleanly (headline + banner + URL visible).
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 **UI hint**: yes (image asset is a public-facing visual surface)
 
 Plans:
-- [ ] 08-01-PLAN.md — Vendor @resvg/resvg-js + 3 static-weight TTFs (JetBrains Mono Bold + Inter Regular/Bold), swap 6 font-family attrs in references/og-image.svg, write scripts/render-og-image.mjs (render + 5 D-05 byte checks + LAND-02 grep inlined), run + commit public/og-image.png, verify Astro build copies it to dist/client/. Covers OG-01.
+- [x] 08-01-PLAN.md — Vendor @resvg/resvg-js + 3 static-weight TTFs (JetBrains Mono Bold + Inter Regular/Bold), swap 6 font-family attrs in references/og-image.svg, write scripts/render-og-image.mjs (render + 5 D-05 byte checks + LAND-02 grep inlined), run + commit public/og-image.png, verify Astro build copies it to dist/client/. Covers OG-01.
 
 **Risk note (R-3)**: SVG → PNG rendering in CI requires a tool not currently
 installed. At plan time choose ONE: (a) install `rsvg-convert` or `cairosvg`
@@ -188,7 +188,7 @@ verification.
 | 5. Schema + signup payload | 6/6 | Complete | 2026-05-13 |
 | 6. Landing page + form + meta + analytics | 0/3 | Not started | - |
 | 7. Legal pages | 0/2 | Not started | - |
-| 8. Open Graph image | 0/1 | Not started | - |
+| 8. Open Graph image | 1/1 | Complete   | 2026-05-14 |
 | 9. `/manage` editor + unsubscribe | 0/TBD | Not started | - |
 | 10. Confirmation email update | 0/TBD | Not started | - |
 | 11. End-to-end + launch gate | 0/TBD | Not started | - |
