@@ -29,3 +29,6 @@ pnpm-debug.log*
 
 # sqlite data dir
 data/
+
+# headless-chrome cache (installed locally for Lighthouse runs; do not commit)
+chrome-headless-shell/
