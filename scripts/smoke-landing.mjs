@@ -133,14 +133,17 @@ await runCase('FORM-02-option-count', () =>
   (html.match(/<option value="/g) || []).length >= 49);
 
 await runCase('FORM-02-confederation-order', () => {
-  // Anchor on the full optgroup label (unique substring) rather than the
-  // confederation acronym alone — indexOf('CAF') would otherwise match
-  // inside "CONCACAF" before reaching the real "CAF — Africa" optgroup,
-  // making the order assertion pass for the wrong reason.
+  // Anchor on a unique fragment of each optgroup label (acronym + first
+  // few words after the em-dash) rather than the acronym alone —
+  // indexOf('CAF') would otherwise match inside "CONCACAF" before
+  // reaching the real "CAF — Africa" optgroup, making the order
+  // assertion pass for the wrong reason. The fragments deliberately
+  // exclude '&' (which Astro HTML-encodes to '&#38;' in the served
+  // output) so the string match is exact against the rendered HTML.
   const order = [
     'UEFA — Europe',
     'CONMEBOL — South America',
-    'CONCACAF — North & Central America',
+    'CONCACAF — North',
     'CAF — Africa',
     'AFC — Asia',
     'OFC — Oceania',
