@@ -133,7 +133,18 @@ await runCase('FORM-02-option-count', () =>
   (html.match(/<option value="/g) || []).length >= 49);
 
 await runCase('FORM-02-confederation-order', () => {
-  const order = ['UEFA', 'CONMEBOL', 'CONCACAF', 'CAF', 'AFC', 'OFC'];
+  // Anchor on the full optgroup label (unique substring) rather than the
+  // confederation acronym alone — indexOf('CAF') would otherwise match
+  // inside "CONCACAF" before reaching the real "CAF — Africa" optgroup,
+  // making the order assertion pass for the wrong reason.
+  const order = [
+    'UEFA — Europe',
+    'CONMEBOL — South America',
+    'CONCACAF — North & Central America',
+    'CAF — Africa',
+    'AFC — Asia',
+    'OFC — Oceania',
+  ];
   const positions = order.map((c) => html.indexOf(c));
   if (positions.some((p) => p === -1)) return false;
   for (let i = 1; i < positions.length; i++) {
