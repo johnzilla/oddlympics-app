@@ -125,8 +125,11 @@ since they're pure content.
   2. The rendered image shows wordmark, banner text `WORLD CUP 2026 · JUNE 11 – JULY 19`, the headline, a one-line sub, the URL `oddlympics.app`, and the "Independent project · Not affiliated with FIFA" tag — with zero prohibited terms (LAND-02).
   3. The source SVG (`references/og-image.svg`) is committed to the repo so the asset can be re-rendered after copy changes.
   4. opengraph.xyz preview for `https://oddlympics.app`, a Slack share, and an iMessage share each render the card cleanly (headline + banner + URL visible).
-**Plans**: TBD
+**Plans:** 1 plan
 **UI hint**: yes (image asset is a public-facing visual surface)
+
+Plans:
+- [ ] 08-01-PLAN.md — Vendor @resvg/resvg-js + 3 static-weight TTFs (JetBrains Mono Bold + Inter Regular/Bold), swap 6 font-family attrs in references/og-image.svg, write scripts/render-og-image.mjs (render + 5 D-05 byte checks + LAND-02 grep inlined), run + commit public/og-image.png, verify Astro build copies it to dist/client/. Covers OG-01.
 
 **Risk note (R-3)**: SVG → PNG rendering in CI requires a tool not currently
 installed. At plan time choose ONE: (a) install `rsvg-convert` or `cairosvg`
@@ -185,7 +188,7 @@ verification.
 | 5. Schema + signup payload | 6/6 | Complete | 2026-05-13 |
 | 6. Landing page + form + meta + analytics | 0/3 | Not started | - |
 | 7. Legal pages | 0/2 | Not started | - |
-| 8. Open Graph image | 0/TBD | Not started | - |
+| 8. Open Graph image | 0/1 | Not started | - |
 | 9. `/manage` editor + unsubscribe | 0/TBD | Not started | - |
 | 10. Confirmation email update | 0/TBD | Not started | - |
 | 11. End-to-end + launch gate | 0/TBD | Not started | - |
