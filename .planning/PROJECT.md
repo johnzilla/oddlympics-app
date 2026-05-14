@@ -65,19 +65,12 @@ group-stage kickoff on 2026-06-11. **Target completion: 2026-05-19.**
 - ✓ Launch-blast mechanism (`scripts/launch-blast.mjs`, dry-run by default) — v1 MVP Phase 2.5 (LAUNCH-01, blast not yet fired — pending operator action)
 - ✓ Demand-capture free-text field on `/schedule` + `feature_requests` table — v1 MVP Phase 2.5 SC4 (commit `6129910`)
 - ✓ Kickoff notification cron (`oddlympics-notify.timer`, dry-run pending `KICKOFF_NOTIFICATIONS_ENABLED=true`) — v1 MVP Phase 3 (NOTIFY-01, NOTIFY-03, NOTIFY-04)
+- ✓ Consumer landing page rewrite (`src/pages/index.astro`): consumer headline + JS-populated tz label + banner pill + four below-fold sections + consumer footer + 48-team confederation-grouped `<select>` + OG/Twitter meta tags + zero prohibited terms — v2.0 Phase 6 (LAND-01, LAND-02, LAND-03, LAND-04, FORM-01, FORM-02, FORM-03, META-01)
+- ✓ Plausible `Signup Submit` custom event + dashboard custom goal configured — v2.0 Phase 6 (ANLTC-01)
 
 ### Active
 
 <!-- v2.0 Consumer Landing scope — target 2026-05-19, before WC group stage 2026-06-11 -->
-
-#### Landing page + meta (Phase 5–6)
-
-- [ ] Replace `index.astro` with consumer-targeted template: headline "Your team's matches. In your time zone. One ping before kickoff." + JS-populated tz label + WC banner pill
-- [ ] Four below-fold sections: How it works (3 steps), Why this exists, After the World Cup, FAQ (5 items)
-- [ ] Consumer footer: Manage, Privacy, Terms, Contact (`hello@oddlympics.app`), "Independent project · Not affiliated with FIFA"
-- [ ] Lighthouse mobile ≥ 90 (Performance, Accessibility, Best Practices, SEO)
-- [ ] Responsive at 390 / 768 / 1280 px
-- [ ] New `<title>` + meta description + Open Graph + Twitter card tags (no prohibited terms)
 
 #### Signup flow widening (Phase 5)
 
@@ -101,12 +94,6 @@ group-stage kickoff on 2026-06-11. **Target completion: 2026-05-19.**
 - [ ] Built/rendered `/og-image.png` at exact 1200×630, <300KB — shows wordmark, banner, headline, sub, URL, "Not affiliated with FIFA" tag
 - [ ] `og:image`, `og:image:width`, `og:image:height`, `og:image:alt`, `twitter:image` meta tags point to it
 - [ ] opengraph.xyz preview, Slack share, iMessage share render cleanly
-
-#### Analytics (Phase 5)
-
-- [ ] Plausible script preserved unchanged
-- [ ] Submit handler fires `Signup Submit` event with `team` prop = selected slug
-- [ ] Plausible goal `Signup Submit` configured server-side before deploy
 
 #### `/manage` updates + backward compat (Phase 9)
 
@@ -217,4 +204,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-12 after starting milestone v2.0 Consumer Landing & Signup Flow*
+*Last updated: 2026-05-14 after Phase 6 (landing-page-form-meta-analytics) verified passed*
