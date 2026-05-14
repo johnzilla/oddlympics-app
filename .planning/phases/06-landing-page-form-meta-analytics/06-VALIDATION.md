@@ -41,7 +41,7 @@ completed: 2026-05-14
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 06-01-T1 | 01 | 1 | LAND-01, LAND-02, LAND-04, FORM-01, FORM-02, FORM-03, META-01 | T-06-01..09 | Full rewrite of src/pages/index.astro: new frontmatter + head (META-01 tags) + body (banner + headline + sub-headline with SSR span + form with 48-team confederation-grouped select + 4 below-fold sections + footer) + retuned <style is:global>. Honeypot retained verbatim. Prohibited terms scrubbed. | grep build output | `npm run build && npx astro check && ! grep -iE 'bitcoin\|lightning\|crypto\|world domination\|personal olympics' dist/client/index.html && [ "$(grep -c '<optgroup ' dist/client/index.html)" = "6" ] && grep -F "Your team's matches" dist/client/index.html` | ✅ src/pages/index.astro exists | ✅ green |
+| 06-01-T1 | 01 | 1 | LAND-01, LAND-02, LAND-04, FORM-01, FORM-02, FORM-03, META-01 | T-06-01..09 | Full rewrite of src/pages/index.astro: new frontmatter + head (META-01 tags) + body (banner + headline + sub-headline with SSR span + form with 48-team confederation-grouped select + 4 below-fold sections + footer) + retuned <style is:global>. Honeypot retained verbatim. Prohibited terms scrubbed. | grep build output | `npm run build && npx astro check && ! grep -iE 'bitcoin\|lightning\|crypto\|world domination\|personal olympics' dist/client/index.html && [ "$(grep -o '<optgroup ' dist/client/index.html \| wc -l \| tr -d ' ')" = "6" ] && grep -F "Your team's matches" dist/client/index.html` | ✅ src/pages/index.astro exists | ✅ green |
 | 06-02-T1 | 02 | 2 | ANLTC-01, FORM-03 (retained) | T-06-10..16 | Append one inline `<script is:inline>` block to src/pages/index.astro implementing tz-label swap + ?error= COPY-map verbatim + Plausible Signup Submit listener (D-09/11/12). XSS-safe via textContent. Fire-and-forget submit (no preventDefault). | grep + build | `npm run build && grep -F 'Signup Submit' dist/client/index.html && grep -F 'tz-label' dist/client/index.html && ! grep -F 'innerHTML' src/pages/index.astro && ! grep -F 'preventDefault' src/pages/index.astro` | ✅ src/pages/index.astro exists | ✅ green |
 | 06-03-T1 | 03 | 3 | LAND-01..04, FORM-01..03, META-01, ANLTC-01 (all assertions) | T-06-17..21 | Author scripts/smoke-landing.mjs (~80-120 LOC, Node-native, mirrors scripts/smoke-signup.mjs harness): GET / + body grep across 15+ evidence tags; POST /api/signup with valid + bad-team payloads to verify 303 redirects. Add `smoke:landing` and `check:land-02` to package.json scripts. | smoke harness | `npm run build && node scripts/smoke-landing.mjs` | ✅ scripts/smoke-landing.mjs shipped (commit ffa627b) | ✅ green (18/18 PASS) |
 | 06-03-T2 | 03 | 3 | ANLTC-01 (R-4 / D-10) | T-06-19, T-06-20 | Pre-deploy operator action: configure Plausible custom goal `Signup Submit` at https://plausible.io/oddlympics.app/settings/goals; add Day-2-ops row to DEPLOY.md citing CONTEXT D-10. | manual (dashboard) + grep DEPLOY.md | `grep -F "Plausible custom-goal" DEPLOY.md` (post-merge sanity grep) | manual + ✅ DEPLOY.md row at line 114 (commit 17dfbc5) | ✅ green (operator confirmed goal exists) |
@@ -80,3 +80,28 @@ completed: 2026-05-14
 - [x] `nyquist_compliant: true` set in frontmatter (after planner per-task verification map is filled)
 
 **Approval:** green (all 9 phase requirement IDs evidenced via smoke + Lighthouse JSON + headless-puppeteer + operator-confirmed dashboard goal — see 06-03-SUMMARY.md §Self-Check)
+
+---
+
+## Validation Audit 2026-05-13
+
+Re-ran `/gsd-validate-phase 06` after phase completion. All Per-Task Map claims verified against current `main`:
+
+- `npm run build` → exit 0
+- `! grep -iE 'bitcoin|lightning|crypto|world domination|personal olympics' dist/client/index.html` → 0 hits (LAND-02 PASS)
+- `grep -F "Your team's matches" dist/client/index.html` → PASS
+- `node scripts/smoke-landing.mjs` against `node ./dist/server/entry.mjs` → `pass=18 fail=0`, exit 0
+- `npm run check:land-02` → exit 0
+- `grep -F "Plausible custom-goal" DEPLOY.md` → exit 0
+- `references/lighthouse-phase-06.json` categories: Perf 1.00 / A11y 0.94 / BP 1.00 / SEO 1.00 (all ≥ 0.9)
+- `references/phase-06-viewport-{390-iphone,768-ipad,1280-desktop}.png` → all 3 present
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+**Cosmetic AC-command fix applied to row 06-01-T1:** changed `grep -c '<optgroup '` to `grep -o '<optgroup ' \| wc -l \| tr -d ' '`. Astro emits the entire `<body>` on a single line, so `grep -c` (line count) returns `1` rather than `6` (occurrence count). The previous command would have appeared to fail on re-run even though the rendered HTML is correct (6 optgroups present). The smoke script's `FORM-02-optgroup-count` case already uses the correct form. Issue was documented in 06-01-SUMMARY.md §Issues Encountered; fix here makes the row's command self-executable.
+
+**Phase 06 remains `nyquist_compliant: true`.**
