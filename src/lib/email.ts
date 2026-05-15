@@ -65,7 +65,7 @@ export function buildUnsubscribeHeaders(email: string): {
 }
 
 export async function sendManageLink(email: string, token: string): Promise<void> {
-  const url = `${SITE_URL}/schedule?token=${encodeURIComponent(token)}`;
+  const url = `${SITE_URL}/manage?token=${encodeURIComponent(token)}`;
   const subject = 'Pick your World Cup teams — oddlympics';
   const text = [
     'Pick the teams you want kickoff notifications for.',
