@@ -161,7 +161,7 @@ Plans:
 - [x] 09-04-PLAN.md — Rewrite src/pages/manage.astro as dual-mode editor (signed-out form retained; signed-in branch with banner + team <select> + tz row + matches list + logout) + update /api/save-selection to accept team=<slug> via VALID_TEAMS, retain team_ids[] fallback, change redirect to /manage, replace too-many with bad-team (D-01, D-02, D-03, D-04; covers MANAGE-01 + COMPAT-01)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 09-05-PLAN.md — scripts/smoke-manage.mjs with 9 end-to-end cases + npm run smoke:manage (verifies MANAGE-01, MANAGE-02, COMPAT-01, D-01 redirect, and SC4)
+- [x] 09-05-PLAN.md — scripts/smoke-manage.mjs with 9 end-to-end cases + npm run smoke:manage (verifies MANAGE-01, MANAGE-02, COMPAT-01, D-01 redirect, and SC4)
 
 **Plan-time decision**: choose between reusing `/api/save-selection`
 semantics or introducing `/api/manage` for the update endpoint. MANAGE-01
