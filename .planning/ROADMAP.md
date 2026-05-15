@@ -153,7 +153,7 @@ when copy changes." Option (b) is faster to ship; option (a) closes the
 
 Plans:
 **Wave 1**
-- [ ] 09-01-PLAN.md — TTL_BY_PURPOSE table in src/lib/token.ts (D-05; underpins MANAGE-02 1y unsubscribe TTL)
+- [x] 09-01-PLAN.md — TTL_BY_PURPOSE table in src/lib/token.ts (D-05; underpins MANAGE-02 1y unsubscribe TTL)
 - [ ] 09-02-PLAN.md — markConfirmed WHERE widening + unsubscribed_at clear (D-07, SC4 re-subscribe) + sendManageLink URL change /schedule → /manage (D-01)
 
 **Wave 2** *(blocked on Wave 1 completion)*
