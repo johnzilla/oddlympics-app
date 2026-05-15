@@ -12,3 +12,7 @@ export const VALID_TEAMS: ReadonlySet<string> = new Set(TEAMS.map((t) => t.slug)
 export function isValidTeamSlug(slug: string): boolean {
   return VALID_TEAMS.has(slug);
 }
+
+export function teamLabel(slug: string): string {
+  return TEAMS.find((t) => t.slug === slug)?.label ?? slug;
+}
