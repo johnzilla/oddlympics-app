@@ -106,7 +106,7 @@ export const POST: APIRoute = async ({ request, site }) => {
   const token = mintToken(rawEmail);
 
   try {
-    await sendMagicLink(rawEmail, token);
+    await sendMagicLink(rawEmail, token, rawTeam, tz);
   } catch (err) {
     console.error('[signup] email error', err);
     return back('email');
