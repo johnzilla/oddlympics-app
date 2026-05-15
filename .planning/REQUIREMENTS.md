@@ -50,7 +50,7 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 
 ### `/manage` flow
 
-- [ ] **MANAGE-01**: `/manage` displays the subscriber's current team and timezone and allows updating both. Update endpoint pinned in the plan — either reuse `/api/save-selection` semantics or introduce `/api/manage`; the plan must specify which. Auth continues to use the existing magic-link/session mechanism — no new auth surface.
+- [x] **MANAGE-01**: `/manage` displays the subscriber's current team and timezone and allows updating both. Update endpoint pinned in the plan — either reuse `/api/save-selection` semantics or introduce `/api/manage`; the plan must specify which. Auth continues to use the existing magic-link/session mechanism — no new auth surface.
 - [x] **MANAGE-02**: One-click unsubscribe via the email link works without authentication beyond a signed token in the URL. Token is HMAC-signed, expires after 1 year, and is single-use per unsubscribe action.
 
 ### Backward compatibility
@@ -197,7 +197,7 @@ Each v2.0 REQ-ID maps to exactly one phase. Filled by `/gsd-new-milestone` roadm
 | OG-01 | Phase 8 | Complete |
 | META-01 | Phase 6 | Complete |
 | ANLTC-01 | Phase 6 | Complete |
-| MANAGE-01 | Phase 9 | Pending |
+| MANAGE-01 | Phase 9 | Complete |
 | MANAGE-02 | Phase 9 | Complete |
 | COMPAT-01 | Phase 5 | Pending |
 | COMPAT-02 | Phase 5 | Pending |
