@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { db, setSelection, insertFeatureRequest } from '../../lib/db';
 import { verifyToken } from '../../lib/token';
 import { buildSessionCookie, readSessionFromCookie } from '../../lib/session';
+import { VALID_TEAMS } from '../../lib/teams';
 
 export const prerender = false;
 
@@ -23,7 +24,7 @@ function isValidIanaTz(tz: string): boolean {
 function redirectTo(token: string, status: string, setCookie?: string): Response {
   const params = new URLSearchParams({ status });
   if (token) params.set('token', token);
-  const headers: Record<string, string> = { Location: `/schedule?${params}` };
+  const headers: Record<string, string> = { Location: `/manage?${params}` };
   if (setCookie) headers['Set-Cookie'] = setCookie;
   return new Response(null, { status: 303, headers });
 }
@@ -47,24 +48,29 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  // Phase 5 — D-01: single-team semantics. Form still POSTs team_ids[] as integer
-  // football-data IDs (Phase 9 will redesign /manage as a dedicated single-team editor).
-  // Take the FIRST checked ID, resolve to the matching teams.slug, persist that.
-  const rawIds = form.getAll('team_ids') as string[];
+  // Phase 9 — D-03: primary input is team=<slug> from the /manage editor select.
+  // team_ids[] fallback retained for the deploy-window transition (stale /manage
+  // tabs mid-deploy still post the old checkbox form). Remove fallback after
+  // 1 week of stable deploy (target removal: 2026-05-26).
   let teamSlug: string | null = null;
-  for (const raw of rawIds) {
-    const s = (raw ?? '').trim();
-    if (!TEAM_ID_RE.test(s)) continue;
-    const n = Number(s);
-    if (n <= 0) continue;
-    const row = db.prepare('SELECT slug FROM teams WHERE id = ?').get(n) as { slug: string | null } | undefined;
-    if (row?.slug) {
-      teamSlug = row.slug;
-      break;
+
+  const slugInput = ((form.get('team') as string) ?? '').trim().toLowerCase();
+  if (slugInput && VALID_TEAMS.has(slugInput)) {
+    teamSlug = slugInput;
+  } else {
+    // Fallback: resolve first valid team_ids[] integer to slug (transition window only)
+    const rawIds = form.getAll('team_ids') as string[];
+    for (const raw of rawIds) {
+      const s = (raw ?? '').trim();
+      if (!TEAM_ID_RE.test(s)) continue;
+      const n = Number(s);
+      if (n <= 0) continue;
+      const row = db.prepare('SELECT slug FROM teams WHERE id = ?').get(n) as { slug: string | null } | undefined;
+      if (row?.slug) { teamSlug = row.slug; break; }
     }
   }
   if (!teamSlug) {
-    return redirectTo(formToken, 'too-many');
+    return redirectTo(formToken, 'bad-team');
   }
 
   const tz = ((form.get('timezone') as string) ?? '').trim();
