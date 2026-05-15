@@ -10,6 +10,7 @@
     "preview": "astro preview",
     "serve": "node --env-file=.env ./dist/server/entry.mjs",
     "astro": "astro",
+    "smoke:confirm": "node scripts/smoke-confirm-email.mjs",
     "smoke:landing": "node scripts/smoke-landing.mjs",
     "smoke:manage": "node scripts/smoke-manage.mjs",
     "check:land-02": "! grep -iE '[b]itcoin|[l]ightning|[c]rypto|[w]orld domination|[p]ersonal olympics' dist/client/index.html",
