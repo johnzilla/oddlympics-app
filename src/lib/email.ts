@@ -1,5 +1,7 @@
 import { Resend } from 'resend';
 import { mintToken } from './token';
+import { teamLabel } from './teams';
+import { tzLabel } from './timezones';
 
 const API_KEY = process.env.RESEND_API_KEY ?? '';
 const FROM = process.env.EMAIL_FROM ?? 'oddlympics <onboarding@resend.dev>';
@@ -12,16 +14,25 @@ if (!API_KEY && isProd) {
 
 const resend = API_KEY ? new Resend(API_KEY) : null;
 
-export async function sendMagicLink(email: string, token: string): Promise<void> {
+export async function sendMagicLink(
+  email: string,
+  token: string,
+  team: string,
+  timezone: string,
+): Promise<void> {
   const url = `${SITE_URL}/api/confirm?token=${encodeURIComponent(token)}`;
-  const subject = 'Confirm your spot — oddlympics';
+  const teamHuman = teamLabel(team);
+  const tzHuman = tzLabel(timezone);
+  const subject = 'Confirm your World Cup alerts — oddlympics';
   const text = [
-    'Confirm your VIP spot for oddlympics.',
+    'Confirm your World Cup alerts for oddlympics.',
     '',
-    'Click the link below to lock in your early access:',
+    'Click below to confirm:',
     url,
     '',
-    "We'll email you when it's time. No spam, no marketing — just the launch ping.",
+    `We'll email you 1 hour before every ${teamHuman} match in ${tzHuman}.`,
+    '',
+    'No spam. No ads. Unsubscribe anytime.',
     '',
     "If you didn't request this, ignore this email.",
     '',
@@ -31,12 +42,12 @@ export async function sendMagicLink(email: string, token: string): Promise<void>
   const html = `<!doctype html>
 <html><body style="font:14px ui-monospace,SFMono-Regular,Menlo,monospace;color:#111;background:#fafafa;padding:32px">
 <div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #eee;border-radius:8px;padding:28px">
-  <h1 style="font-size:18px;margin:0 0 12px">Confirm your spot</h1>
-  <p style="margin:0 0 20px;line-height:1.55">Click below to lock in your early access for <strong>oddlympics</strong>.</p>
+  <h1 style="font-size:18px;margin:0 0 12px">Confirm your alerts</h1>
+  <p style="margin:0 0 20px;line-height:1.55">We'll email you 1 hour before every <strong>${teamHuman}</strong> match in ${tzHuman}.</p>
   <p style="margin:0 0 24px"><a href="${url}" style="display:inline-block;background:hsl(18 70% 56%);color:#0b0b0e;text-decoration:none;padding:12px 18px;border-radius:6px;font-weight:700">Confirm email</a></p>
   <p style="margin:0 0 8px;color:#666;font-size:12px">Or paste this URL:</p>
   <p style="margin:0 0 24px;word-break:break-all;color:#666;font-size:12px">${url}</p>
-  <p style="margin:0;color:#999;font-size:11px">No spam, no marketing — just the launch ping. If you didn't request this, ignore this email.</p>
+  <p style="margin:0;color:#999;font-size:11px">No spam. No ads. Unsubscribe anytime. If you didn't request this, ignore this email.</p>
 </div>
 </body></html>`;
 
@@ -45,10 +56,19 @@ export async function sendMagicLink(email: string, token: string): Promise<void>
     // without configuring Resend.
     console.log('\n[email-dev-fallback] Magic link for', email);
     console.log('  ', url, '\n');
+    console.log('   body:', `every ${teamHuman} match in ${tzHuman}`, '\n');
     return;
   }
 
-  const { error } = await resend.emails.send({ from: FROM, to: email, subject, text, html });
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject,
+    text,
+    html,
+    replyTo: 'hello@oddlympics.app',
+    headers: buildUnsubscribeHeaders(email),
+  });
   if (error) throw new Error(`Resend error: ${error.message}`);
 }
 
