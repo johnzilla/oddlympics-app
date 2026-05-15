@@ -4,7 +4,10 @@
 **Owner:** John Turner
 **Created:** 2026-05-12
 **Target completion:** 2026-05-19 (7 days)
-**Status:** ready to plan
+**Status:** in progress — Phases 5–9 shipped (in code on `main`); Phase 10
+(confirmation email) in its operator close-out gate; Phase 11 (E2E launch gate)
+pending. Note: the GSD roadmap maps this milestone to phases 5–11, not the 1–7
+"suggested phase breakdown" sketched below (which predates planning).
 
 ---
 

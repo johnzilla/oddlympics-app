@@ -1,10 +1,11 @@
 # oddlympics
 
-> World domination. Your world.
+> Your team's matches. In your time zone. One ping before kickoff.
 
 Personalized "when does MY thing happen" notifications for international sports
-fans, launching around the 2026 FIFA World Cup. The first surface is a teaser
-landing page that captures email signups via a magic-link confirm flow.
+fans, launching with the 2026 FIFA World Cup. Pick your team, get every match
+in your local time zone, and one email an hour before each kickoff. Signup is a
+two-field form (team + email) confirmed via a magic-link double-opt-in flow.
 
 **Live:** https://oddlympics.app
 
@@ -43,18 +44,39 @@ to `main` (~40 seconds end-to-end).
   AC2/AC9/AC12 evidence). First non-additive SQLite migration in project
   history — `selected_teams` dropped, idempotent, version-asserted; pre-deploy
   backup tool at `scripts/backup-pre-05.mjs`.
-- ⏳ Phase 6–11 — Landing page + form + meta + analytics; legal pages; OG
-  image; `/manage` editor redesign; confirmation email update; E2E launch gate.
+- ✅ Phase 6 — Consumer landing rewrite: `src/pages/index.astro` replaced with
+  the consumer template (48-team confederation-grouped `<select>`, tz-label JS,
+  Plausible `Signup Submit` event, swapped OG/Twitter meta tags). Smoke at
+  `scripts/smoke-landing.mjs`.
+- ✅ Phase 7 — Legal pages: `/privacy` and `/terms` routes (prerendered, same
+  site shell as the landing page) serving the canonical reference copy.
+- ✅ Phase 8 — Open Graph image: source SVG + rendered 1200×630 `public/og-image.png`
+  (`scripts/render-og-image.mjs` via `@resvg/resvg-js`) wired into the head meta.
+- ✅ Phase 9 — `/manage` editor + unsubscribe: dual-mode `/manage` (signed-out
+  magic-link form + signed-in team/timezone editor with backfill banner),
+  per-purpose token TTLs, re-subscribe support. Smoke at `scripts/smoke-manage.mjs`.
+- 🔄 Phase 10 — Confirmation email update: `sendMagicLink()` widened to name the
+  team + timezone in the body (D-04 value-prop line, D-05 subject, `Reply-To` +
+  `List-Unsubscribe` headers). Code shipped (10-01) with an offline smoke
+  `scripts/smoke-confirm-email.mjs` (10-02). Closing on an operator gate —
+  deploy + Mail-Tester ≥ 8/10 + Gmail/Proton/Outlook cross-client evidence (10-03).
+- ⏳ Phase 11 — End-to-end + launch gate: AC1–AC12 on production, Lighthouse run,
+  one real signup test, tag `v1.0-consumer-landing`.
 
 **Operator actions remaining (v1):** fire the launch blast, flip the kickoff
 cron live (`KICKOFF_NOTIFICATIONS_ENABLED=true` in `/etc/oddlympics.env`),
 end-to-end smoke-test one real kickoff notification before group stage opens.
 
-**Operator actions remaining (v2.0):** before the deploy that lands the Phase 5
-commits, run `scripts/backup-pre-05.mjs` on the droplet — see `DEPLOY.md` for
-the runbook. (The migration is idempotent and runs automatically on boot, but
-the backup is the recovery floor for the one-row, one-shot `selected_teams`
-drop.)
+**Operator actions remaining (v2.0):**
+- Before the deploy that lands the Phase 5 commits, run
+  `scripts/backup-pre-05.mjs` on the droplet — see `DEPLOY.md`. (The migration
+  is idempotent and runs on boot, but the backup is the recovery floor for the
+  one-row, one-shot `selected_teams` drop.)
+- Phase 10 close-out gate (Plan 10-03): confirm the GitHub Actions deploy is
+  green and live, then run one Mail-Tester signup from the prod sender
+  (`onboarding@resend.dev`) for a ≥ 8/10 score, plus three real cross-client
+  signups (Gmail / Proton / Outlook) for render evidence. Screenshots land
+  under `.planning/phases/10-confirmation-email-update/evidence/`.
 
 **Deferred to v1.1:** Telegram bot, Lightning tip jar, niche-sport long tail
 (strongman, cubing, etc.), shared `Layout.astro` refactor.
@@ -138,7 +160,11 @@ scripts/
   send-kickoff-notifications.mjs  # ~60min-before-kickoff sender, idempotent (UNIQUE on user+match+channel); JOINs vip_signups.team → teams.slug
   launch-blast.mjs         # one-time "pick your teams" email to existing teaser list (manual --send)
   backup-pre-05.mjs        # pre-Phase-5-migration SQLite snapshot (operator runs on droplet before the deploy that drops selected_teams)
-  smoke-signup.mjs         # Phase 5 end-to-end verification: 7 cases + AC2 static assertion against /api/signup (exit 0 = all PASS)
+  render-og-image.mjs      # Phase 8: render references/og-image.svg → public/og-image.png at 1200×630 (@resvg/resvg-js) + byte/LAND-02 checks
+  smoke-signup.mjs         # Phase 5 end-to-end verification: 8 cases + AC2 static assertion against /api/signup (exit 0 = all PASS)
+  smoke-landing.mjs        # Phase 6 landing-page verification (consumer copy, 48-option <select>, tz-label, no LAND-02 terms)
+  smoke-manage.mjs         # Phase 9 /manage verification: 9 end-to-end cases (MANAGE-01/02, COMPAT-01, re-subscribe)
+  smoke-confirm-email.mjs  # Phase 10 offline confirmation-email verification: 10 zero-network/zero-DB body-composition cases
 public/
   favicon.svg
 deploy/

@@ -38,9 +38,19 @@ for international sports fans, launching at the 2026 FIFA World Cup
   `scripts/smoke-signup.mjs` (8/8 PASS end-to-end against the built server).
   Pre-deploy operator action: `scripts/backup-pre-05.mjs` snapshots
   `data/oddlympics.db` → `.pre-05.bak` (see `DEPLOY.md`).
-- Phases 6–11 (planned): landing page + form + meta + analytics; legal pages;
-  Open Graph image; `/manage` editor redesign; confirmation email update; E2E
-  launch gate. Target ship 2026-05-19. Full roadmap in `.planning/ROADMAP.md`.
+- Phases 6–9 shipped (in code on `main`): Phase 6 consumer landing rewrite
+  (`index.astro` + 48-team `<select>` + tz-label JS + Plausible event + meta
+  swap); Phase 7 `/privacy` + `/terms` legal pages; Phase 8 Open Graph image
+  (`public/og-image.png` via `scripts/render-og-image.mjs`); Phase 9 dual-mode
+  `/manage` editor + unsubscribe + per-purpose token TTLs.
+- Phase 10 (confirmation email update) — code shipped: 10-01 widened
+  `sendMagicLink()` to name team + timezone (D-04 value-prop, D-05 subject,
+  `Reply-To` + `List-Unsubscribe` headers); 10-02 offline smoke
+  `scripts/smoke-confirm-email.mjs`. Plan 10-03 is the operator close-out gate
+  (deploy + Mail-Tester ≥ 8/10 + Gmail/Proton/Outlook cross-client evidence).
+- Phase 11 (planned): E2E launch gate — AC1–AC12 on production, Lighthouse run,
+  real signup test, tag `v1.0-consumer-landing`. Target ship 2026-05-19. Full
+  roadmap in `.planning/ROADMAP.md`.
 
 **v1.1 deferrals:** Telegram bot, Lightning tip jar (vaultwarden integration),
 niche-sport long tail (strongman, cubing), shared `Layout.astro` refactor.
