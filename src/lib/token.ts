@@ -1,7 +1,17 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 const SECRET = process.env.MAGIC_LINK_SECRET ?? '';
-const TTL_SECONDS = 60 * 60 * 24; // 24 hours
+// Per-purpose TTLs: unsubscribe links are 1-year credentials so a user's
+// inbox copy remains actionable without requiring a re-login flow (MANAGE-02).
+// The session entry mirrors src/lib/session.ts SESSION_TTL_SECONDS for documentation
+// completeness — buildSessionCookie always passes ttlSeconds explicitly so this
+// entry is never reached at runtime.
+const TTL_BY_PURPOSE = {
+  confirm:     60 * 60 * 24,         // 24h — magic-link confirm window
+  manage:      60 * 60 * 24,         // 24h — magic-link manage window
+  unsubscribe: 60 * 60 * 24 * 365,   // 1y — MANAGE-02: long-lived unsubscribe credential
+  session:     60 * 60 * 24 * 30,    // 30d — mirrors src/lib/session.ts SESSION_TTL_SECONDS
+} as const;
 
 if (!SECRET && process.env.NODE_ENV === 'production') {
   throw new Error('MAGIC_LINK_SECRET is required in production');
@@ -35,7 +45,9 @@ export function mintToken(
     ttlSeconds?: number;
   },
 ): string {
-  const ttl = opts?.ttlSeconds ?? TTL_SECONDS;
+  // opts.ttlSeconds takes precedence (buildSessionCookie passes it explicitly);
+  // otherwise resolve via purpose table; fall back to confirm (24h) if purpose absent.
+  const ttl = opts?.ttlSeconds ?? TTL_BY_PURPOSE[opts?.purpose ?? 'confirm'];
   const payload: Payload = { email, exp: Math.floor(Date.now() / 1000) + ttl };
   if (opts?.purpose) payload.purpose = opts.purpose;
   const body = b64url(Buffer.from(JSON.stringify(payload)));
