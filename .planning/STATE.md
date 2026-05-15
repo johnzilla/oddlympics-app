@@ -4,14 +4,14 @@ milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: executing
 stopped_at: Phase 10 context gathered
-last_updated: "2026-05-15T13:11:19.064Z"
+last_updated: "2026-05-15T13:20:47.957Z"
 last_activity: 2026-05-15
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 20
-  completed_plans: 18
-  percent: 90
+  completed_plans: 19
+  percent: 95
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-12)
 ## Current Position
 
 Phase: 10 (Confirmation email update) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-05-15
 
-Progress: [█████████░] 90%
+Progress: [██████████] 95%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [█████████░] 90%
 | Phase 09 P02 | 1m 24s | 2 tasks | 2 files |
 | Phase 09 P03 | 63s | 1 tasks | 1 files |
 | Phase 10 P01 | 6min | 3 tasks | 4 files |
+| Phase 10 P10-02 | 12 minutes | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,9 @@ Recent decisions affecting current work:
 - [Phase 07]: Phase 7 Plan 2: Rendered numbered terms clauses as <ol> with each <li> opening with <strong> (NOT <h2>) — the bold labels in references/terms.md are inline labels inside list items, not section breaks. Plan 01 <h2> precedent applies to section-style **Bold heading:** patterns; the terms doc structure differs (numbered clauses) and the plan action explicitly directed <strong>.
 - [Phase ?]: WHERE clause now OR-matches unsubscribed_at IS NOT NULL; SET clears it to restore active row
 - [Phase ?]: Consolidated manage link destination from /schedule to /manage; in-flight links handled via Plan 09-03 301 redirect within 24h TTL window
+- [Phase 10]: 10-02: Smoke re-implements teamLabel + tzLabel + composeBody inline (drift-detection via byte-exact shadow), mirrors smoke-manage.mjs:58-74 pattern
+- [Phase 10]: 10-02: Case 6 asserts Curaçao diacritic verbatim — slug=curacao, label=Curaçao in references/teams.json:30, no ASCII fallback at runtime
+- [Phase 10]: 10-02: smoke:confirm inserted alphabetically before smoke:landing in package.json (smoke:confirm < smoke:landing < smoke:manage)
 
 ### Pending Todos
 
@@ -122,7 +126,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-15T13:11:14.337Z
+Last session: 2026-05-15T13:19:28.777Z
 Stopped at: Phase 10 context gathered
 Resume file: 
 None
