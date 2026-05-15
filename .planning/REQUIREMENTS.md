@@ -55,7 +55,7 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 
 ### Backward compatibility
 
-- [ ] **COMPAT-01**: Pre-milestone subscribers (rows with no `team` and no `timezone`) do not break `/manage` or the kickoff cron. Backfill at migration time: set `team = NULL`, `timezone = 'America/New_York'`. A one-time banner on `/manage` prompts them to pick a team.
+- [x] **COMPAT-01**: Pre-milestone subscribers (rows with no `team` and no `timezone`) do not break `/manage` or the kickoff cron. Backfill at migration time: set `team = NULL`, `timezone = 'America/New_York'`. A one-time banner on `/manage` prompts them to pick a team.
 - [ ] **COMPAT-02**: Existing `/api/signup` error-code contract unchanged — no new error codes introduced. Bad-team and bad-timezone both reuse `bad-form` (with a server-side log line distinguishing them).
 
 ---
@@ -199,7 +199,7 @@ Each v2.0 REQ-ID maps to exactly one phase. Filled by `/gsd-new-milestone` roadm
 | ANLTC-01 | Phase 6 | Complete |
 | MANAGE-01 | Phase 9 | Complete |
 | MANAGE-02 | Phase 9 | Complete |
-| COMPAT-01 | Phase 5 | Pending |
+| COMPAT-01 | Phase 5 | Complete |
 | COMPAT-02 | Phase 5 | Pending |
 
 **Coverage (v2.0):**

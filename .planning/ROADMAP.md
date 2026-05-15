@@ -148,7 +148,7 @@ when copy changes." Option (b) is faster to ship; option (a) closes the
   2. A pre-milestone subscriber row (`team=NULL`, `timezone='America/New_York'` from Phase 5 backfill) loads `/manage` without error and sees a one-time banner prompting "Pick a team" — the banner dismisses once `team` is set to a non-NULL value.
   3. Clicking the unsubscribe link in an outbound email reaches `/api/unsubscribe?token=...` and removes the user from active sending, with no authentication beyond the signed token. Token is HMAC-signed, expires after 1 year, single-use per unsubscribe action; second click on the same token does not error but is a no-op.
   4. Re-subscribing a previously-unsubscribed user via a fresh signup is supported (existing teaser behavior preserved).
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 **UI hint**: yes
 
 Plans:
@@ -158,7 +158,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 09-03-PLAN.md — src/pages/schedule.astro becomes a thin 301 redirect to /manage preserving query string (D-01)
-- [ ] 09-04-PLAN.md — Rewrite src/pages/manage.astro as dual-mode editor (signed-out form retained; signed-in branch with banner + team <select> + tz row + matches list + logout) + update /api/save-selection to accept team=<slug> via VALID_TEAMS, retain team_ids[] fallback, change redirect to /manage, replace too-many with bad-team (D-01, D-02, D-03, D-04; covers MANAGE-01 + COMPAT-01)
+- [x] 09-04-PLAN.md — Rewrite src/pages/manage.astro as dual-mode editor (signed-out form retained; signed-in branch with banner + team <select> + tz row + matches list + logout) + update /api/save-selection to accept team=<slug> via VALID_TEAMS, retain team_ids[] fallback, change redirect to /manage, replace too-many with bad-team (D-01, D-02, D-03, D-04; covers MANAGE-01 + COMPAT-01)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 09-05-PLAN.md — scripts/smoke-manage.mjs with 9 end-to-end cases + npm run smoke:manage (verifies MANAGE-01, MANAGE-02, COMPAT-01, D-01 redirect, and SC4)
@@ -201,7 +201,7 @@ verification.
 | 6. Landing page + form + meta + analytics | 0/3 | Not started | - |
 | 7. Legal pages | 0/2 | Not started | - |
 | 8. Open Graph image | 1/1 | Complete   | 2026-05-14 |
-| 9. `/manage` editor + unsubscribe | 3/5 | In Progress|  |
+| 9. `/manage` editor + unsubscribe | 4/5 | In Progress|  |
 | 10. Confirmation email update | 0/TBD | Not started | - |
 | 11. End-to-end + launch gate | 0/TBD | Not started | - |
 
