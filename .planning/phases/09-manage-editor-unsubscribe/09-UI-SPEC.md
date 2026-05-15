@@ -35,6 +35,72 @@ refers to the `<select>` HTML structure (confederation `<optgroup>` grouping +
 
 ---
 
+## Brownfield Inheritance Waivers
+
+Phase 9 is a brownfield modification of pages already in production
+(`src/pages/manage.astro`, `src/pages/schedule.astro`). Two design-quality
+dimensions are explicitly waived for this phase. Both waivers are scoped to
+Phase 9 only and explicitly deferred to v1.1 along with the broader
+Layout.astro extraction.
+
+### W-01 — Typography scale (6 sizes) waived
+
+The standard 4-size typography cap is waived for Phase 9.
+
+**Sizes used:** 10, 11, 13, 14, 18, 36px (6 sizes total).
+
+**Rationale:**
+
+- The typography scale is inherited verbatim from already-shipped
+  `src/pages/schedule.astro` (lines 274–350) and `src/pages/manage.astro`.
+- Phase 9 is a brownfield page modification, not a new design system.
+- Reducing the scale would require restyling pages already in production
+  outside Phase 9's scope (the matches list, the banner pill, the legend
+  rows on `/schedule` and the source `manage.astro` body all consume
+  these specific sizes).
+- CLAUDE.md §Conventions explicitly defers Layout.astro extraction to
+  v1.1; full typography rationalization belongs in that v1.1 refactor,
+  not this phase.
+- Reference: CONTEXT.md §"Out of scope" (lines 44–46): *"Layout.astro
+  extraction across `/manage`, `/index` — deferred to v1.1 per CLAUDE.md
+  and Phase 7 D-07. Continue the paste-style `<style is:global>` pattern."*
+
+**Scope of waiver:** Phase 9 only. The v1.1 Layout.astro refactor will
+revisit and rationalize the full typography scale across all pages at once.
+
+### W-02 — Spacing exceptions (14px, 18px) waived
+
+The multiple-of-4 spacing rule is waived for two specific declared values.
+
+**Values used:**
+
+- `.headline` margin-bottom = 14px (inherited from `src/pages/schedule.astro:~293`)
+- `.banner` margin-bottom = 18px (inherited from `src/pages/manage.astro:~101`
+  and `src/pages/schedule.astro:~292`)
+
+All OTHER spacing in this spec uses the standard 4 / 8 / 12 / 16 / 24 / 32 / 48
+scale (see §Spacing Scale below).
+
+**Rationale:**
+
+- Same brownfield rationale as W-01: these two values exist verbatim in
+  already-shipped pages.
+- Changing them would alter the visual rhythm of pages already in
+  production (the banner-to-headline vertical cadence and the
+  headline-to-subhead cadence are both consumed by `/schedule`,
+  `/manage`, and any future page that pastes the same style block).
+- Phase 9 is not the right scope to renegotiate the visual rhythm of
+  pre-existing pages.
+- Full spacing rationalization deferred to v1.1 Layout.astro extraction.
+- Reference: CONTEXT.md §"Out of scope" (lines 44–46): *"Layout.astro
+  extraction across `/manage`, `/index` — deferred to v1.1 per CLAUDE.md
+  and Phase 7 D-07. Continue the paste-style `<style is:global>` pattern."*
+
+**Scope of waiver:** Phase 9 only. The v1.1 Layout.astro refactor will
+rationalize the full spacing scale across all pages at once.
+
+---
+
 ## Design System
 
 | Property | Value |
@@ -53,7 +119,7 @@ refers to the `<select>` HTML structure (confederation `<optgroup>` grouping +
 
 ## Spacing Scale
 
-Declared values (all multiples of 4, matching the existing `manage.astro` + `schedule.astro` spacing rhythm):
+Declared values (all multiples of 4, matching the existing `manage.astro` + `schedule.astro` spacing rhythm — exceptions: 14px and 18px, see W-02 brownfield waiver):
 
 | Token | Value | Usage |
 |-------|-------|-------|
@@ -67,10 +133,10 @@ Declared values (all multiples of 4, matching the existing `manage.astro` + `sch
 
 Notes:
 - The existing `--pad` variable equals `48px` on desktop and steps down to `24px` at `@media (max-width: 640px)` (mobile gutters). Phase 9 inherits this — do not introduce a new `--pad`.
-- The headline-to-subhead spacing (`margin: 0 0 14px` on `.headline`) uses 14px, which deviates from the strict 8-point scale. **Preserved verbatim** from `schedule.astro:293` to maintain visual rhythm with existing pages; do not "fix" to 16px.
-- Banner bottom-margin (`margin-bottom: 18px` on `.banner`) also deviates. **Preserved verbatim** from `manage.astro:101` for the same reason.
+- The headline-to-subhead spacing (`margin: 0 0 14px` on `.headline`) uses 14px, which deviates from the strict 8-point scale. **Preserved verbatim** from `schedule.astro:293` to maintain visual rhythm with existing pages; do not "fix" to 16px. **See W-02 brownfield waiver.**
+- Banner bottom-margin (`margin-bottom: 18px` on `.banner`) also deviates. **Preserved verbatim** from `manage.astro:101` for the same reason. **See W-02 brownfield waiver.**
 
-Exceptions (preserved from existing source — do not modify):
+Exceptions (preserved from existing source — do not modify; see W-02 brownfield waiver):
 - `.headline` bottom margin = 14px (not 16px)
 - `.banner` bottom margin = 18px (not 16px)
 
@@ -78,7 +144,7 @@ Exceptions (preserved from existing source — do not modify):
 
 ## Typography
 
-Single family throughout: `var(--mono)`. Sizes and weights:
+Single family throughout: `var(--mono)`. Sizes and weights (6 sizes — see W-01 brownfield waiver):
 
 | Role | Size | Weight | Line Height | Source |
 |------|------|--------|-------------|--------|
@@ -88,6 +154,8 @@ Single family throughout: `var(--mono)`. Sizes and weights:
 | Body / form input | 14px | 400 (input) / 700 (button) | 1.55 | `schedule.astro:294,304,316` |
 | Section heading (`.section-h`) | 18px | 700 | 1.2 | `schedule.astro:320` |
 | Page headline (`.headline`) | 36px desktop / 28px mobile | 700 | 1.1 | `schedule.astro:293,347` |
+
+**Total size count:** 6 (10, 11, 13, 14, 18, 36). Standard cap is 4; the 4-size cap is waived for Phase 9 per **W-01 brownfield waiver** above.
 
 **Declared weights:** exactly two — `400` (regular) and `700` (bold). No semibold (500/600), no light (300).
 
@@ -403,8 +471,8 @@ When `gsd-ui-checker` or `gsd-ui-auditor` runs against the executed phase, the f
 - [ ] Dimension 1 Copywriting: PASS
 - [ ] Dimension 2 Visuals: PASS
 - [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
+- [ ] Dimension 4 Typography: PASS (W-01 waiver applied)
+- [ ] Dimension 5 Spacing: PASS (W-02 waiver applied)
 - [ ] Dimension 6 Registry Safety: PASS
 
 **Approval:** pending
@@ -416,8 +484,9 @@ When `gsd-ui-checker` or `gsd-ui-auditor` runs against the executed phase, the f
 | Section | Source |
 |---------|--------|
 | Design System (Tool, font, no shadcn) | CLAUDE.md §Conventions + RESEARCH §Project Constraints + filesystem check (no `components.json`, no `tailwind.config.*`) |
-| Spacing Scale | `src/pages/schedule.astro:283-350` verbatim |
-| Typography | `src/pages/schedule.astro:283-350` verbatim |
+| Brownfield Inheritance Waivers (W-01, W-02) | CONTEXT.md §"Out of scope" (Layout.astro extraction deferred to v1.1 per CLAUDE.md and Phase 7 D-07) + audit of inherited values in `src/pages/schedule.astro` and `src/pages/manage.astro` |
+| Spacing Scale | `src/pages/schedule.astro:283-350` verbatim (exceptions per W-02) |
+| Typography | `src/pages/schedule.astro:283-350` verbatim (6-size scale per W-01) |
 | Color (`--bg`, `--fg`, `--accent`, `--ok`, `--err`) | `src/pages/schedule.astro:274-284` verbatim |
 | Accent reserved-for list | Derived from CONTEXT D-04 (`.banner` class) + audit of `schedule.astro` color usage |
 | Copywriting (headline / subhead / labels) | `src/pages/schedule.astro:105-202` verbatim |
