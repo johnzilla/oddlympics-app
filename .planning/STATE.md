@@ -4,14 +4,14 @@ milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: executing
 stopped_at: Phase 09 UI-SPEC approved
-last_updated: "2026-05-15T02:04:12.159Z"
+last_updated: "2026-05-15T02:07:46.777Z"
 last_activity: 2026-05-15
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 17
-  completed_plans: 13
-  percent: 76
+  completed_plans: 14
+  percent: 82
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-12)
 ## Current Position
 
 Phase: 09 (manage-editor-unsubscribe) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-05-15
 
-Progress: [████████░░] 76%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [████████░░] 76%
 | Phase 07 P02 | ~2 min | 1 tasks | 1 files |
 | Phase 08-open-graph-image P01 | 198 | 4 tasks | 8 files |
 | Phase 09-manage-editor-unsubscribe P01 | 120 | 1 tasks | 1 files |
+| Phase 09 P02 | 1m 24s | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Phase 6 Plan 3: Lighthouse mobile Perf 1.00 / A11y 0.94 / BP 1.00 / SEO 1.00 (all >= 0.9 → LAND-03 soft gate PASS). Two color-contrast audit hits held a11y at 0.94: banner pill (3.6:1) and submit button (4.24:1) — both serious-impact WCAG AA. Documented as Phase 11 AC8 hard-gate follow-up; cheapest fix is deepening #d94a1f to #b8350d (banner) and #c43d15 (button) to push contrast to ≥ 4.5:1.
 - [Phase ?]: Phase 7 Plan 1: Rendered '**Bold heading:**' as <h2> in privacy.astro (per PATTERNS 5e + CONTEXT discretion bullet 2 — more semantic). Plan 02 (terms.astro) MUST use the same <h2> choice for cross-page consistency.
 - [Phase 07]: Phase 7 Plan 2: Rendered numbered terms clauses as <ol> with each <li> opening with <strong> (NOT <h2>) — the bold labels in references/terms.md are inline labels inside list items, not section breaks. Plan 01 <h2> precedent applies to section-style **Bold heading:** patterns; the terms doc structure differs (numbered clauses) and the plan action explicitly directed <strong>.
+- [Phase ?]: WHERE clause now OR-matches unsubscribed_at IS NOT NULL; SET clears it to restore active row
+- [Phase ?]: Consolidated manage link destination from /schedule to /manage; in-flight links handled via Plan 09-03 301 redirect within 24h TTL window
 
 ### Pending Todos
 
@@ -117,7 +120,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-15T02:04:12.148Z
+Last session: 2026-05-15T02:07:46.771Z
 Stopped at: Phase 09 UI-SPEC approved
 Resume file: 
 None

@@ -148,13 +148,13 @@ when copy changes." Option (b) is faster to ship; option (a) closes the
   2. A pre-milestone subscriber row (`team=NULL`, `timezone='America/New_York'` from Phase 5 backfill) loads `/manage` without error and sees a one-time banner prompting "Pick a team" — the banner dismisses once `team` is set to a non-NULL value.
   3. Clicking the unsubscribe link in an outbound email reaches `/api/unsubscribe?token=...` and removes the user from active sending, with no authentication beyond the signed token. Token is HMAC-signed, expires after 1 year, single-use per unsubscribe action; second click on the same token does not error but is a no-op.
   4. Re-subscribing a previously-unsubscribed user via a fresh signup is supported (existing teaser behavior preserved).
-**Plans:** 5 plans
+**Plans:** 2/5 plans executed
 **UI hint**: yes
 
 Plans:
 **Wave 1**
 - [x] 09-01-PLAN.md — TTL_BY_PURPOSE table in src/lib/token.ts (D-05; underpins MANAGE-02 1y unsubscribe TTL)
-- [ ] 09-02-PLAN.md — markConfirmed WHERE widening + unsubscribed_at clear (D-07, SC4 re-subscribe) + sendManageLink URL change /schedule → /manage (D-01)
+- [x] 09-02-PLAN.md — markConfirmed WHERE widening + unsubscribed_at clear (D-07, SC4 re-subscribe) + sendManageLink URL change /schedule → /manage (D-01)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 09-03-PLAN.md — src/pages/schedule.astro becomes a thin 301 redirect to /manage preserving query string (D-01)
@@ -201,7 +201,7 @@ verification.
 | 6. Landing page + form + meta + analytics | 0/3 | Not started | - |
 | 7. Legal pages | 0/2 | Not started | - |
 | 8. Open Graph image | 1/1 | Complete   | 2026-05-14 |
-| 9. `/manage` editor + unsubscribe | 0/5 | Not started | - |
+| 9. `/manage` editor + unsubscribe | 2/5 | In Progress|  |
 | 10. Confirmation email update | 0/TBD | Not started | - |
 | 11. End-to-end + launch gate | 0/TBD | Not started | - |
 
