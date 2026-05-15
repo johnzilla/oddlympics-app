@@ -29,7 +29,7 @@ Each requirement maps to one roadmap phase. Acceptance criteria AC1–AC12 in `M
 - [ ] **SIGNUP-01**: `/api/signup` accepts new `team` field, validates against the 48-team allow-list, rejects with `?error=bad-form` (303 redirect, no row written) when missing, empty, or unknown.
 - [ ] **SIGNUP-02**: `/api/signup` accepts new `timezone` field, validates against the IANA timezone database (`Intl.supportedValuesOf('timeZone')` or equivalent allow-list). On invalid or empty: fall back to `America/New_York` and flag the row for later IP-based correction. Does NOT reject on bad timezone.
 - [ ] **SIGNUP-03**: `team` and `timezone` persist on the subscriber record alongside `email`, `created_at`, and existing `requested_sport`. Existing rate-limit, honeypot, Origin-check, and email-format-validation behavior preserved unchanged.
-- [ ] **SIGNUP-04**: Confirmation email body names the team and a human-readable timezone (e.g., "We'll email you 1 hour before every England match in Detroit time.").
+- [x] **SIGNUP-04**: Confirmation email body names the team and a human-readable timezone (e.g., "We'll email you 1 hour before every England match in Detroit time.").
 
 ### Legal pages
 
@@ -191,7 +191,7 @@ Each v2.0 REQ-ID maps to exactly one phase. Filled by `/gsd-new-milestone` roadm
 | SIGNUP-01 | Phase 5 | Pending |
 | SIGNUP-02 | Phase 5 | Pending |
 | SIGNUP-03 | Phase 5 | Pending |
-| SIGNUP-04 | Phase 10 | Pending |
+| SIGNUP-04 | Phase 10 | Complete |
 | LEGAL-01 | Phase 7 | Complete |
 | LEGAL-02 | Phase 7 | Complete |
 | OG-01 | Phase 8 | Complete |

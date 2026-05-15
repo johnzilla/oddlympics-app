@@ -176,11 +176,11 @@ roadmap.
   1. The confirmation email body names both the team and a human-readable timezone (e.g., "We'll email you 1 hour before every England match in Detroit time.") using the values from the signup row.
   2. Test sends to Gmail, Proton, and Outlook inboxes render the email cleanly (no broken layout, links resolve, unsubscribe footer present, no prohibited terms).
   3. A Mail-Tester run against the production sender scores ≥ 8/10.
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 **Wave 1**
-- [ ] 10-01-PLAN.md — Widen sendMagicLink(email, token, team, timezone); add teamLabel + tzLabel helpers; rewrite subject (D-05) + value-prop line (D-04); wire replyTo + List-Unsubscribe headers onto the Resend send; update /api/signup call site; covers SIGNUP-04 code surface.
+- [x] 10-01-PLAN.md — Widen sendMagicLink(email, token, team, timezone); add teamLabel + tzLabel helpers; rewrite subject (D-05) + value-prop line (D-04); wire replyTo + List-Unsubscribe headers onto the Resend send; update /api/signup call site; covers SIGNUP-04 code surface.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 10-02-PLAN.md — scripts/smoke-confirm-email.mjs (10 cases: canonical, multi-word, FALLBACK_TZ, underscore tz, Etc/UTC, diacritic-or-fallback, subject literal, LAND-02 grep, unknown-slug fallback, empty-tz fallthrough) + npm run smoke:confirm alias; offline byte-equivalence drift net for SIGNUP-04.
@@ -212,7 +212,7 @@ verification.
 | 7. Legal pages | 0/2 | Not started | - |
 | 8. Open Graph image | 1/1 | Complete   | 2026-05-14 |
 | 9. `/manage` editor + unsubscribe | 4/5 | In Progress|  |
-| 10. Confirmation email update | 0/3 | Not started | - |
+| 10. Confirmation email update | 1/3 | In Progress|  |
 | 11. End-to-end + launch gate | 0/TBD | Not started | - |
 
 **Execution order:** 5 → 6 → 7 → 8 → 9 → 10 → 11. Phases 7 and 8 only
