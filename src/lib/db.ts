@@ -92,10 +92,18 @@ export const upsertVipSignup = db.prepare<
   RETURNING *
 `);
 
+// D-07 (re-subscribe SC4): WHERE is widened to also match rows where
+// unsubscribed_at IS NOT NULL, so a previously-unsubscribed user who
+// re-confirms via magic link gets their row restored to fully active.
+// SET clears unsubscribed_at to NULL alongside updating confirmed_at.
+// Already-confirmed-and-active rows produce 0 rows (idempotent): their
+// confirmed_at IS NOT NULL and unsubscribed_at IS NULL, so neither
+// branch of the OR matches.
 export const markConfirmed = db.prepare<[string]>(`
   UPDATE vip_signups
-  SET confirmed_at = strftime('%s','now')
-  WHERE email = ? AND confirmed_at IS NULL
+  SET confirmed_at = strftime('%s','now'),
+      unsubscribed_at = NULL
+  WHERE email = ? AND (confirmed_at IS NULL OR unsubscribed_at IS NOT NULL)
   RETURNING *
 `);
 
