@@ -1,0 +1,173 @@
+---
+// Shared page shell. Owns the html/head boilerplate, the unified design
+// tokens, and the common chrome (.wrap/.banner/.headline/.subhead/.link).
+// Per-page <head> variance (OG/SEO/noindex/analytics) is fully parameterized
+// so no page regresses. Page-specific CSS stays in each page's own <style>.
+//
+// This is the v1.1-deferred Layout.astro extraction, done early: the inline
+// per-page style duplication is exactly what let the dark/light theme drift
+// happen in the first place. One place to change chrome now.
+interface Props {
+  title: string;
+  description?: string;
+  /** Emit <meta name="robots" content="noindex">. Status/app pages set true. */
+  noindex?: boolean;
+  /** Load Plausible. Preserves current per-page behavior (privacy/terms: off). */
+  analytics?: boolean;
+  /** Open Graph / Twitter card. Only the marketing landing passes this. */
+  og?: {
+    title: string;
+    description: string;
+    type?: string;
+    url?: string;
+    siteName?: string;
+    image: string;
+    imageAlt?: string;
+    twitterDescription?: string;
+  };
+}
+
+const {
+  title,
+  description,
+  noindex = false,
+  analytics = false,
+  og,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  {noindex && <meta name="robots" content="noindex" />}
+  <title>{title}</title>
+  {description && <meta name="description" content={description} />}
+  {og && (
+    <Fragment>
+      <meta property="og:title" content={og.title} />
+      <meta property="og:description" content={og.description} />
+      <meta property="og:type" content={og.type ?? 'website'} />
+      {og.url && <meta property="og:url" content={og.url} />}
+      {og.siteName && <meta property="og:site_name" content={og.siteName} />}
+      <meta property="og:image" content={og.image} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      {og.imageAlt && <meta property="og:image:alt" content={og.imageAlt} />}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={og.title} />
+      <meta
+        name="twitter:description"
+        content={og.twitterDescription ?? og.description}
+      />
+      <meta name="twitter:image" content={og.image} />
+    </Fragment>
+  )}
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  {analytics && (
+    <Fragment>
+      <!-- Privacy-friendly analytics by Plausible -->
+      <script async src="https://plausible.io/js/pa-wRAab3seDWDDBnGbRbe0K.js"></script>
+      <script is:inline>
+        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+        plausible.init()
+      </script>
+    </Fragment>
+  )}
+  <slot name="head" />
+</head>
+<body>
+  <slot />
+</body>
+</html>
+
+<style is:global>
+  :root {
+    /* Unified design system (the index.astro "rework"). Single source of
+       truth for every page. --mono is intentionally aliased to the sans
+       stack so legacy per-page component CSS that still says var(--mono)
+       renders in the home page's face; --pad is the legacy hero spacing
+       token a few pages still reference. */
+    --bg: #fafaf7;
+    --fg: #14151a;
+    --fg-dim: #5a5d68;
+    --line: #e4e4dd;
+    --line-strong: #c9cbc4;
+    --surface: #ffffff;
+    --accent: #b8350d;
+    --accent-ink: #ffffff;
+    --accent-soft: #fbe9e0;
+    --ok: #1a7f37;
+    --err: #b3261e;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --mono: var(--font-sans);
+    --max: 720px;
+    --pad-x: clamp(20px, 5vw, 48px);
+    --pad: 48px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body { min-height: 100dvh; }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding-left: var(--pad-x);
+    padding-right: var(--pad-x);
+  }
+
+  /* Shared chrome — the canonical index.astro versions. Pages drop their
+     divergent copies and inherit these, which is the unification itself. */
+  .banner {
+    display: inline-block;
+    margin: 0 0 24px;
+    padding: 6px 12px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+  }
+
+  .headline {
+    margin: 0 0 16px;
+    font-family: var(--font-sans);
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--fg);
+  }
+
+  .subhead {
+    margin: 0 0 32px;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--fg-dim);
+    max-width: 620px;
+  }
+
+  .link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

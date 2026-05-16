@@ -1,22 +1,8 @@
 ---
+import Layout from '../components/Layout.astro';
 export const prerender = true;
 ---
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <title>Confirmed — oddlympics</title>
-  <!-- Privacy-friendly analytics by Plausible -->
-  <script async src="https://plausible.io/js/pa-wRAab3seDWDDBnGbRbe0K.js"></script>
-  <script is:inline>
-    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-    plausible.init()
-  </script>
-</head>
-<body>
+<Layout title="Confirmed — oddlympics" noindex analytics>
   <main class="hero">
     <div class="hero-content">
       <span id="banner" class="banner"></span>
@@ -70,30 +56,10 @@ export const prerender = true;
       document.title = c.headline + ' — oddlympics';
     } catch {}
   </script>
-</body>
-</html>
+</Layout>
 
-<style is:global>
-  :root {
-    /* Unified with the index.astro light design system (the "rework").
-       Same token names as this page's CSS so it re-themes from this block
-       alone. --mono holds the home page's sans stack so body copy matches;
-       proper rename lands with the deferred v1.1 Layout extraction. */
-    --bg: #fafaf7;
-    --fg: #14151a;
-    --fg-dim: #5a5d68;
-    --accent: #b8350d;
-    --pad: 48px;
-    --mono: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--mono); -webkit-font-smoothing: antialiased; }
-  body { min-height: 100dvh; }
+<style>
   .hero { min-height: 100dvh; display: flex; align-items: center; padding: var(--pad); }
   .hero-content { max-width: 720px; }
-  .banner { display: inline-block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: var(--accent); border: 1px solid var(--accent); padding: 5px 10px; border-radius: 999px; margin-bottom: 18px; }
-  .headline { font-size: 36px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 14px; }
-  .subhead { font-size: 14px; line-height: 1.55; color: var(--fg-dim); margin: 0; max-width: 540px; }
-  .link { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-  @media (max-width: 520px) { :root { --pad: 28px; } .headline { font-size: 30px; } }
+  @media (max-width: 520px) { :root { --pad: 28px; } }
 </style>
