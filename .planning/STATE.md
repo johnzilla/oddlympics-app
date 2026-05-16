@@ -4,13 +4,13 @@ milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: executing
 stopped_at: "Phase 12 context gathered (restore multi-team: user_teams join table, /manage confederation checkboxes max 5, cron join swap, N-team copy; no-legacy override locked; Phase 11 re-gates after)"
-last_updated: "2026-05-16T03:31:06.030Z"
-last_activity: 2026-05-16 -- Phase 12 planning complete
+last_updated: "2026-05-16T10:54:04.595Z"
+last_activity: 2026-05-16
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 29
-  completed_plans: 24
+  completed_plans: 25
   percent: 75
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-12)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** Phase 11 — end-to-end-launch-gate
+**Current focus:** Phase 12 — restore-multi-team-selection
 
 ## Current Position
 
-Phase: 11 (end-to-end-launch-gate) — EXECUTING
-Plan: 3 of 5
+Phase: 12 (restore-multi-team-selection) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-05-16 -- Phase 12 planning complete
+Last activity: 2026-05-16
 
-Progress: [█████████░] 88%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
@@ -129,7 +129,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-16T02:54:26.691Z
+Last session: 2026-05-16T10:54:04.589Z
 Stopped at: Phase 12 context gathered (restore multi-team: user_teams join table, /manage confederation checkboxes max 5, cron join swap, N-team copy; no-legacy override locked; Phase 11 re-gates after)
 Resume file: 
-.planning/phases/12-restore-multi-team-selection/12-CONTEXT.md
+None
