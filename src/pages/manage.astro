@@ -3,7 +3,7 @@ export const prerender = false;
 
 import { verifyToken } from '../lib/token';
 import { buildSessionCookie, readSessionFromCookie } from '../lib/session';
-import { db, getByEmail, type VipSignup, type Match } from '../lib/db';
+import { db, getByEmail, getUserTeams, type VipSignup, type Match } from '../lib/db';
 import { TEAMS } from '../lib/teams';
 
 const CONFEDERATION_ORDER = [
@@ -50,26 +50,45 @@ const hadUrlToken = urlToken.length > 0;
 let user: VipSignup | undefined;
 let matches: (Match & { home_tla?: string | null; away_tla?: string | null })[] = [];
 let selectedIds: number[] = [];
+let userTeamSlugs: Set<string> = new Set();
 
 if (valid && result) {
   user = getByEmail.get(result.email) as VipSignup | undefined;
 
-  if (user?.team) {
-    // Resolve the slug → numeric team id for the matches JOIN query
-    const teamRow = db.prepare('SELECT id FROM teams WHERE slug = ?').get(user.team) as { id: number } | undefined;
-    if (teamRow) {
-      selectedIds = [teamRow.id];
-      matches = db.prepare<[number, number]>(`
-        SELECT
-          m.id, m.utc_date, m.stage, m.group_name,
-          m.home_team_id, m.away_team_id, m.status,
-          h.tla AS home_tla, a.tla AS away_tla
-        FROM matches m
-        LEFT JOIN teams h ON h.id = m.home_team_id
-        LEFT JOIN teams a ON a.id = m.away_team_id
-        WHERE m.home_team_id = ? OR m.away_team_id = ?
-        ORDER BY m.utc_date ASC
-      `).all(teamRow.id, teamRow.id) as (Match & { home_tla?: string | null; away_tla?: string | null })[];
+  // Load the user's followed teams from user_teams join table (multi-team, Phase 12).
+  const userTeamRows = user
+    ? (getUserTeams.all(result.email) as { team_slug: string }[])
+    : [];
+  userTeamSlugs = new Set(userTeamRows.map((r) => r.team_slug));
+
+  if (userTeamSlugs.size > 0) {
+    // Resolve each followed slug → numeric team id (parameterized per slug — no string interpolation).
+    for (const slug of userTeamSlugs) {
+      const teamRow = db
+        .prepare('SELECT id FROM teams WHERE slug = ?')
+        .get(slug) as { id: number } | undefined;
+      if (teamRow) selectedIds.push(teamRow.id);
+    }
+
+    if (selectedIds.length > 0) {
+      // Build a parameterized IN clause with one ? per id.
+      const placeholders = selectedIds.map(() => '?').join(', ');
+      matches = db
+        .prepare<number[]>(`
+          SELECT
+            m.id, m.utc_date, m.stage, m.group_name,
+            m.home_team_id, m.away_team_id, m.status,
+            h.tla AS home_tla, a.tla AS away_tla
+          FROM matches m
+          LEFT JOIN teams h ON h.id = m.home_team_id
+          LEFT JOIN teams a ON a.id = m.away_team_id
+          WHERE m.home_team_id IN (${placeholders}) OR m.away_team_id IN (${placeholders})
+          ORDER BY m.utc_date ASC
+        `)
+        .all(...selectedIds, ...selectedIds) as (Match & {
+          home_tla?: string | null;
+          away_tla?: string | null;
+        })[];
     }
   }
 }
@@ -79,8 +98,8 @@ const STATUS_COPY: Record<string, { kind: 'ok' | 'err'; text: string }> = {
   saved:       { kind: 'ok',  text: 'Saved. Your schedule is updated below.' },
   'bad-token': { kind: 'err', text: 'That link is no longer valid. Request a new one.' },
   'bad-tz':    { kind: 'err', text: "Couldn't read your time zone. Try again." },
-  'bad-team':  { kind: 'err', text: 'Team not recognized. Use the dropdown.' },
-  unknown:     { kind: 'err', text: "We couldn't find your signup. Sign up at /." },
+  'bad-team':  { kind: 'err', text: 'Team not recognized. Pick 1–5 teams from the list and save again.' },
+  'too-many':  { kind: 'err', text: 'You can follow at most 5 teams. Uncheck some and save again.' },
   server:      { kind: 'err', text: 'Server hiccup. Try again in a minute.' },
 };
 
@@ -195,11 +214,11 @@ const title = valid && !isUnsubscribed
       {/* D: Signed-in editor branch */}
       {valid && !isUnsubscribed && (
         <>
-          <span class="banner">{!user?.team ? 'Pick a team' : 'Your schedule'}</span>
+          <span class="banner">{userTeamSlugs.size === 0 ? 'Pick your teams' : 'Your schedule'}</span>
           <h1 class="headline">Pick the teams you follow.</h1>
           <p class="subhead">
-            {!user?.team
-              ? "You're signed up. Choose a team below to start getting kickoff alerts."
+            {userTeamSlugs.size === 0
+              ? "You're signed up. Choose up to 5 teams below to start getting kickoff alerts."
               : "We'll email you about an hour before each match they play, in your local time. Change anytime — your sign-in lasts 30 days on this device."}
           </p>
 
@@ -230,17 +249,20 @@ const title = valid && !isUnsubscribed
             </div>
 
             <fieldset class="picker">
-              <legend class="legend">YOUR TEAM</legend>
-              <select name="team" aria-label="Your team" required>
-                <option value="" disabled selected={!user?.team}>Pick your team</option>
-                {groupedTeams.map(({ label, teams }) => (
-                  <optgroup label={label}>
+              <legend class="legend">Your teams — Follow up to 5</legend>
+              {groupedTeams.map(({ label, teams }) => (
+                <div class="conf-group">
+                  <p class="conf-label">{label}</p>
+                  <div class="conf-teams">
                     {teams.map((t) => (
-                      <option value={t.slug} selected={t.slug === user?.team}>{t.label}</option>
+                      <label class="team-option">
+                        <input type="checkbox" name="team" value={t.slug} checked={userTeamSlugs.has(t.slug)} />
+                        {t.label}
+                      </label>
                     ))}
-                  </optgroup>
-                ))}
-              </select>
+                  </div>
+                </div>
+              ))}
             </fieldset>
 
             <button type="submit">Save selection</button>
@@ -248,7 +270,7 @@ const title = valid && !isUnsubscribed
 
           {selectedIds.length > 0 && (
             <section class="schedule">
-              <h2 class="section-h">Your matches ({matches.length})</h2>
+              <h2 class="section-h">Your teams' matches ({matches.length})</h2>
               {matches.length === 0 ? (
                 <p class="subhead">No matches yet. Once the schedule is loaded for your picks, they'll show up here.</p>
               ) : (
@@ -358,6 +380,35 @@ const title = valid && !isUnsubscribed
           });
         })();
       </script>
+
+      <script is:inline>
+        // JS-off-safe checkbox cap: once 5 teams are checked, disable remaining unchecked
+        // boxes as a courtesy. Server-side validation in /api/save-selection is the source
+        // of truth — this only prevents accidental over-selection, not malicious bypass.
+        (function () {
+          try {
+            const MAX = 5;
+            const form = document.querySelector('form.picker-form');
+            if (!form) return;
+
+            function updateCap() {
+              const boxes = form.querySelectorAll('input[name="team"]');
+              const checkedCount = Array.from(boxes).filter(function (b) { return b.checked; }).length;
+              boxes.forEach(function (b) {
+                if (!b.checked) {
+                  b.disabled = checkedCount >= MAX;
+                }
+              });
+            }
+
+            form.addEventListener('change', function (e) {
+              if (e.target && e.target.name === 'team') updateCap();
+            });
+
+            updateCap();
+          } catch {}
+        })();
+      </script>
     </>
   )}
 </body>
@@ -400,6 +451,13 @@ const title = valid && !isUnsubscribed
   .legend { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-dim); margin-bottom: 12px; display: block; }
   .picker select { width: 100%; background: var(--surface); border: 1px solid var(--line); color: var(--fg); font-family: var(--mono); font-size: 14px; padding: 10px 12px; border-radius: 6px; }
   .picker select:focus { outline: none; border-color: var(--accent); }
+  .conf-group { margin-bottom: 16px; }
+  .conf-group:last-child { margin-bottom: 0; }
+  .conf-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-dim); margin: 0 0 8px; }
+  .conf-teams { display: flex; flex-direction: column; gap: 6px; }
+  .team-option { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg); cursor: pointer; }
+  .team-option input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+  .team-option input[type="checkbox"]:disabled { opacity: 0.4; cursor: not-allowed; }
   button[type="submit"] { padding: 12px 18px; font-family: var(--mono); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; width: 100%; max-width: 460px; }
   button[type="submit"]:hover { filter: brightness(1.08); }
   .schedule { margin-top: 32px; }
