@@ -201,11 +201,11 @@ verification.
   2. A Lighthouse mobile run against the production landing page is saved to `references/lighthouse-final.html` and shows Performance, Accessibility, Best Practices, SEO all ≥ 90.
   3. A real signup from John's personal Gmail in a fresh browser profile delivers a correctly-rendered confirmation email naming the team and timezone within 60 seconds; the unsubscribe link from that email returns the user to `/unsubscribed` and removes them from active sending.
   4. The release is tagged `v1.0-consumer-landing` in git on the deploy commit.
-**Plans:** 5 plans (4 waves)
+**Plans:** 1/5 plans executed
 
 Plans:
 **Wave 1**
-- [ ] 11-01-PLAN.md — D-02 a11y contrast fix in index.astro (#b8350d banner / #c43d15 button), color-only commit, lands FIRST
+- [x] 11-01-PLAN.md — D-02 a11y contrast fix in index.astro (#b8350d banner / #c43d15 button), color-only commit, lands FIRST
 - [ ] 11-02-PLAN.md — scripts/launch-gate.mjs (AC1-AC12 prod runner) + scripts/cleanup-gate-rows.mjs + smoke:gate/cleanup:gate aliases
 
 **Wave 2** *(blocked on Wave 1 — needs the fix deployed AND the runner built)*
@@ -227,7 +227,7 @@ Plans:
 | 8. Open Graph image | 1/1 | Complete   | 2026-05-14 |
 | 9. `/manage` editor + unsubscribe | 4/5 | In Progress|  |
 | 10. Confirmation email update | 3/3 | Complete    | 2026-05-16 |
-| 11. End-to-end + launch gate | 0/5 | Not started | - |
+| 11. End-to-end + launch gate | 1/5 | In Progress|  |
 
 **Execution order:** 5 → 6 → 7 → 8 → 9 → 10 → 11. Phases 7 and 8 only
 depend on Phase 6's site shell + meta-tag scaffolding respectively; 9 and
