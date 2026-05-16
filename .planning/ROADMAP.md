@@ -26,7 +26,7 @@ inline scripts, or inline styles).
 - [ ] **Phase 7: Legal pages** — `/privacy` and `/terms` routes serving canonical copy, same site shell as landing
 - [x] **Phase 8: Open Graph image** — source SVG + rendered 1200×630 PNG + OG/Twitter image meta tags wired to it (completed 2026-05-14)
 - [ ] **Phase 9: `/manage` editor + unsubscribe** — show + edit team and timezone, one-time banner for backfilled rows, confirm unsubscribe token semantics
-- [ ] **Phase 10: Confirmation email update** — name team + timezone in the body, deliverability cross-client + spam-score check
+- [x] **Phase 10: Confirmation email update** — name team + timezone in the body, deliverability cross-client + spam-score check (completed 2026-05-16)
 - [ ] **Phase 11: End-to-end + launch gate** — AC1–AC12 on production, Lighthouse run, real signup test, tag `v1.0-consumer-landing`
 
 ## Phase Details
@@ -176,7 +176,7 @@ roadmap.
   1. The confirmation email body names both the team and a human-readable timezone (e.g., "We'll email you 1 hour before every England match in Detroit time.") using the values from the signup row.
   2. Test sends to Gmail and Proton inboxes render the email cleanly (no broken layout, links resolve, unsubscribe footer present, no prohibited terms). [DESCOPED 2026-05-15 by operator: Outlook moved to best-effort, deferred to Phase 11 AC4 — no operator Outlook access; Outlook.com webmail is Blink-engine, near-identical to the passing Gmail render per RESEARCH §4. Gmail + Proton both PASS; Mail-Tester scored 10/10.]
   3. A Mail-Tester run against the production sender scores ≥ 8/10.
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 **Wave 1**
@@ -186,7 +186,7 @@ Plans:
 - [x] 10-02-PLAN.md — scripts/smoke-confirm-email.mjs (10 cases: canonical, multi-word, FALLBACK_TZ, underscore tz, Etc/UTC, diacritic-or-fallback, subject literal, LAND-02 grep, unknown-slug fallback, empty-tz fallthrough) + npm run smoke:confirm alias; offline byte-equivalence drift net for SIGNUP-04.
 
 **Wave 3** *(blocked on Waves 1 + 2 completion; NOT autonomous — operator action)*
-- [ ] 10-03-PLAN.md — Deploy via GitHub Actions; operator runs Mail-Tester ≥ 8/10 (D-08 / SC3) + 3 cross-client sends to Gmail / Proton / Outlook (D-09 / SC2); commit 4 PNG screenshots under evidence/; write 10-SUMMARY.md with §Deliverability Evidence + §Cross-Client Evidence + §Hand-off to Phase 11.
+- [x] 10-03-PLAN.md — Deploy via GitHub Actions; operator runs Mail-Tester ≥ 8/10 (D-08 / SC3) + 3 cross-client sends to Gmail / Proton / Outlook (D-09 / SC2); commit 4 PNG screenshots under evidence/; write 10-SUMMARY.md with §Deliverability Evidence + §Cross-Client Evidence + §Hand-off to Phase 11.
 
 **Risk note (R-1 resolved)**: ESP is already wired (Resend). No provider
 pick needed in this phase; the work is template copy + cross-client
@@ -212,7 +212,7 @@ verification.
 | 7. Legal pages | 0/2 | Not started | - |
 | 8. Open Graph image | 1/1 | Complete   | 2026-05-14 |
 | 9. `/manage` editor + unsubscribe | 4/5 | In Progress|  |
-| 10. Confirmation email update | 2/3 | In Progress|  |
+| 10. Confirmation email update | 3/3 | Complete    | 2026-05-16 |
 | 11. End-to-end + launch gate | 0/TBD | Not started | - |
 
 **Execution order:** 5 → 6 → 7 → 8 → 9 → 10 → 11. Phases 7 and 8 only
