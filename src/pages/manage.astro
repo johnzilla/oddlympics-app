@@ -427,17 +427,25 @@ const title = valid && !isUnsubscribed
 
 <style is:global>
   :root {
-    --bg: #0b0b0e;
-    --fg: #ececf1;
-    --fg-dim: #b8b8c2;
-    --line: rgba(255, 255, 255, 0.18);
-    --surface: rgba(255, 255, 255, 0.06);
-    --accent: hsl(18 70% 56%);
-    --accent-ink: #0b0b0e;
-    --ok: hsl(140 50% 60%);
-    --err: hsl(360 70% 65%);
+    /* Unified with the index.astro light design system (the "rework").
+       Token names are kept identical to this page's component CSS so the
+       whole page re-themes from this block alone — no per-component edits.
+       NOTE: --mono intentionally holds the home page's SANS stack so body
+       text and form controls match index.astro; a proper rename lands with
+       the v1.1 Layout.astro extraction (deferred per CLAUDE.md). */
+    --bg: #fafaf7;
+    --fg: #14151a;
+    --fg-dim: #5a5d68;
+    --line: #e4e4dd;
+    --line-strong: #c9cbc4;
+    --surface: #ffffff;
+    --accent: #b8350d;
+    --accent-ink: #ffffff;
+    --accent-soft: #fbe9e0;
+    --ok: #1a7f37;
+    --err: #b3261e;
     --pad: 48px;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --mono: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--mono); -webkit-font-smoothing: antialiased; }
