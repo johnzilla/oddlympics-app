@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
-status: executing
-stopped_at: "Phase 12 context gathered (restore multi-team: user_teams join table, /manage confederation checkboxes max 5, cron join swap, N-team copy; no-legacy override locked; Phase 11 re-gates after)"
-last_updated: "2026-05-16T11:07:57.640Z"
+status: verifying
+stopped_at: Phase 12 Plan 04 complete — D-07 verify-only + M10-M14 smoke; pass=15 fail=0; Phase 12 MVP fence D-08 done
+last_updated: "2026-05-16T11:17:53.910Z"
 last_activity: 2026-05-16
 progress:
   total_phases: 8
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 29
-  completed_plans: 27
-  percent: 75
+  completed_plans: 28
+  percent: 88
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-05-12)
 
 Phase: 12 (restore-multi-team-selection) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-16
 
-Progress: [█████████░] 93%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [█████████░] 93%
 | Phase 10 P10-02 | 12 minutes | 2 tasks | 2 files |
 | Phase 11 P01 | 5min | 1 tasks | 1 files |
 | Phase 12-restore-multi-team-selection P02 | 345 | 2 tasks | 2 files |
+| Phase 12-restore-multi-team-selection P04 | 15min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,8 @@ Recent decisions affecting current work:
 - [Phase 10]: 10-02: Case 6 asserts Curaçao diacritic verbatim — slug=curacao, label=Curaçao in references/teams.json:30, no ASCII fallback at runtime
 - [Phase 10]: 10-02: smoke:confirm inserted alphabetically before smoke:landing in package.json (smoke:confirm < smoke:landing < smoke:manage)
 - [Phase ?]: D-02 executed: color-only commit to index.astro — banner #b8350d + button #c43d15, both clearing WCAG-AA >=4.5:1; direct background override on submit-button (no new CSS token) per Phase-6 minimal-surface structure-lock
+- [Phase ?]: D-07 verify-only confirmed: email.ts unchanged, single-team copy correct
+- [Phase ?]: Phase 12 smoke M1-M14 green pass=15 fail=0, multi-team restored end-to-end
 
 ### Pending Todos
 
@@ -130,7 +133,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-16T11:07:57.635Z
-Stopped at: Phase 12 context gathered (restore multi-team: user_teams join table, /manage confederation checkboxes max 5, cron join swap, N-team copy; no-legacy override locked; Phase 11 re-gates after)
+Last session: 2026-05-16T11:17:53.904Z
+Stopped at: Phase 12 Plan 04 complete — D-07 verify-only + M10-M14 smoke; pass=15 fail=0; Phase 12 MVP fence D-08 done
 Resume file: 
 None
