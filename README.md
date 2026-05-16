@@ -29,8 +29,10 @@ to `main` (~40 seconds end-to-end).
   Phase 6 consumer landing, Phase 7 `/privacy` + `/terms`, Phase 8 Open Graph
   image, Phase 9 dual-mode `/manage` editor, Phase 10 confirmation-email
   rework (custom verified sender, 10/10 Mail-Tester). Phase 11 launch gate
-  run against production (AC1–AC12 + Lighthouse all green: Perf 0.97 / A11y
-  1.0 / Best-Practices 1.0 / SEO 1.0). Tagged **`v1.0-consumer-landing`**.
+  run on production: automated ACs + Lighthouse green (Perf 0.97 / A11y 1.0 /
+  Best-Practices 1.0 / SEO 1.0); AC-MT (multi-team `/manage`) operator-approved
+  on the Phase-12 evidence basis; AC4/AC10/AC11/OG manual checks non-blocking
+  by owner decision. Phase 11 closed, tagged **`v1.0-consumer-landing`**.
 - ✅ **Phase 12 — multi-team restore** — `/manage` is a 1–5 team
   confederation-grouped checkbox editor backed by a `user_teams` join table;
   signup stays single-team (one slug); the kickoff cron fans out per followed
