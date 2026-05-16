@@ -4,12 +4,12 @@ milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: executing
 stopped_at: "Phase 12 context gathered (restore multi-team: user_teams join table, /manage confederation checkboxes max 5, cron join swap, N-team copy; no-legacy override locked; Phase 11 re-gates after)"
-last_updated: "2026-05-16T02:54:26.697Z"
-last_activity: 2026-05-16
+last_updated: "2026-05-16T03:31:06.030Z"
+last_activity: 2026-05-16 -- Phase 12 planning complete
 progress:
   total_phases: 8
   completed_phases: 6
-  total_plans: 25
+  total_plans: 29
   completed_plans: 24
   percent: 75
 ---
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-12)
 Phase: 11 (end-to-end-launch-gate) — EXECUTING
 Plan: 3 of 5
 Status: Ready to execute
-Last activity: 2026-05-16
+Last activity: 2026-05-16 -- Phase 12 planning complete
 
 Progress: [█████████░] 88%
 
