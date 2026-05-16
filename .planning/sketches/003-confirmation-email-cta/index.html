@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 003 — Confirmation-email re-entry CTA</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+  /* Sketch chrome only — the EMAIL itself uses inline styles + tables
+     (real email constraints: no external CSS, no flexbox/grid, no JS). */
+  body { padding-top: 46px; background: #6b6e76; }
+  #variant-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9998; background: var(--surface); border-bottom: 1px solid var(--line-strong); padding: 8px 14px; display: flex; gap: 8px; font-family: system-ui; }
+  .variant-tab { font: inherit; font-size: 12px; padding: 5px 11px; border: 1px solid var(--line-strong); background: var(--bg); color: var(--fg-dim); border-radius: 999px; cursor: pointer; transition: all .15s; }
+  .variant-tab:hover { border-color: var(--accent); color: var(--accent); }
+  .variant-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .variant { display: none; padding: 28px 12px 80px; } .variant.active { display: block; }
+  .client-meta { max-width: 600px; margin: 0 auto 0; background: #fff; border-radius: 8px 8px 0 0; border-bottom: 1px solid #e4e4dd; padding: 14px 24px; font-family: system-ui; font-size: 13px; color: #5a5d68; }
+  .client-meta b { color: #14151a; }
+  .annotate [data-tag]:hover { outline: 2px dashed #b8350d; outline-offset: 2px; }
+  #sketch-tools { position: fixed; bottom: 12px; right: 12px; z-index: 9999; font-family: system-ui; font-size: 12px; background: rgba(0,0,0,.72); color: #fff; padding: 8px 12px; border-radius: 8px; opacity: .4; transition: opacity .2s; display: flex; gap: 10px; align-items: center; }
+  #sketch-tools:hover { opacity: 1; }
+  #sketch-tools button { font: inherit; font-size: 11px; background: #222; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 3px 6px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="variant-nav">
+  <button class="variant-tab" onclick="sv('a',this)">A: Plain button</button>
+  <button class="variant-tab active" onclick="sv('b',this)">B: "Keep this email — it's your key" ★ Selected</button>
+  <button class="variant-tab" onclick="sv('c',this)">C: Quiet footer line</button>
+</div>
+
+<!-- ================= VARIANT A: plain re-entry button ================= -->
+<div id="variant-a" class="variant">
+  <div class="client-meta"><b>oddlympics</b> &lt;hello@oddlympics.app&gt; &nbsp;·&nbsp; <b>You're following Argentina at the World Cup</b> &nbsp;·&nbsp; to: you@example.com</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:0 0 8px 8px;font-family:Arial,Helvetica,sans-serif;color:#14151a;">
+    <tr><td style="padding:32px 40px 8px;">
+      <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#b8350d;">ODDLYMPICS</div>
+    </td></tr>
+    <tr><td style="padding:8px 40px 0;">
+      <h1 style="margin:0 0 14px;font-size:24px;line-height:1.2;color:#14151a;">You're in. ⚽</h1>
+      <p style="margin:0 0 14px;font-size:15px;line-height:1.6;color:#14151a;">We'll email you about an hour before every <b>Argentina</b> match at the World Cup, in <b>America/New_York</b> time. Nothing else.</p>
+      <p style="margin:0 0 28px;font-size:15px;line-height:1.6;color:#5a5d68;">Want to follow more teams, change your time zone, or stop the emails? It's all on one page — no password to dig up.</p>
+    </td></tr>
+    <tr><td style="padding:0 40px 8px;" data-tag="re-entry: plain button">
+      <!-- bulletproof table button -->
+      <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+        <td style="background:#b8350d;border-radius:6px;">
+          <a href="#" style="display:inline-block;padding:13px 26px;font-family:'Courier New',monospace;font-size:14px;font-weight:bold;color:#ffffff;text-decoration:none;">Manage what you follow →</a>
+        </td>
+      </tr></table>
+    </td></tr>
+    <tr><td style="padding:28px 40px 36px;">
+      <hr style="border:0;border-top:1px solid #e4e4dd;margin:0 0 18px;">
+      <p style="margin:0;font-family:'Courier New',monospace;font-size:12px;line-height:1.6;color:#5a5d68;">oddlympics.app · Independent project, not affiliated with FIFA<br><a href="#" style="color:#5a5d68;">Unsubscribe</a></p>
+    </td></tr>
+  </table>
+</div>
+
+<!-- ========= VARIANT B: "keep this email — it's your key" ========= -->
+<div id="variant-b" class="variant active">
+  <div class="client-meta"><b>oddlympics</b> &lt;hello@oddlympics.app&gt; &nbsp;·&nbsp; <b>You're following Argentina — keep this email</b> &nbsp;·&nbsp; to: you@example.com</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:0 0 8px 8px;font-family:Arial,Helvetica,sans-serif;color:#14151a;">
+    <tr><td style="padding:32px 40px 8px;">
+      <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#b8350d;">ODDLYMPICS</div>
+    </td></tr>
+    <tr><td style="padding:8px 40px 0;">
+      <h1 style="margin:0 0 14px;font-size:24px;line-height:1.2;color:#14151a;">You're in. ⚽</h1>
+      <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#14151a;">We'll email you about an hour before every <b>Argentina</b> match at the World Cup, in <b>America/New_York</b> time. Nothing else.</p>
+    </td></tr>
+    <tr><td style="padding:0 40px;" data-tag="re-entry: this-email-is-your-key callout">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fbe9e0;border:1px solid #b8350d;border-radius:8px;">
+        <tr><td style="padding:18px 22px;">
+          <p style="margin:0 0 6px;font-size:15px;font-weight:bold;color:#b8350d;">No account. No password. Keep this email.</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#14151a;">You never made an account — there's nothing to remember or leak. This button always brings you back to add teams, change your time zone, or follow new sports as oddlympics grows.</p>
+          <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+            <td style="background:#b8350d;border-radius:6px;">
+              <a href="#" style="display:inline-block;padding:13px 26px;font-family:'Courier New',monospace;font-size:14px;font-weight:bold;color:#ffffff;text-decoration:none;">Manage what you follow →</a>
+            </td>
+          </tr></table>
+        </td></tr>
+      </table>
+    </td></tr>
+    <tr><td style="padding:28px 40px 36px;">
+      <hr style="border:0;border-top:1px solid #e4e4dd;margin:0 0 18px;">
+      <p style="margin:0;font-family:'Courier New',monospace;font-size:12px;line-height:1.6;color:#5a5d68;">oddlympics.app · Independent project, not affiliated with FIFA<br><a href="#" style="color:#5a5d68;">Unsubscribe</a></p>
+    </td></tr>
+  </table>
+</div>
+
+<!-- ============= VARIANT C: quiet footer line only ============= -->
+<div id="variant-c" class="variant">
+  <div class="client-meta"><b>oddlympics</b> &lt;hello@oddlympics.app&gt; &nbsp;·&nbsp; <b>You're following Argentina at the World Cup</b> &nbsp;·&nbsp; to: you@example.com</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:0 0 8px 8px;font-family:Arial,Helvetica,sans-serif;color:#14151a;">
+    <tr><td style="padding:32px 40px 8px;">
+      <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#b8350d;">ODDLYMPICS</div>
+    </td></tr>
+    <tr><td style="padding:8px 40px 0;">
+      <h1 style="margin:0 0 14px;font-size:24px;line-height:1.2;color:#14151a;">You're in. ⚽</h1>
+      <p style="margin:0 0 28px;font-size:15px;line-height:1.6;color:#14151a;">We'll email you about an hour before every <b>Argentina</b> match at the World Cup, in <b>America/New_York</b> time. Nothing else.</p>
+    </td></tr>
+    <tr><td style="padding:0 40px 30px;">
+      <p style="margin:0;font-size:14px;line-height:1.6;color:#5a5d68;">That's the whole setup — nothing more to do.</p>
+    </td></tr>
+    <tr><td style="padding:0 40px 36px;" data-tag="re-entry: quiet footer line">
+      <hr style="border:0;border-top:1px solid #e4e4dd;margin:0 0 18px;">
+      <p style="margin:0 0 8px;font-family:'Courier New',monospace;font-size:12px;line-height:1.7;color:#5a5d68;">
+        Add teams / change time zone: <a href="#" style="color:#b8350d;">manage what you follow</a> (we email you a one-time link — no password)<br>
+        oddlympics.app · Not affiliated with FIFA · <a href="#" style="color:#5a5d68;">Unsubscribe</a>
+      </p>
+    </td></tr>
+  </table>
+</div>
+
+<div id="sketch-tools">
+  <span>this is HTML email — no JS, table layout, inline CSS</span>
+  <button onclick="document.body.classList.toggle('annotate')">annotate</button>
+</div>
+
+<script>
+  function sv(id, btn) {
+    document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('variant-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
