@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: executing
-stopped_at: "Phase 11 BLOCKED: launch gate certified single-team baseline (10/10 automatable ACs, Lighthouse 97/100/100/100) but v2.0 is single-team end-to-end — founder-rejected. Tag v1.0-consumer-landing WITHHELD. Multi-team restoration required before launch (own phase/milestone, not Phase 11). Pending operator: AC4/AC10/AC11/OG manual checks + scripts/cleanup-gate-rows.mjs --confirm on droplet (3 +ac3 rows)."
-last_updated: "2026-05-16T02:34:18.606Z"
+stopped_at: "Phase 12 context gathered (restore multi-team: user_teams join table, /manage confederation checkboxes max 5, cron join swap, N-team copy; no-legacy override locked; Phase 11 re-gates after)"
+last_updated: "2026-05-16T02:54:26.697Z"
 last_activity: 2026-05-16
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 6
   total_plans: 25
   completed_plans: 24
-  percent: 86
+  percent: 75
 ---
 
 # Project State
@@ -129,7 +129,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-16T02:34:18.601Z
-Stopped at: Phase 11 BLOCKED: launch gate certified single-team baseline (10/10 automatable ACs, Lighthouse 97/100/100/100) but v2.0 is single-team end-to-end — founder-rejected. Tag v1.0-consumer-landing WITHHELD. Multi-team restoration required before launch (own phase/milestone, not Phase 11). Pending operator: AC4/AC10/AC11/OG manual checks + scripts/cleanup-gate-rows.mjs --confirm on droplet (3 +ac3 rows).
+Last session: 2026-05-16T02:54:26.691Z
+Stopped at: Phase 12 context gathered (restore multi-team: user_teams join table, /manage confederation checkboxes max 5, cron join swap, N-team copy; no-legacy override locked; Phase 11 re-gates after)
 Resume file: 
-.planning/phases/11-end-to-end-launch-gate/11-SUMMARY.md
+.planning/phases/12-restore-multi-team-selection/12-CONTEXT.md
