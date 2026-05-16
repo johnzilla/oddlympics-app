@@ -25,6 +25,8 @@ interface Props {
     imageAlt?: string;
     twitterDescription?: string;
   };
+  /** Render the shared site footer. Default on for consistent chrome. */
+  footer?: boolean;
 }
 
 const {
@@ -33,6 +35,7 @@ const {
   noindex = false,
   analytics = false,
   og,
+  footer = true,
 } = Astro.props;
 ---
 
@@ -79,6 +82,19 @@ const {
 </head>
 <body>
   <slot />
+  {footer && (
+    <footer class="site-footer">
+      <div class="wrap">
+        <nav class="links">
+          <a href="/manage">Manage subscription</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a href="mailto:hello@oddlympics.app">Contact</a>
+        </nav>
+        <p class="copy">© 2026 Oddlympics · Independent project · Not affiliated with FIFA</p>
+      </div>
+    </footer>
+  )}
 </body>
 </html>
 
@@ -169,5 +185,39 @@ const {
     color: var(--accent);
     text-decoration: underline;
     text-underline-offset: 3px;
+  }
+
+  /* Shared site footer */
+  .site-footer {
+    border-top: 1px solid var(--line);
+    padding: 32px 0 64px;
+  }
+
+  .site-footer .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .site-footer a {
+    font-size: 13px;
+    color: var(--fg-dim);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .site-footer a:hover { filter: brightness(0.92); }
+
+  .site-footer a:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(184, 53, 13, 0.15);
+    border-radius: 4px;
+  }
+
+  .site-footer .copy {
+    margin: 16px 0 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-dim);
   }
 </style>

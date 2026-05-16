@@ -1,21 +1,12 @@
 ---
+import Layout from '../components/Layout.astro';
 export const prerender = true;
 
 const TITLE = 'Terms — Oddlympics';
 const DESCRIPTION = 'Terms of use for Oddlympics: free service through July 19, 2026, best-effort delivery, no FIFA or team affiliation, Michigan (USA) governing law.';
 const LAST_UPDATED = 'May 13, 2026';
 ---
-
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{TITLE}</title>
-  <meta name="description" content={DESCRIPTION} />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-</head>
-<body>
+<Layout title={TITLE} description={DESCRIPTION}>
   <main>
     <section class="content">
       <div class="wrap">
@@ -36,60 +27,9 @@ const LAST_UPDATED = 'May 13, 2026';
       </div>
     </section>
   </main>
+</Layout>
 
-  <footer class="site-footer">
-    <div class="wrap">
-      <nav class="links">
-        <a href="/manage">Manage subscription</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="mailto:hello@oddlympics.app">Contact</a>
-      </nav>
-      <p class="copy">© 2026 Oddlympics · Independent project · Not affiliated with FIFA</p>
-    </div>
-  </footer>
-</body>
-</html>
-
-<style is:global>
-  :root {
-    --bg: #fafaf7;
-    --fg: #14151a;
-    --fg-dim: #5a5d68;
-    --line: #e4e4dd;
-    --line-strong: #c9cbc4;
-    --surface: #ffffff;
-    --accent: #b8350d;
-    --accent-ink: #ffffff;
-    --accent-soft: #fbe9e0;
-    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    --max: 720px;
-    --pad-x: clamp(20px, 5vw, 48px);
-  }
-
-  * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: var(--font-sans);
-    font-size: 15px;
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  body { min-height: 100dvh; }
-
-  .wrap {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding-left: var(--pad-x);
-    padding-right: var(--pad-x);
-  }
-
+<style>
   .content {
     padding-top: 64px;
     padding-bottom: 32px;
@@ -145,41 +85,6 @@ const LAST_UPDATED = 'May 13, 2026';
     font-size: 0.95em;
   }
 
-  /* Footer */
-  .site-footer {
-    border-top: 1px solid var(--line);
-    padding: 32px 0 64px;
-  }
-
-  .site-footer .links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .site-footer a {
-    font-size: 13px;
-    color: var(--fg-dim);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .site-footer a:hover { filter: brightness(0.92); }
-
-  .site-footer a:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(217, 74, 31, 0.15);
-    border-radius: 4px;
-  }
-
-  .site-footer .copy {
-    margin: 16px 0 0;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--fg-dim);
-  }
-
-  /* Mobile breakpoint */
   @media (max-width: 520px) {
     .content { padding-top: 36px; }
   }
