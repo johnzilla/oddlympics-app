@@ -290,3 +290,12 @@ export const getUserTeams = db.prepare<[string]>(`
 export const updateTimezone = db.prepare<[string, string]>(`
   UPDATE vip_signups SET timezone = ? WHERE email = ?
 `);
+
+// Phase 12 — CR-01: scoped variant of updateTimezone that restores the SQL-level state gate
+// the replaced setSelection carried — only updates timezone for an active (confirmed + not
+// unsubscribed) row. res.changes === 0 inside the transaction signals a not-active user.
+// Param order: (timezone, email) — mirrors updateTimezone exactly.
+export const updateTimezoneActive = db.prepare<[string, string]>(`
+  UPDATE vip_signups SET timezone = ?
+  WHERE email = ? AND confirmed_at IS NOT NULL AND unsubscribed_at IS NULL
+`);

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { db, deleteUserTeams, insertUserTeam, updateTimezone, insertFeatureRequest } from '../../lib/db';
+import { db, deleteUserTeams, insertUserTeam, updateTimezoneActive, insertFeatureRequest } from '../../lib/db';
 import { verifyToken } from '../../lib/token';
 import { buildSessionCookie, readSessionFromCookie } from '../../lib/session';
 import { VALID_TEAMS } from '../../lib/teams';
@@ -71,10 +71,13 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Team picks and timezone are one atomic unit — a rolled-back transaction
     // leaves both unchanged, preventing a state where team rows changed but tz did not.
+    // CR-01: updateTimezoneActive runs first so an unsubscribed/unconfirmed user throws
+    // before any user_teams write — better-sqlite3 rolls back the whole transaction on throw.
     const saveSelection = db.transaction((email: string, slugs: string[], timezone: string) => {
+      const res = updateTimezoneActive.run(timezone, email);
+      if (res.changes === 0) throw new Error('not-active');
       deleteUserTeams.run(email);
       for (const slug of slugs) insertUserTeam.run(email, slug);
-      updateTimezone.run(timezone, email);
     });
     saveSelection(result.email, validSlugs, tz);
 
@@ -93,6 +96,11 @@ export const POST: APIRoute = async ({ request }) => {
       }
     }
   } catch (err) {
+    // CR-01: consent-rejection path — distinct log so journald distinguishes it from a real DB fault.
+    if (err instanceof Error && err.message === 'not-active') {
+      console.error(`[save-selection] not-active: ${result.email}`);
+      return redirectTo(formToken, 'unknown');
+    }
     console.error('[save-selection] db error', err);
     return redirectTo(formToken, 'server');
   }
