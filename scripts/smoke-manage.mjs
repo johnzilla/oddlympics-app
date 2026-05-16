@@ -502,13 +502,14 @@ await runCase('M6-banner-team-null', async () => {
     console.error(`  expected status 200, got ${status}`);
     return false;
   }
-  if (!body.includes('Pick a team')) {
-    console.error('  expected banner text "Pick a team" in body');
+  // Post-12-02: banner is 'Pick your teams' when userTeamSlugs.size === 0.
+  if (!body.includes('Pick your teams')) {
+    console.error('  expected banner text "Pick your teams" in body');
     return false;
   }
   // The apostrophe is HTML-entity encoded in server-rendered output: &#39;
   if (!body.includes("You&#39;re signed up") && !body.includes("You're signed up")) {
-    console.error('  expected banner subhead "You\'re signed up" (or &#39; entity) in body');
+    console.error('  expected subhead "You\'re signed up" (or &#39; entity) in body');
     return false;
   }
   return true;
@@ -828,12 +829,11 @@ await runCase('M14-cron-visibility', async () => {
       AND t.id IN (?, ?)
   `).all(rowA.id, rowB.id);
 
-  if (users.length !== 1) {
-    console.error(`  expected exactly 1 distinct user row, got ${users.length}`);
-    return false;
-  }
-  if (users[0].email !== email) {
-    console.error(`  expected email=${email}, got ${users[0].email}`);
+  // The test email must appear exactly once in the result (SELECT DISTINCT collapses multi-team fan-out).
+  // Other users in the scratch DB may also match (prior smoke runs, other tests) — filter to just this email.
+  const matchingUsers = users.filter((u) => u.email === email);
+  if (matchingUsers.length !== 1) {
+    console.error(`  expected exactly 1 row for ${email}, got ${matchingUsers.length} (total rows: ${users.length})`);
     return false;
   }
   return true;
