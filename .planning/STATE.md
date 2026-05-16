@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: executing
-stopped_at: "Phase 12 COMPLETE — gap-closure 12-05/12-06 executed; CR-01/CR-02 consent regressions closed; smoke M1–M16 green (pass=17 fail=0); verification PASSED 11/11. Multi-team restored end-to-end. NEXT: re-run Phase 11 launch gate (D-09) — v1.0-consumer-landing tag still withheld until that re-gate certifies."
-last_updated: "2026-05-16T13:23:14.027Z"
-last_activity: 2026-05-16 -- Phase 11 planning complete
+stopped_at: "11-06 Task 1 DONE (4e74e54): AC-MT added to launch-gate.mjs. CHECKPOINT at Task 2 (blocking-human) — operator must deploy post-Phase-12 build, run npm run smoke:gate against https://oddlympics.app, capture AC4/AC10/AC11/AC-MT/OG operator evidence, then type 'approved'."
+last_updated: "2026-05-16T14:00:00.000Z"
+last_activity: 2026-05-16 -- 11-06 Task 1 committed; checkpoint Task 2 awaiting operator
 progress:
   total_phases: 8
   completed_phases: 7
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-12)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** Milestone complete
+**Current focus:** Phase 11 — end-to-end-launch-gate
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-16 -- Phase 11 planning complete
+Phase: 11 (end-to-end-launch-gate) — EXECUTING
+Plan: 1 of 6
+Status: Executing Phase 11
+Last activity: 2026-05-16 -- Phase 11 execution started
 
 Progress: [██████████] 97%
 
@@ -137,7 +137,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-16T12:17:31.140Z
-Stopped at: Phase 12 COMPLETE — gap-closure 12-05/12-06 executed; CR-01/CR-02 consent regressions closed; smoke M1–M16 green (pass=17 fail=0); verification PASSED 11/11. Multi-team restored end-to-end. NEXT: re-run Phase 11 launch gate (D-09) — v1.0-consumer-landing tag still withheld until that re-gate certifies.
+Last session: 2026-05-16T14:00:00.000Z
+Stopped at: 11-06 Task 1 DONE (4e74e54) — AC-MT added to launch-gate.mjs. Awaiting operator at Task 2 blocking-human checkpoint (deploy + gate run + operator evidence for AC4/AC10/AC11/AC-MT/OG).
 Resume file: 
 None
