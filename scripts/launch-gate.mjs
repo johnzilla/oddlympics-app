@@ -430,7 +430,7 @@ await runCase('AC8-lighthouse-mobile', async () => {
     [
       'lighthouse',
       BASE,
-      '--preset=mobile',
+      '--form-factor=mobile',
       '--output=html',
       `--output-path=${lhOutputPath}`,
       '--chrome-flags=--headless=new --no-sandbox --disable-dev-shm-usage',
@@ -460,7 +460,7 @@ await runCase('AC8-lighthouse-mobile', async () => {
     [
       'lighthouse',
       BASE,
-      '--preset=mobile',
+      '--form-factor=mobile',
       '--output=json',
       `--output-path=${lhJsonPath}`,
       '--chrome-flags=--headless=new --no-sandbox --disable-dev-shm-usage',
