@@ -25,15 +25,37 @@ Content + light affordance only — no backend, no redesign.
       *feature*: no password to create or leak, no account, privacy. Decide
       placement (signup, the magic-link request step, `/manage`, or a mix) —
       lead with the benefit, not the mechanism.
-- [ ] **Entry affordance** — replace the "very tiny" footer `manage account`
-      link with a real returning-user entry path. **Gated on the
-      `/gsd-sketch` outcome** for the entry UX (see related sketch).
+- [ ] **Entry affordance** — add a quiet secondary link directly under the
+      signup form on `/` ("Already signed up? Manage what you follow on
+      oddlympics →"). Resolved by sketch 001 (Variant B). The 13px footer
+      link can stay as-is; the under-form link is the real path.
+
+## Resolved design directions (sketches 001–003, all winners committed)
+
+See `.planning/sketches/MANIFEST.md` + per-sketch READMEs for the built
+mockups. Decisions to implement:
+
+- **Landing entry (001-B):** quiet secondary link under the signup form,
+  not new chrome. Sport-agnostic copy ("manage what you follow on
+  oddlympics"). No no-account explanation on the landing page.
+- **/manage (002-B):** sport-accordion IA — one collapsible block per
+  sport, future sports as quiet "Coming soon" rows. Signed-out request
+  screen carries the `no password / no account` accent-soft trust block.
+  Copy fix: never say "the editor" → "takes you right back in".
+- **Confirmation email (003-B):** "Keep this email — it's your key"
+  accent-soft callout reframing the email as the durable re-entry point.
+  **Shares copy with the 002 signed-out trust block** — implement the
+  "no account / no password" message once, reuse in both surfaces.
+- **Durability:** all copy + IA is sport-agnostic by decision (future
+  weird-sports roadmap) — see `.planning/notes/multi-team-discoverability-gap.md`.
 
 ## Dependencies / sequencing
 
-1. `/gsd-sketch` the entry-affordance UX first (throwaway mockups).
-2. Then one focused task: ship the copy across all surfaces + build the
-   chosen entry affordance.
+1. ~~`/gsd-sketch` the entry-affordance UX~~ — DONE (sketches 001–003,
+   winners marked).
+2. One focused task: ship the copy + the 001-B link + 002-B accordion +
+   003-B email callout, with the shared no-account copy factored once.
+   Runnable as `/gsd-quick` (no backend, no new milestone).
 
 ## Done looks like
 
