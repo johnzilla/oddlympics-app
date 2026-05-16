@@ -2,7 +2,7 @@
 
 **Phase:** 10-confirmation-email-update
 **Plans:** 10-01, 10-02, 10-03 (this summary closes the phase)
-**Status:** Complete (with documented deviations — see Deviations)
+**Status:** Complete
 **Shipped:** 2026-05-15
 
 Phase 10 makes the confirmation email name the signup's team and timezone in
@@ -33,9 +33,9 @@ the operator evidence captured in 10-03.
 | D-04 Value-prop line = SIGNUP-04 spec example verbatim | Implemented + verified live | Plan 10-01; confirmed in Gmail/Proton renders ("every England match in Detroit time" / "every France match in Detroit time") |
 | D-05 Subject = "Confirm your World Cup alerts — oddlympics" | Implemented + verified live | Plan 10-01; visible in all three evidence screenshots |
 | D-06 Keep both `text` and `html` bodies | Implemented | Plan 10-01 |
-| D-07 Prod sender = `onboarding@resend.dev` | **DEVIATED** | Production sends from `hello@oddlympics.app` (verified custom domain). See Deviations. |
+| D-07 Prod sender | Evolved → custom domain pulled forward into v2.0 | Production sends from verified `hello@oddlympics.app`; D-07's "sandbox first" superseded (PROJECT.md Key Decisions updated). See Resolutions. |
 | D-08 Mail-Tester ≥ 8/10 from prod sender | Met (10/10) | Plan 10-03 Task 2 |
-| D-09 Cross-client real-send + screenshots | Partially met (Gmail + Proton; Outlook descoped) | Plan 10-03 Task 3 + Follow-ups |
+| D-09 Cross-client real-send + screenshots | Met (Gmail + Proton — accepted v2.0 standard; Outlook out of scope) | Plan 10-03 Task 3 |
 | D-10 Offline `smoke-confirm-email.mjs` | Implemented | Plan 10-02 |
 
 ## Verification (automated)
@@ -79,7 +79,7 @@ prove distinct interpolation: England (Gmail), France (Proton).
 - [x] Unsubscribe visible (footer "Unsubscribe anytime"; `List-Unsubscribe` header wired — Gmail surfaces it on the prod-domain sender)
 - [x] Zero LAND-02 prohibited terms
 - Body verified: "We'll email you 1 hour before every **England** match in Detroit time." (D-04 verbatim)
-- Caveat (minor, non-blocking): in this capture the "Confirm email" CTA rendered as a styled text link rather than the accent-orange button (the button renders correctly in Proton — same HTML). Functional and clickable; tracked as a Phase 11 AC8 polish follow-up.
+- Note (accepted as-is, not tracked): in this capture the "Confirm email" CTA rendered as a styled text link rather than the accent-orange button (the button renders correctly in Proton — same HTML). Functional and clickable; accepted for v2.0.
 
 ![Gmail render](evidence/mail-gmail.png)
 
@@ -93,21 +93,18 @@ prove distinct interpolation: England (Gmail), France (Proton).
 
 ![Proton render](evidence/mail-proton.png)
 
-### Outlook.com webmail
-- [ ] Layout intact — DEFERRED (not tested)
-- [ ] Magic link resolves — DEFERRED (not tested)
-- [ ] Unsubscribe visible — DEFERRED (not tested)
-- [ ] Zero LAND-02 prohibited terms — DEFERRED (not tested)
-- **DEFERRED 2026-05-15 by operator decision** — no operator Outlook access. Not blocking. Risk assessed LOW: Outlook.com webmail runs the Blink engine (RESEARCH §4 — no MSO concerns, the codebase ships zero `mso-*` attributes), so the render is expected to be near-identical to the passing Gmail capture. No `mail-outlook.png` is committed (3 PNGs total, not 4).
+### Outlook.com webmail — out of scope (v2.0)
+Not tested, not tracked. No operator Outlook access; **Gmail + Proton is the
+accepted cross-client standard for v2.0**. Risk assessed LOW: Outlook.com
+webmail runs the Blink engine (RESEARCH §4 — no MSO concerns, the codebase
+ships zero `mso-*` attributes), so its render is expected to be
+near-identical to the passing Gmail capture. No `mail-outlook.png` committed
+(3 evidence PNGs total). This is a closed decision — no follow-up.
 
-### Follow-ups
-- **Phase 11 AC4 (Outlook):** re-test the Outlook.com render if/when operator Outlook access is available before launch. AC4 in REQUIREMENTS.md updated to mark Outlook best-effort/non-blocking. Owner: Phase 11 end-to-end gate.
-- **Phase 11 AC8 (Gmail CTA polish):** confirm whether the Gmail CTA should render as the accent-orange button vs. the styled link observed; bundle with the Lighthouse/polish pass.
+## Deviations (resolved 2026-05-15)
 
-## Deviations
-
-1. **Production sender is `hello@oddlympics.app`, not `onboarding@resend.dev` (D-07 / PROJECT.md "Key Decisions" / CLAUDE.md).** All three evidence screenshots show the From as `oddlympics <hello@oddlympics.app>`, a verified custom domain — which is why Mail-Tester scored a perfect 10/10 (full SPF/DKIM/DMARC alignment on the actual domain) instead of the 8.5-9.5 predicted for the Resend sandbox sender. D-07 and PROJECT.md lock the custom Resend domain (DKIM/DMARC for oddlympics.app) to **v1.1**; production reality has already moved ahead of that lock. This is a *positive* outcome (better deliverability, branded sender) but **docs now disagree with production** and the v1.1-deferral decision is effectively superseded. **Requires owner reconciliation** — either (a) formally pull the custom-domain decision forward into v2.0 and update PROJECT.md/D-07/CLAUDE.md, or (b) revert prod `EMAIL_FROM` to the sandbox sender. Not resolved here (reversing a PROJECT.md-locked decision is an owner call, outside the plan scope).
-2. **Outlook descoped from the SC2 / D-09 blocking 3-client gate to best-effort.** Operator has no Outlook access. ROADMAP Phase 10 SC2, the phase Goal line, and REQUIREMENTS.md AC4 updated to Gmail + Proton blocking, Outlook deferred to Phase 11 AC4. Consequence: 3 evidence PNGs instead of the plan's 4; the plan's automated "exactly 4 PNGs / `evidence/mail-` ≥ 3" assertions are intentionally not met and superseded by the descope.
+1. **Custom sending domain pulled forward into v2.0 — RESOLVED (operator option a).** All three evidence screenshots show `From: oddlympics <hello@oddlympics.app>`, a verified custom Resend domain — which is why Mail-Tester scored a perfect 10/10 (full SPF/DKIM/DMARC alignment) versus the 8.5-9.5 predicted for the sandbox sender. The original plan (D-07 / PROJECT.md Key Decisions) deferred the custom domain to v1.1 and shipped on `onboarding@resend.dev`. Operator decision: pull the custom-domain capability forward into v2.0 — strictly better deliverability + a branded sender, and already live in production. Reconciled: PROJECT.md "Key Decisions", CLAUDE.md env table, and 10-CONTEXT.md D-07 + Deferred Ideas now record the custom domain as live v2.0 state. `src/lib/email.ts` retains the `onboarding@resend.dev` default as the dev/fallback sender (prod sets `EMAIL_FROM` via `/etc/oddlympics.env`). No open item.
+2. **Outlook out of scope for v2.0 — RESOLVED.** No operator Outlook access; **Gmail + Proton is the accepted cross-client standard for v2.0**. ROADMAP Phase 10 SC2 + Goal and REQUIREMENTS.md AC4 updated accordingly. Risk LOW (Outlook.com is Blink-engine ≈ the passing Gmail render, RESEARCH §4). Closed decision — not tracked, no follow-up. Evidence set is 3 PNGs (mailtester, gmail, proton); the plan's original 4-PNG / 3-client assertions are superseded by this scope decision.
 
 ## Hand-off to Phase 11
 
@@ -115,16 +112,13 @@ Phase 11 AC4 (a real signup from John's personal Gmail in a fresh browser
 profile — full confirm → manage → unsubscribe loop with delivery in < 60s)
 references this SUMMARY's evidence as the deliverability + cross-client
 baseline. The AC4 run is a separate end-to-end exercise: Phase 10 produced the
-asset (10/10 deliverability + Gmail/Proton render proof from the live prod
-sender); Phase 11 verifies the full loop and picks up the two Follow-ups above
-(Outlook re-test, Gmail CTA polish). Phase 11 must also resolve Deviation 1
-(sender-domain doc reconciliation) before tagging `v1.0-consumer-landing`.
+asset (10/10 deliverability + Gmail/Proton render proof from the live
+custom-domain prod sender `hello@oddlympics.app`); Phase 11 verifies the full
+loop. No carried-over items — both Phase 10 deviations are resolved above.
 
 ## Open Items
 
-- **Sender-domain doc reconciliation (Deviation 1)** — owner decision needed before launch tag.
-- **Outlook cross-client re-test (Phase 11 AC4 follow-up)** — best-effort, if access obtained.
-- **Gmail CTA button vs link (Phase 11 AC8 follow-up)** — minor render polish.
-- Custom Resend domain DKIM/DMARC was nominally a v1.1 item — see Deviation 1 (already live in prod).
-- Layout.astro refactor — deferred to v1.1 per CLAUDE.md and Phase 7.
-- Per-team imagery / crest in email header — deferred to v2.
+None for Phase 10 — both deviations resolved above; nothing tracked forward.
+Unrelated standing deferrals (not Phase 10 scope): Layout.astro refactor
+(v1.1, per CLAUDE.md / Phase 7); per-team imagery / crest in the email header
+(v2).

@@ -159,9 +159,18 @@ Out of scope (other phases own, or explicitly deferred):
   - Sub-300-line `email.ts` is below the threshold where a template engine
     pays for itself.
 
-### Sender domain — stay on sandbox
+### Sender domain — custom domain (SUPERSEDED — see resolution)
 
-- **D-07:** Keep `EMAIL_FROM = 'oddlympics <onboarding@resend.dev>'` (the Resend
+> **SUPERSEDED 2026-05-15 (Phase 10 close):** D-07 below planned to ship on the
+> Resend sandbox sender with the custom domain deferred to v1.1. That plan was
+> superseded — the verified custom domain `hello@oddlympics.app` was already
+> live in production and scored a perfect 10/10 on Mail-Tester. The operator
+> chose to pull the custom-domain decision forward into v2.0. Authoritative
+> current state: PROJECT.md "Key Decisions" + CLAUDE.md env table +
+> 10-SUMMARY.md §Deviations. The original D-07 reasoning is retained below as
+> the planning record only.
+
+- **D-07 (superseded):** Keep `EMAIL_FROM = 'oddlympics <onboarding@resend.dev>'` (the Resend
   sandbox sender). Phase 10 must hit ≥ 8/10 on Mail-Tester WITHOUT a custom
   domain.
   - Locked by PROJECT.md Key Decisions: "Custom Resend domain (DKIM/DMARC for
@@ -472,10 +481,10 @@ The planner and executor decide:
 <deferred>
 ## Deferred Ideas
 
-- **Custom Resend domain (DKIM + DMARC for `oddlympics.app`)** — locked to v1.1
-  in PROJECT.md Key Decisions. Phase 10 must clear the ≥ 8/10 bar from the
-  sandbox sender. Revisit only if the live score is unrecoverable from
-  copy/header tweaks (very unlikely on Resend's verified sandbox).
+- **Custom Resend domain (DKIM + DMARC for `oddlympics.app`)** — ~~locked to
+  v1.1~~ **RESOLVED 2026-05-15: shipped in v2.0 Phase 10.** Production sends
+  from the verified custom domain `hello@oddlympics.app` and scored 10/10 on
+  Mail-Tester. No longer deferred; no longer tracked.
 - **HTML email templating engine (Mjml, react-email, maizzle)** — considered for
   D-06; rejected. The body is < 50 lines and only mutates copy strings;
   template-engine overhead does not pay for itself in this milestone. Revisit

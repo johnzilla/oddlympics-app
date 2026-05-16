@@ -295,7 +295,7 @@ vs. Iran kicks off in 60 minutes (your time)" email that lands when promised.
 | Var | Required | Default | Used in |
 |---|---|---|---|
 | `RESEND_API_KEY` | prod only | — | `src/lib/email.ts:3` (throws on prod boot if missing) |
-| `EMAIL_FROM` | optional | `oddlympics <onboarding@resend.dev>` | `src/lib/email.ts:4` |
+| `EMAIL_FROM` | optional | `oddlympics <onboarding@resend.dev>` (code/dev default) — **prod sets `oddlympics <hello@oddlympics.app>`** in `/etc/oddlympics.env`: the verified custom Resend domain went live in v2.0 Phase 10 (10/10 Mail-Tester), superseding the original v1.1 deferral | `src/lib/email.ts:4` |
 | `MAGIC_LINK_SECRET` | prod only | dev fallback string | `src/lib/token.ts:3` (throws on prod boot if missing) |
 | `PUBLIC_SITE_URL` | optional | `http://localhost:4321` | `src/lib/email.ts:5` (link base) |
 | `DATABASE_PATH` | optional | `./data/oddlympics.db` | `src/lib/db.ts:6` |

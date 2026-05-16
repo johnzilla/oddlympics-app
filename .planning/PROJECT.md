@@ -120,7 +120,7 @@ group-stage kickoff on 2026-06-11. **Target completion: 2026-05-19.**
 - **Web push (browser)** — service worker + per-platform quirks too risky for the deadline; Telegram fills the "instant push" slot.
 - **Multi-event coverage (Olympics, Tour de France, etc.)** — v2 territory after WC validates the personalization graph.
 - **Real backend with Postgres / multiple replicas** — single droplet + SQLite handles WC-launch scale; revisit only if traffic forces it.
-- **Custom Resend domain (DKIM/DMARC for oddlympics.app)** — v1.1; ship with Resend's verified sandbox sender first.
+- **Custom Resend domain (DKIM/DMARC for oddlympics.app)** — LIVE in v2.0 (Phase 10, 2026-05-15): production sends from the verified custom domain `hello@oddlympics.app` (set via `/etc/oddlympics.env` `EMAIL_FROM`), scoring 10/10 on Mail-Tester. Decision pulled forward from v1.1 — the "sandbox sender first" plan was superseded once the custom domain was verified. (`src/lib/email.ts` keeps the `onboarding@resend.dev` default as the dev/fallback sender.)
 - **DigitalOcean platform migration** — droplet is fine, no Vercel/Render migration on the table.
 - **Cashu / Nostr-native architecture** — Approach C from design doc; reconsider for a 2028 LA Olympics relaunch, not now.
 - **Native mobile apps** — web only, mobile-friendly responsive design.

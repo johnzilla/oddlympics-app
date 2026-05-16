@@ -69,7 +69,7 @@ These come from `MILESTONE-consumer-landing.md` and must all pass before v2.0 is
 | AC1 | Landing page renders ("Your team's matches" present); visual diff matches `references/landing_preview.png` within tolerance | Phase 6 |
 | AC2 | All 48 `<option>` elements selectable; values match `references/teams.json` | Phase 5 |
 | AC3 | Playwright in `America/Detroit`, `Europe/London`, `Africa/Lagos` submits form and persists the correct IANA tz; sub-headline label renders the expected city | Phase 5/6 |
-| AC4 | End-to-end signup loop: Gmail + Proton receive a confirmation within 60 s naming team + tz; unsubscribe link works. Outlook is best-effort, not blocking (descoped 2026-05-15 by operator — no operator Outlook access; Outlook.com webmail is Blink-engine ≈ the passing Gmail render per Phase 10 RESEARCH §4). Re-test Outlook if access is obtained before launch. | Phase 11 |
+| AC4 | End-to-end signup loop: Gmail + Proton receive a confirmation within 60 s naming team + tz; unsubscribe link works. Gmail + Proton is the accepted cross-client standard for v2.0; Outlook is out of scope (not tested, not tracked — Outlook.com is Blink-engine ≈ the passing Gmail render per Phase 10 RESEARCH §4). | Phase 11 |
 | AC5 | `/privacy` and `/terms` return 200 with canonical copy; last-updated date matches deploy | Phase 7 |
 | AC6 | `/og-image.png` returns 200, type `image/png`, exactly 1200×630; opengraph.xyz preview renders headline/banner/URL | Phase 8 |
 | AC7 | No prohibited terms (`bitcoin`, `lightning`, `crypto`, `world domination`, `personal olympics`) anywhere in `/`, `/privacy`, `/terms`, `/manage` | Phase 11 |

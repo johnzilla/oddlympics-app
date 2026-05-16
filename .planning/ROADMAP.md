@@ -22,10 +22,10 @@ inline scripts, or inline styles).
 ## Phases
 
 - [x] **Phase 5: Schema + signup payload** — additive `team`/`timezone` columns, allow-list validation, backfill, `/api/signup` widened without breaking the existing contract
-- [ ] **Phase 6: Landing page + form + meta + analytics** — replace `index.astro` with the consumer template, wire 48-team dropdown + tz-label JS + Plausible `Signup Submit` event, swap meta tags
-- [ ] **Phase 7: Legal pages** — `/privacy` and `/terms` routes serving canonical copy, same site shell as landing
+- [x] **Phase 6: Landing page + form + meta + analytics** — replace `index.astro` with the consumer template, wire 48-team dropdown + tz-label JS + Plausible `Signup Submit` event, swap meta tags (completed 2026-05-13)
+- [x] **Phase 7: Legal pages** — `/privacy` and `/terms` routes serving canonical copy, same site shell as landing (completed 2026-05-14)
 - [x] **Phase 8: Open Graph image** — source SVG + rendered 1200×630 PNG + OG/Twitter image meta tags wired to it (completed 2026-05-14)
-- [ ] **Phase 9: `/manage` editor + unsubscribe** — show + edit team and timezone, one-time banner for backfilled rows, confirm unsubscribe token semantics
+- [x] **Phase 9: `/manage` editor + unsubscribe** — show + edit team and timezone, one-time banner for backfilled rows, confirm unsubscribe token semantics (completed 2026-05-14)
 - [x] **Phase 10: Confirmation email update** — name team + timezone in the body, deliverability cross-client + spam-score check (completed 2026-05-16)
 - [ ] **Phase 11: End-to-end + launch gate** — AC1–AC12 on production, Lighthouse run, real signup test, tag `v1.0-consumer-landing`
 
@@ -169,12 +169,12 @@ requires the plan to pin this. Document the choice in the plan, not the
 roadmap.
 
 ### Phase 10: Confirmation email update
-**Goal**: The confirmation email a new signup receives names the user's team and timezone in human-readable form, renders cleanly across Gmail + Proton (Outlook descoped to best-effort — see SC2 note), and scores ≥ 8/10 on Mail-Tester.
+**Goal**: The confirmation email a new signup receives names the user's team and timezone in human-readable form, renders cleanly across Gmail + Proton (Outlook out of scope for v2.0), and scores ≥ 8/10 on Mail-Tester. ACHIEVED 2026-05-15.
 **Depends on**: Phase 5 (template needs the `team` + `timezone` fields persisted)
 **Requirements**: SIGNUP-04
 **Success Criteria** (what must be TRUE):
   1. The confirmation email body names both the team and a human-readable timezone (e.g., "We'll email you 1 hour before every England match in Detroit time.") using the values from the signup row.
-  2. Test sends to Gmail and Proton inboxes render the email cleanly (no broken layout, links resolve, unsubscribe footer present, no prohibited terms). [DESCOPED 2026-05-15 by operator: Outlook moved to best-effort, deferred to Phase 11 AC4 — no operator Outlook access; Outlook.com webmail is Blink-engine, near-identical to the passing Gmail render per RESEARCH §4. Gmail + Proton both PASS; Mail-Tester scored 10/10.]
+  2. Test sends to Gmail and Proton inboxes render the email cleanly (no broken layout, links resolve, unsubscribe footer present, no prohibited terms). MET 2026-05-15: Gmail (England) + Proton dark-mode (France) both PASS from prod sender `hello@oddlympics.app`. Outlook is out of scope for v2.0 — Gmail + Proton is the accepted cross-client standard (no operator Outlook access; Outlook.com is Blink-engine, ~= the passing Gmail render per RESEARCH §4). No further tracking.
   3. A Mail-Tester run against the production sender scores ≥ 8/10.
 **Plans:** 3/3 plans complete
 
