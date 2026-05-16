@@ -61,7 +61,9 @@ function mintManageToken(email) {
 
 const db = new Database(DB_PATH);
 
-// Defensive: ensure match_notifications exists. Mirrors src/lib/db.ts.
+// Defensive: ensure match_notifications and user_teams exist. Mirrors src/lib/db.ts.
+// user_teams is needed here so the cron is self-contained if run against a DB
+// that hasn't been booted through the web server yet.
 db.exec(`
   CREATE TABLE IF NOT EXISTS match_notifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,6 +74,13 @@ db.exec(`
     UNIQUE (user_email, match_id, channel)
   );
   CREATE INDEX IF NOT EXISTS idx_notif_match ON match_notifications(match_id);
+  CREATE TABLE IF NOT EXISTS user_teams (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    team_slug TEXT NOT NULL,
+    UNIQUE(email, team_slug)
+  );
+  CREATE INDEX IF NOT EXISTS idx_user_teams_email ON user_teams(email);
 `);
 
 const matchesQuery = db.prepare(`
@@ -86,15 +95,19 @@ const matchesQuery = db.prepare(`
   ORDER BY m.utc_date
 `);
 
-// Find users subscribed via vip_signups.team (slug) joined to teams.slug;
-// match by teams.id IN (home_id, away_id) so the existing argv shape stays.
+// Find users subscribed via user_teams join table (D-06): vip_signups -> user_teams
+// -> teams.slug. SELECT DISTINCT collapses a user following both teams in one match
+// to a single row. NOTIFY-04 one-email-per-match is already structurally guaranteed
+// by match_notifications UNIQUE(user_email, match_id, channel) + claim-before-send;
+// no additional team-keyed dedupe needed. Call site argv shape (home_id, away_id,
+// match.id) is unchanged.
 const usersQuery = db.prepare(`
   SELECT DISTINCT v.email AS email, v.timezone AS timezone
   FROM vip_signups v
-  JOIN teams t ON v.team = t.slug
+  JOIN user_teams ut ON ut.email = v.email
+  JOIN teams t ON t.slug = ut.team_slug
   WHERE v.confirmed_at IS NOT NULL
     AND v.unsubscribed_at IS NULL
-    AND v.team IS NOT NULL
     AND t.id IN (?, ?)
     AND NOT EXISTS (
       SELECT 1 FROM match_notifications n
