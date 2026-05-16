@@ -243,14 +243,20 @@ await runCase('AC2-team-select-48-options', () => {
   // If not available, require operator to install once via npx.
   let puppeteer;
   try {
-    // Try to resolve from the repo's node_modules first (if already present from npx cache).
     puppeteer = await import('puppeteer-core');
   } catch {
-    console.error('[gate] FAIL: AC3 requires puppeteer-core to be loadable.');
-    console.error('[gate] It is NOT a project dependency. Load it via:');
-    console.error('[gate]   npx -y puppeteer-core node scripts/launch-gate.mjs');
-    console.error('[gate] Or install temporarily: npm install --no-save puppeteer-core');
-    process.exit(2);
+    // D-06: the gate must be one re-runnable command. puppeteer-core is kept out
+    // of package.json (D-03 / 06-03) — bootstrap it with --no-save so package.json
+    // stays untouched, then retry the import.
+    console.log('[gate] AC3: puppeteer-core not found — installing (--no-save, package.json untouched)…');
+    try {
+      execSync('npm install --no-save puppeteer-core', { cwd: REPO_ROOT, stdio: 'inherit' });
+      puppeteer = await import('puppeteer-core');
+    } catch (err) {
+      console.error(`[gate] FAIL: AC3 could not bootstrap puppeteer-core: ${err.message}`);
+      console.error('[gate] Install manually then re-run: npm install --no-save puppeteer-core && npm run smoke:gate');
+      process.exit(2);
+    }
   }
 
   const locales = [
