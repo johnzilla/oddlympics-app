@@ -1,10 +1,11 @@
 ---
-export const prerender = false;
-
+import Layout from '../components/Layout.astro';
 import { verifyToken } from '../lib/token';
 import { buildSessionCookie, readSessionFromCookie } from '../lib/session';
 import { db, getByEmail, getUserTeams, type VipSignup, type Match } from '../lib/db';
 import { TEAMS } from '../lib/teams';
+
+export const prerender = false;
 
 const CONFEDERATION_ORDER = [
   'UEFA',
@@ -125,22 +126,7 @@ const title = valid && !isUnsubscribed
   ? 'Your schedule — oddlympics'
   : 'Manage your schedule — oddlympics';
 ---
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <title>{title}</title>
-  <!-- Privacy-friendly analytics by Plausible -->
-  <script async src="https://plausible.io/js/pa-wRAab3seDWDDBnGbRbe0K.js"></script>
-  <script is:inline>
-    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-    plausible.init()
-  </script>
-</head>
-<body>
+<Layout title={title} noindex analytics>
   <main class="hero">
     <div class="hero-content">
 
@@ -422,40 +408,11 @@ const title = valid && !isUnsubscribed
       </script>
     </>
   )}
-</body>
-</html>
+</Layout>
 
-<style is:global>
-  :root {
-    /* Unified with the index.astro light design system (the "rework").
-       Token names are kept identical to this page's component CSS so the
-       whole page re-themes from this block alone — no per-component edits.
-       NOTE: --mono intentionally holds the home page's SANS stack so body
-       text and form controls match index.astro; a proper rename lands with
-       the v1.1 Layout.astro extraction (deferred per CLAUDE.md). */
-    --bg: #fafaf7;
-    --fg: #14151a;
-    --fg-dim: #5a5d68;
-    --line: #e4e4dd;
-    --line-strong: #c9cbc4;
-    --surface: #ffffff;
-    --accent: #b8350d;
-    --accent-ink: #ffffff;
-    --accent-soft: #fbe9e0;
-    --ok: #1a7f37;
-    --err: #b3261e;
-    --pad: 48px;
-    --mono: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--mono); -webkit-font-smoothing: antialiased; }
-  body { min-height: 100dvh; }
+<style>
   .hero { min-height: 100dvh; display: flex; align-items: center; padding: var(--pad); }
   .hero-content { max-width: 920px; }
-  .banner { display: inline-block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: var(--accent); border: 1px solid var(--accent); padding: 5px 10px; border-radius: 999px; margin-bottom: 18px; }
-  .headline { font-size: 36px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 14px; }
-  .subhead { font-size: 14px; line-height: 1.55; color: var(--fg-dim); margin: 0 0 28px; max-width: 540px; }
-  .link { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
   .flash { font-size: 13px; line-height: 1.5; padding: 10px 14px; border-radius: 6px; margin: 0 0 20px; border: 1px solid; }
   .flash.ok { color: var(--ok); border-color: var(--ok); }
   .flash.err { color: var(--err); border-color: var(--err); }
@@ -498,7 +455,6 @@ const title = valid && !isUnsubscribed
   .hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
   @media (max-width: 640px) {
     :root { --pad: 24px; }
-    .headline { font-size: 28px; }
     .match { grid-template-columns: 1fr; gap: 4px; }
     .cta-form { flex-direction: column; }
     .cta-form button { width: 100%; }
