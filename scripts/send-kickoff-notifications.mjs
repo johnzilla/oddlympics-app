@@ -95,17 +95,31 @@ const matchesQuery = db.prepare(`
   ORDER BY m.utc_date
 `);
 
-// Find users subscribed via user_teams join table (D-06): vip_signups -> user_teams
-// -> teams.slug. SELECT DISTINCT collapses a user following both teams in one match
-// to a single row. NOTIFY-04 one-email-per-match is already structurally guaranteed
-// by match_notifications UNIQUE(user_email, match_id, channel) + claim-before-send;
-// no additional team-keyed dedupe needed. Call site argv shape (home_id, away_id,
-// match.id) is unchanged.
+// Find users subscribed to a match's home/away team.
+//
+// A confirmed user's followed teams are: their user_teams rows (the /manage
+// multi-team editor, Phase 12) if they have any, OTHERWISE their single
+// vip_signups.team pick set at signup. The LEFT JOIN + COALESCE expresses
+// exactly that fallback:
+//   - multi-team /manage user: ut.team_slug is non-null on every joined row,
+//     so COALESCE picks it and fans out per followed team. A team they
+//     deselected in /manage is NOT resurrected (v.team is never consulted
+//     while any user_teams row exists for them).
+//   - landing-page signup who never opened /manage (the primary funnel) OR a
+//     re-subscribed user whose user_teams was cleared on unsubscribe (CR-02):
+//     no user_teams rows, so the LEFT JOIN yields one row with ut.team_slug
+//     NULL and COALESCE falls back to v.team — they get notified for their
+//     original pick. (Pre-Phase-12 behavior; the Phase-12 INNER JOIN silently
+//     dropped this entire path — #core-promise regression.)
+// SELECT DISTINCT collapses a user following both teams in one match to a
+// single row. NOTIFY-04 one-email-per-match is also structurally guaranteed by
+// match_notifications UNIQUE(user_email, match_id, channel) + claim-before-send.
+// Call site argv shape (home_id, away_id, match.id) is unchanged.
 const usersQuery = db.prepare(`
   SELECT DISTINCT v.email AS email, v.timezone AS timezone
   FROM vip_signups v
-  JOIN user_teams ut ON ut.email = v.email
-  JOIN teams t ON t.slug = ut.team_slug
+  LEFT JOIN user_teams ut ON ut.email = v.email
+  JOIN teams t ON t.slug = COALESCE(ut.team_slug, v.team)
   WHERE v.confirmed_at IS NOT NULL
     AND v.unsubscribed_at IS NULL
     AND t.id IN (?, ?)
