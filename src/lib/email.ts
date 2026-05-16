@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { mintToken } from './token';
 import { teamLabel } from './teams';
 import { tzLabel } from './timezones';
+import { NO_ACCOUNT_TITLE, NO_ACCOUNT_BODY, REENTRY_CTA } from './copy';
 
 const API_KEY = process.env.RESEND_API_KEY ?? '';
 const FROM = process.env.EMAIL_FROM ?? 'oddlympics <onboarding@resend.dev>';
@@ -21,6 +22,7 @@ export async function sendMagicLink(
   timezone: string,
 ): Promise<void> {
   const url = `${SITE_URL}/api/confirm?token=${encodeURIComponent(token)}`;
+  const manageUrl = `${SITE_URL}/manage`;
   const teamHuman = teamLabel(team);
   const tzHuman = tzLabel(timezone);
   const subject = 'Confirm your World Cup alerts — oddlympics';
@@ -31,6 +33,9 @@ export async function sendMagicLink(
     url,
     '',
     `We'll email you 1 hour before every ${teamHuman} match in ${tzHuman}.`,
+    '',
+    'Add teams, change your time zone, or follow new sports anytime — no',
+    `account, no password: ${manageUrl}`,
     '',
     'No spam. No ads. Unsubscribe anytime.',
     '',
@@ -44,6 +49,17 @@ export async function sendMagicLink(
 <div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #eee;border-radius:8px;padding:28px">
   <h1 style="font-size:18px;margin:0 0 12px">Confirm your alerts</h1>
   <p style="margin:0 0 20px;line-height:1.55">We'll email you 1 hour before every <strong>${teamHuman}</strong> match in ${tzHuman}.</p>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fbe9e0;border:1px solid #b8350d;border-radius:8px;margin:0 0 24px">
+    <tr><td style="padding:18px 22px">
+      <p style="margin:0 0 6px;font-size:15px;font-weight:bold;color:#b8350d">${NO_ACCOUNT_TITLE} Keep this email.</p>
+      <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#14151a">${NO_ACCOUNT_BODY}</p>
+      <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+        <td style="background:#b8350d;border-radius:6px">
+          <a href="${manageUrl}" style="display:inline-block;padding:13px 26px;font-family:'Courier New',monospace;font-size:14px;font-weight:bold;color:#ffffff;text-decoration:none">${REENTRY_CTA} →</a>
+        </td>
+      </tr></table>
+    </td></tr>
+  </table>
   <p style="margin:0 0 24px"><a href="${url}" style="display:inline-block;background:hsl(18 70% 56%);color:#0b0b0e;text-decoration:none;padding:12px 18px;border-radius:6px;font-weight:700">Confirm email</a></p>
   <p style="margin:0 0 8px;color:#666;font-size:12px">Or paste this URL:</p>
   <p style="margin:0 0 24px;word-break:break-all;color:#666;font-size:12px">${url}</p>
