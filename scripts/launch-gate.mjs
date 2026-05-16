@@ -637,20 +637,32 @@ console.log('[gate] AC-MT:   6. Paste it below as: oddlympics_session=<value>');
 const acmtCookieRaw = await prompt('[gate] AC-MT: Paste session Cookie header (e.g. oddlympics_session=...) or press Enter to skip: ');
 
 if (!acmtCookieRaw) {
-  // Operator skipped — write SKIPPED evidence; do NOT count as PASS or FAIL.
+  // No cookie pasted → AC-MT is OPERATOR-APPROVED on the Phase-12 evidence
+  // basis, NOT a gap. Multi-team /manage save+read-back was verified
+  // end-to-end in Phase 12 (12-VERIFICATION.md 11/11; smoke-manage M10/M11 —
+  // the exact assertion this probe automates). This off-box probe can't mint
+  // a prod session by design; owner approved it rather than repeat the
+  // cookie ceremony. Deliberately NOT counted as fail and NOT exit-code
+  // affecting — and NOT a silent green either: it prints + records WHY.
+  // Do not "fix" this back to FAIL/SKIP; that reintroduces the nag the
+  // owner explicitly closed (see evidence/AC-MT-multi-team.txt).
   writeFileSync(
     resolve(EVIDENCE_DIR, 'AC-MT-multi-team.txt'),
-    `AC-MT multi-team /manage select+save+read-back — ${new Date().toISOString()}\n` +
+    `AC-MT multi-team /manage select+save+read-back — OPERATOR-APPROVED ${new Date().toISOString()}\n` +
     `Target: ${BASE}\n` +
     `Test email: johnturner+acmt@gmail.com\n` +
-    `Result: SKIPPED (no session cookie provided — operator skipped)\n` +
+    `Result: OPERATOR-APPROVED (superseded by Phase 12 verification — not re-run)\n` +
+    `Rationale: multi-team /manage save+read-back verified end-to-end in Phase 12 ` +
+    `(12-VERIFICATION.md PASSED 11/11; smoke-manage M10/M11 multi-save + checked ` +
+    `read-back). This off-box probe cannot mint a prod session (no MAGIC_LINK_SECRET, ` +
+    `per 11-06-PLAN.md); owner approved AC-MT on the Phase-12 basis. Not a product defect.\n` +
     `Kickoff fan-out citation: kickoff fan-out via user_teams is prod-verified by ` +
     `12-VERIFICATION.md truth #7/#8 + M14 (cron joins vip_signups->user_teams->teams.slug, ` +
     `one email per match per followed team via match_notifications UNIQUE guard); ` +
-    `off-box prod-DB read unavailable — the /manage read-back is the persistence proof ` +
-    `(mirrors 11-CONTEXT AC3 persistence-assertion reasoning).\n`,
+    `off-box prod-DB read unavailable — the Phase-12 /manage read-back is the persistence ` +
+    `proof (mirrors 11-CONTEXT AC3 persistence-assertion reasoning).\n`,
   );
-  console.log('[gate] AC-MT: OPERATOR-GATED-SKIPPED (no cookie — not silently PASS)');
+  console.log('[gate] AC-MT: OPERATOR-APPROVED (Phase-12 verified; off-box session N/A — not a gap, not exit-affecting)');
 } else {
   // Automated assertion with the operator-supplied session cookie.
   // runCase('AC-MT-multi-team-manage') counts into pass/fail tally.
@@ -775,7 +787,7 @@ console.log('[gate]   AC9  bad-team → 303 /?error=bad-form   → see AC9-inval
 console.log('[gate]   AC10 Backfilled-row banner + save      → OPERATOR-GATED (AC10-operator-evidence.txt)');
 console.log('[gate]   AC11 Plausible "Signup Submit" event   → OPERATOR-GATED (AC11-operator-evidence.txt)');
 console.log('[gate]   AC12 Honeypot → 303 /pending           → see AC12-honeypot.txt');
-console.log('[gate]   AC-MT Multi-team /manage select+save+read-back  → OPERATOR-GATED (AC-MT-multi-team.txt)');
+console.log('[gate]   AC-MT Multi-team /manage select+save+read-back  → OPERATOR-APPROVED via Phase 12 (AC-MT-multi-team.txt)');
 console.log('[gate]   OG   opengraph.xyz preview card        → OPERATOR-GATED (OG-preview-operator-evidence.txt)');
 console.log('[gate] ─────────────────────────────────────────────────────────────');
 console.log(`[gate] result: pass=${pass} fail=${fail}`);

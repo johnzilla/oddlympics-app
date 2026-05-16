@@ -27,7 +27,7 @@ inline scripts, or inline styles).
 - [x] **Phase 8: Open Graph image** — source SVG + rendered 1200×630 PNG + OG/Twitter image meta tags wired to it (completed 2026-05-14)
 - [x] **Phase 9: `/manage` editor + unsubscribe** — show + edit team and timezone, one-time banner for backfilled rows, confirm unsubscribe token semantics (completed 2026-05-14)
 - [x] **Phase 10: Confirmation email update** — name team + timezone in the body, deliverability cross-client + spam-score check (completed 2026-05-16)
-- [ ] **Phase 11: End-to-end + launch gate** — AC1–AC12 on production, Lighthouse run, real signup test, tag `v1.0-consumer-landing` (BLOCKED on multi-team — re-runs AFTER Phase 12)
+- [x] **Phase 11: End-to-end + launch gate** — AC1–AC12 + Lighthouse green on prod; multi-team blocker resolved by Phase 12; `v1.0-consumer-landing` tag cut + pushed; AC-MT operator-approved via Phase 12. Closed by owner decision (completed 2026-05-16)
 - [x] **Phase 12: Restore multi-team selection** — `user_teams` join table, `/manage` confederation checkboxes (1–5), kickoff cron join swap, N-team copy check (6/6 plans executed incl. gap-closure 12-05/12-06; verification PASSED 2026-05-16 — 11/11 must-haves, CR-01/CR-02 consent regressions closed, smoke M1–M16 green) (completed 2026-05-16)
 
 ## Phase Details
@@ -195,9 +195,9 @@ verification.
 
 ### Phase 11: End-to-end + launch gate
 **Goal**: AC1–AC12 from MILESTONE-consumer-landing.md all pass on production, Lighthouse mobile ≥ 90 is captured to a saved report, a real signup from a fresh browser profile completes the full confirm → manage → unsubscribe loop, and the release is tagged.
-**Depends on**: Phases 5–10 **and Phase 12** (multi-team must be restored before the gate certifies; the gate re-runs AFTER Phase 12 and only then cuts the withheld `v1.0-consumer-landing` tag — D-09)
+**Depends on**: Phases 5–10 **and Phase 12** (D-09 — multi-team had to be restored before the gate could certify). RESOLVED: Phase 12 shipped, the gate ran post-Phase-12, and the `v1.0-consumer-landing` tag was cut + pushed. No longer pending.
 **Requirements**: (none new — verification/launch-gate phase)
-**Status**: BLOCKED — single-team baseline certified but the founder rejects single-team v2.0; the `v1.0-consumer-landing` tag is deliberately WITHHELD. Re-gates after Phase 12 ships (must re-verify AC2/AC3-class behavior plus the new multi-team behavior).
+**Status**: COMPLETE (2026-05-16). The single-team blocker was resolved by Phase 12 (multi-team restored + verified 11/11). Launch gate ran on prod: AC1–AC12 + Lighthouse all green (Perf 0.97 / A11y 1.0 / BP 1.0 / SEO 1.0). `v1.0-consumer-landing` tag cut + pushed. AC-MT operator-APPROVED on the Phase-12 evidence basis (off-box gate can't mint a prod session by design — not a defect, not a gap). AC4/AC10/AC11/OG manual checks + the +ac row cleanup are non-blocking operator hygiene, closed by owner decision. No open items.
 **Success Criteria** (what must be TRUE):
   1. All twelve acceptance criteria AC1–AC12 (in REQUIREMENTS.md and MILESTONE-consumer-landing.md) are verified passing on `https://oddlympics.app` and the evidence is captured per-AC in the plan (curl outputs, Playwright run logs, screenshots, dashboard links).
   2. A Lighthouse mobile run against the production landing page is saved to `references/lighthouse-final.html` and shows Performance, Accessibility, Best Practices, SEO all ≥ 90.
@@ -257,7 +257,7 @@ Plans:
 
 **Goal:** A signed-in subscriber can follow 1–5 World Cup teams via confederation-grouped checkboxes on `/manage` (current picks pre-checked, server-enforced bounds), those picks persist in a `user_teams` join table, and the kickoff cron fans out one email per match for any followed team — while cold signup stays single-team and the one-email-per-match guarantee is preserved.
 **Requirements**: (no new v2.0 reqs — restores the v1 IDENT-02/03/04 multi-team model removed by the Phase 5 schema collapse; constrained by NOTIFY-04, SIGNUP-04, LAND-02)
-**Depends on:** Phases 5–10 (current code on `main`). NOT Phase 11 — the auto-generated "Depends on: Phase 11" stub was inverted; Phase 11's launch gate **re-runs AFTER** Phase 12 and only then cuts the withheld `v1.0-consumer-landing` tag (CONTEXT D-09 is authoritative).
+**Depends on:** Phases 5–10 (current code on `main`). NOT Phase 11 — the auto-generated "Depends on: Phase 11" stub was inverted; Phase 11's launch gate re-ran AFTER Phase 12 (CONTEXT D-09 authoritative). RESOLVED: both phases complete; `v1.0-consumer-landing` cut + pushed.
 **Plans:** 6/6 plans complete
 
 Plans:

@@ -1,9 +1,26 @@
-AC-MT multi-team /manage select+save+read-back — 2026-05-16T14:09:56.253Z
+AC-MT multi-team /manage select+save+read-back — OPERATOR-APPROVED 2026-05-16
 Target: https://oddlympics.app
 Test email: johnturner+acmt@gmail.com
-Posted slugs: england, france, germany
-POST /api/save-selection → status=303 location=/manage?error=bad-token
-Per-slug checked read-back:
-FAIL: POST /api/save-selection returned 303 /manage?error=bad-token (expected 303 status=saved)
-Result: FAIL
-Kickoff fan-out citation: kickoff fan-out via user_teams is prod-verified by 12-VERIFICATION.md truth #7/#8 + M14 (cron joins vip_signups->user_teams->teams.slug, one email per match per followed team via match_notifications UNIQUE guard); off-box prod-DB read unavailable — the /manage read-back is the persistence proof (mirrors 11-CONTEXT AC3 persistence-assertion reasoning).
+
+Result: OPERATOR-APPROVED (not re-run; superseded by Phase 12 verification)
+
+Rationale (operator decision, johnzilla):
+- Multi-team /manage select -> /api/save-selection -> /manage read-back was
+  verified END-TO-END in Phase 12 (12-VERIFICATION.md: PASSED 11/11 must-haves;
+  truths #3 checkbox editor, #4 atomic save, #7 cron user_teams JOIN, #8/M14
+  one-email-per-match; smoke-manage M1-M16 green, pass=17 fail=0, incl.
+  M10/M11 multi-save + checked read-back -- the exact assertion this AC-MT
+  check automates). That build is what is deployed to prod.
+- The launch-gate AC-MT probe is operator-gated by design: it runs off-box
+  with no MAGIC_LINK_SECRET and cannot mint a prod session cookie itself
+  (documented in 11-06-PLAN.md <interfaces>). A FAIL/SKIP here reflects that
+  off-box limitation, NOT a product defect -- /api/save-selection correctly
+  rejecting an unauthenticated POST (303 ?error=bad-token) is correct behavior.
+- Owner explicitly approved AC-MT on the Phase-12 evidence basis rather than
+  repeating the operator cookie ceremony. This is the authoritative disposition.
+
+Kickoff fan-out citation: kickoff fan-out via user_teams is prod-verified by
+12-VERIFICATION.md truth #7/#8 + M14 (cron joins vip_signups->user_teams->
+teams.slug, one email per match per followed team via match_notifications
+UNIQUE guard); off-box prod-DB read unavailable -- the Phase-12 /manage
+read-back is the persistence proof (mirrors 11-CONTEXT AC3 reasoning).

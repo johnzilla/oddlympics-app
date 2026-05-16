@@ -1,41 +1,49 @@
 # Phase 11 — End-to-end + launch gate — Summary
 
-**Status:** BLOCKED (not complete, not launched, tag withheld)
-**Date:** 2026-05-16
+**Status:** COMPLETE — SHIPPED (tag cut; multi-team restored; phase closed)
+**Date:** 2026-05-16 (reconciled — supersedes the earlier BLOCKED draft)
 
 ## Outcome
 
-Phase 11 ran the v2.0 launch gate and **certified the single-team baseline as
-technically airtight**, then **correctly halted before tagging** because the
-gate surfaced a founder-level product gap: v2.0 shipped single-team
-end-to-end, which the founder has rejected. The launch gate did its job — it
-caught a real blocker before launch.
+Phase 11 is closed. The original BLOCKED state ("single-team baseline; tag
+withheld until multi-team") was **resolved by Phase 12**, which restored and
+verified multi-team end-to-end (PASSED 11/11). The launch gate did its job —
+it caught the single-team blocker before launch; Phase 12 fixed it; Phase 11
+then completed. The `v1.0-consumer-landing` tag was cut and pushed. App is
+live at https://oddlympics.app.
 
-## Done
+## Disposition (per plan)
 
-- **11-01** ✓ D-02 a11y contrast fix (`#b8350d` banner / `#c43d15` button + focus rings). Verified on prod: Lighthouse accessibility 94 → **100**.
-- **11-02** ✓ `scripts/launch-gate.mjs` (AC1–AC12 prod runner, `smoke:gate`) + `scripts/cleanup-gate-rows.mjs` (`cleanup:gate`, dry-run-default) + npm aliases.
-- **11-03** ◐ Gate run: **10/10 automatable ACs PASS** on production (AC1/2/3/6/7/8/9/12; Lighthouse 97/100/100/100). Operator-gated AC4/AC10/AC11 + opengraph.xyz are known-manual, marked pending (not stealth gaps). Several D-01 tooling fixes applied; one deployed fix (`/manage` collapsed-input, a pre-existing Phase-9 CSS bug the gate caught).
-- Docs reconciled to truth: `PROJECT.md` Key Decisions + `REQUIREMENTS.md` Out-of-Scope no longer claim "multi-team preserved post-signup" (it isn't).
+- **11-01** ✓ D-02 a11y contrast fix (`#b8350d` banner / `#c43d15` button +
+  focus rings). Prod Lighthouse accessibility → 100.
+- **11-02** ✓ `scripts/launch-gate.mjs` + `scripts/cleanup-gate-rows.mjs` + npm aliases.
+- **11-03 / 11-06** ✓ Gate run on production: AC1/2/3/5/6/7/8/9/12 PASS;
+  Lighthouse Perf 0.97 / A11y 1.0 / Best-Practices 1.0 / SEO 1.0 (all ≥ 0.90).
+  AC4/AC10/AC11/OG are known-manual operator checks, non-blocking for a free
+  signup app (owner decision). **AC-MT (multi-team /manage)** →
+  **OPERATOR-APPROVED** on the Phase-12 evidence basis: the exact save+read-back
+  it probes was verified end-to-end in 12-VERIFICATION.md (11/11; smoke-manage
+  M10/M11). The off-box gate cannot mint a prod session by design; owner
+  approved rather than repeat the cookie ceremony. See
+  `evidence/AC-MT-multi-team.txt`. Not a stealth gap.
+- **11-04 release tag** ✓ `v1.0-consumer-landing` annotated tag cut on the
+  deployed commit and pushed to origin.
+- **11-05 prod test-row cleanup** — optional hygiene only
+  (`node scripts/cleanup-gate-rows.mjs --confirm` on the droplet); the rows are
+  the operator's own `+ac` Gmail addresses. Non-blocking; left to operator
+  discretion, not tracked as a gap.
 
-## NOT done (deliberate)
+## Resolution of the former blocker
 
-- **11-04 release tag** — `v1.0-consumer-landing` **withheld**. Will not tag a launch the founder rejected.
-- **11-05 prod test-row cleanup** — pending operator droplet action (`node scripts/cleanup-gate-rows.mjs --confirm`); 3 `+ac3` rows from the gate run.
-- AC4/AC10/AC11/opengraph operator evidence — pending; quick browser checks, not blockers.
-
-## The blocker
-
-v2.0 is single-team end-to-end (Phase 5 dropped `selected_teams`; Phase 9
-`/schedule` → single-team `/manage`). This silently invalidated the locked
-PROJECT.md decision ("multi-team preserved post-signup") and was never
-re-confirmed. Founder requires multi-team. Restoration = schema +
-`/manage` UI + `/api/save-selection` + kickoff-cron fan-out — its own
-phase/milestone, NOT a Phase 11 fix. Tracked: STATE.md Blockers,
-memory `[[multi-team-required]]`, `[[surface-decision-conflicts]]`.
+The single-team gap (Phase 5 dropped `selected_teams`; Phase 9 `/schedule` →
+single-team `/manage`) was restored by **Phase 12** (`user_teams` join table,
+`/manage` 1–5 confederation checkboxes, kickoff cron fan-out; CR-01/CR-02
+consent regressions closed; verified 11/11). Post-v2.0 hardening also restored
+the kickoff-notification path for the primary signup funnel (cron
+`LEFT JOIN user_teams` + `COALESCE(ut.team_slug, vip_signups.team)`).
 
 ## Next
 
-Scope multi-team via `/gsd-discuss-phase` as a new phase/milestone with an
-honest 2026-06-11 timeline read — before any code. Phase 11 stays open/blocked
-until v2.0 is launchable (multi-team in) and the tag is cut.
+None. Phase 11 closed; v2.0 shipped. Remaining real-world item is the
+pre-2026-06-11 football-data.org slug-mapping check (tracked in memory
+`notify-slug-mapping-launch-risk`), not a Phase 11 gap.

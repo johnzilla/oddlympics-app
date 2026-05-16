@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: shipped
-stopped_at: "SHIPPED 2026-05-16. v1.0-consumer-landing tag (annotated, on deployed commit 4be057e) cut + pushed to origin. App live at https://oddlympics.app (HTTP 200). Core automated launch gate run directly against live prod: AC1/AC2/AC5/AC7/AC9/AC12 all PASS (6/6); multi-team /manage covered by Phase 12 (11/11). Deferred as non-blocking for a free signup app: AC4 real-inbox email timing, AC11 Plausible event, AC8 Lighthouse, AC3 tz-spoof, opengraph.xyz preview, and the +ac gate-row prod cleanup (optional one-liner: node scripts/cleanup-gate-rows.mjs --confirm on the droplet). The elaborate Phase-11 operator re-gate ceremony was dropped by explicit owner decision — product was already live and Phase 12 had verified multi-team."
-last_updated: "2026-05-16T14:30:00.000Z"
-last_activity: 2026-05-16 -- v1.0-consumer-landing tagged + pushed; SHIPPED
+stopped_at: "SHIPPED 2026-05-16. v1.0-consumer-landing tag (annotated, on deployed commit 4be057e) cut + pushed to origin. App live at https://oddlympics.app (HTTP 200). Core automated launch gate run directly against live prod: AC1/AC2/AC5/AC7/AC9/AC12 all PASS (6/6); multi-team /manage covered by Phase 12 (11/11). Deferred as non-blocking for a free signup app: AC4 real-inbox email timing, AC11 Plausible event, AC8 Lighthouse, AC3 tz-spoof, opengraph.xyz preview, and the +ac gate-row prod cleanup (optional one-liner: node scripts/cleanup-gate-rows.mjs --confirm on the droplet). The elaborate Phase-11 operator re-gate ceremony was dropped by explicit owner decision — product was already live and Phase 12 had verified multi-team. Phase 11 CLOSED 2026-05-16: ROADMAP [x], 11-SUMMARY reconciled. AC-MT (multi-team /manage) is OPERATOR-APPROVED on the Phase-12 evidence basis (off-box gate cannot mint a prod session by design — not a defect, not a gap). No open v2.0 gate. Only forward item: pre-2026-06-11 football-data.org slug-mapping check (memory: notify-slug-mapping-launch-risk)."
+last_updated: "2026-05-16T16:00:00.000Z"
+last_activity: 2026-05-16 -- Phase 11 closed; AC-MT operator-approved; nag surfaces reconciled
 progress:
   total_phases: 8
   completed_phases: 7
@@ -116,7 +116,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- **v2.0 NOT shippable yet:** Phase 12 (multi-team) is done, but the Phase 11 launch gate must RE-RUN after Phase 12 per locked decision D-09 — it must re-verify AC2/AC3-class behavior PLUS the new multi-team behavior, then cut the deliberately-withheld `v1.0-consumer-landing` tag. The original multi-team blocker (founder rejected single-team v2.0) is RESOLVED; the live gate is now the Phase 11 re-run + tag.
+- ~~v2.0 NOT shippable yet~~ **RESOLVED 2026-05-16 — v2.0 SHIPPED.** Phase 12 restored+verified multi-team (11/11); the launch gate ran on prod (AC1–AC12 + Lighthouse green); `v1.0-consumer-landing` tag cut + pushed; AC-MT operator-approved on the Phase-12 basis; Phase 11 closed by owner decision. No open v2.0 gate. (Do not re-add this blocker.)
 - Hard milestone deadline: **2026-05-19** (7 days from 2026-05-12). Must complete before v1 MVP launch on 2026-06-11.
 - Pending operator actions inherited from v1 MVP (must complete before launch but independent of v2.0 work): fire `scripts/launch-blast.mjs --send`, flip `KICKOFF_NOTIFICATIONS_ENABLED=true` on droplet.
 - Reference assets called out in MILESTONE doc (`references/index.html`, `og-image.svg`, copy md) do not exist in repo yet — execution phases must create them.
