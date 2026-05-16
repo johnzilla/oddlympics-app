@@ -4,8 +4,8 @@ milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
 status: Shipped — no active milestone
 stopped_at: "v2.0 SHIPPED + ARCHIVED 2026-05-16. v1.0-consumer-landing tagged + pushed; app live (HTTP 200); production launch gate green. Milestone archived to .planning/milestones/v2.0-*. No active milestone — launch-readiness mode until 2026-06-11. Pre-launch operator items remain — see ROADMAP Pending operator actions."
-last_updated: "2026-05-16T21:30:00.000Z"
-last_activity: 2026-05-16 — Milestone v2.0 completed and archived
+last_updated: "2026-05-16T22:46:55.016Z"
+last_activity: 2026-05-16 - Completed quick task 260516-q33: manage discoverability content and entry pass
 progress:
   total_phases: 8
   completed_phases: 8
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-16, after v2.0 milestone)
 Phase: Milestone v2.0 complete — shipped + archived
 Plan: —
 Status: Shipped — no active milestone (launch-readiness mode until 2026-06-11)
-Last activity: 2026-05-16 — Milestone v2.0 completed and archived
+Last activity: 2026-05-16 - Completed quick task 260516-q33: manage discoverability content and entry pass
 
 ## Performance Metrics
 
@@ -126,6 +126,7 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260511-ccx | Phase 2.5 SC4: demand-capture textarea on /schedule + feature_requests table | 2026-05-11 | 6129910 | [260511-ccx-implement-phase-2-5-success-criterion-4-](./quick/260511-ccx-implement-phase-2-5-success-criterion-4-/) |
+| 260516-q33 | manage discoverability content and entry pass (sketches 001-B/002-B/003-B) | 2026-05-16 | eb67661 | [260516-q33-manage-discoverability-content-and-entry](./quick/260516-q33-manage-discoverability-content-and-entry/) |
 
 ## Deferred Items
 

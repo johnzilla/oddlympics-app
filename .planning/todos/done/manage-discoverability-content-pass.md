@@ -2,8 +2,18 @@
 title: /manage + multi-team discoverability — content & entry pass
 date: 2026-05-16
 priority: high
+status: done
+completed: 2026-05-16
+completed_by: quick task 260516-q33 (commits 8885e42, 1b3a37f, eb67661)
 context: Launch-readiness. World Cup kickoff 2026-06-11 (~26 days out). Background and rationale in .planning/notes/multi-team-discoverability-gap.md.
 ---
+
+> ✅ **Done 2026-05-16** via `/gsd-quick` task `260516-q33`. Shipped sketch
+> winners 001-B (under-form re-entry link) + 002-B (signed-out trust block +
+> sport accordion + "editor"→"right back in" copy fix) + 003-B (confirmation
+> email "keep this email" callout); shared no-account copy in `src/lib/copy.ts`.
+> See `.planning/quick/260516-q33-manage-discoverability-content-and-entry/`.
+> Local commits on `main`, not pushed.
 
 # /manage + multi-team discoverability — content & entry pass
 
