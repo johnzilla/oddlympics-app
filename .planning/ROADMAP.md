@@ -258,7 +258,7 @@ Plans:
 **Goal:** A signed-in subscriber can follow 1–5 World Cup teams via confederation-grouped checkboxes on `/manage` (current picks pre-checked, server-enforced bounds), those picks persist in a `user_teams` join table, and the kickoff cron fans out one email per match for any followed team — while cold signup stays single-team and the one-email-per-match guarantee is preserved.
 **Requirements**: (no new v2.0 reqs — restores the v1 IDENT-02/03/04 multi-team model removed by the Phase 5 schema collapse; constrained by NOTIFY-04, SIGNUP-04, LAND-02)
 **Depends on:** Phases 5–10 (current code on `main`). NOT Phase 11 — the auto-generated "Depends on: Phase 11" stub was inverted; Phase 11's launch gate **re-runs AFTER** Phase 12 and only then cuts the withheld `v1.0-consumer-landing` tag (CONTEXT D-09 is authoritative).
-**Plans:** 4/4 plans complete
+**Plans:** 6 plans (4 complete + 2 gap-closure pending — verification GAPS_FOUND 2026-05-16: 2 BLOCKER consent regressions CR-01/CR-02)
 
 Plans:
 **Wave 1**
@@ -270,6 +270,12 @@ Plans:
 
 **Wave 3** *(depends on 12-02 + 12-03)*
 - [x] 12-04-PLAN.md — D-07 `sendMagicLink` copy verify (single-team, no SIGNUP-04 regression, no LAND-02) + extend `scripts/smoke-manage.mjs` with M10–M14 end-to-end multi-team cases; full M1–M14 suite green.
+
+**Wave 4** *(gap closure — depends on 12-02; closes the two BLOCKER consent regressions from 12-VERIFICATION.md)*
+- [ ] 12-05-PLAN.md — CR-01 + CR-02 surgical fix: restore the SQL-level confirmed/unsubscribed state gate in `/api/save-selection` (new `updateTimezoneActive` in db.ts → status=unknown on inactive, zero `user_teams` writes), restore the `unknown` STATUS_COPY key in `manage.astro`, and clear `user_teams` on `/api/unsubscribe` so re-confirmation cannot silently re-activate a stale team list.
+
+**Wave 5** *(depends on 12-05 + 12-04)*
+- [ ] 12-06-PLAN.md — WR-04 negative-path smoke coverage: add M15 (unsubscribed-POST → status=unknown, zero writes, tz preserved) + M16 (unsubscribe clears `user_teams` → reconfirm → cron sees zero teams) to `scripts/smoke-manage.mjs`; full M1–M16 suite green against the 12-05-fixed build.
 
 ---
 
