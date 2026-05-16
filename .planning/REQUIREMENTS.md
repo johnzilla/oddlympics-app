@@ -152,7 +152,7 @@ Explicitly excluded; documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Multi-team selection at signup intake | Cold-traffic conversion favors one decision per field; `/schedule` already supports multi-select for returning users, so power breadth is preserved post-signup |
+| Multi-team selection at signup *intake* (cold signup stays single by design) | Cold-traffic conversion favors one decision per field. ⚠ The original rationale ("`/schedule` preserves multi-select post-signup") is STALE — Phase 5/9 removed multi-team entirely (single `team` column; `/schedule` → single-select `/manage`). Multi-team **post-signup is NOT out of scope** — it is a known v2.0 launch blocker (founder-rejected single-team-only); tracked in STATE.md Blockers, required before the `v1.0-consumer-landing` tag. |
 | IP-based country preselection for the team dropdown | Adds geo-lookup dependency + privacy surface for marginal UX gain; defer until real signup data shows user-team mismatch is a problem |
 | Localization of the landing page | English only for v2.0; localization adds copy/QA surface the 2026-05-19 deadline can't absorb |
 | Web push (browser) | Service worker + per-platform quirks too risky; email-only ships a complete product |

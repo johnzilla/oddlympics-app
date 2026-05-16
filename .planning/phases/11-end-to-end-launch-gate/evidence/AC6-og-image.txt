@@ -1,0 +1,2 @@
+PASS: /og-image.png — 200, image/png, 1200×630, 85070 bytes at 2026-05-16T02:30:39.193Z
+Target: https://oddlympics.app/og-image.png

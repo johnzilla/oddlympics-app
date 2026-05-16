@@ -1,0 +1,7 @@
+AC7 prohibited-terms check — 2026-05-16T02:30:39.422Z
+Target: https://oddlympics.app
+
+/: PASS (clean)
+/privacy: PASS (clean)
+/terms: PASS (clean)
+/manage: PASS (clean)

@@ -1,0 +1,10 @@
+AC8 Lighthouse mobile — 2026-05-16T02:31:05.583Z
+Target: https://oddlympics.app
+Report: references/lighthouse-final.html
+
+performance: 97
+accessibility: 100
+best-practices: 100
+seo: 100
+
+Result: PASS (all >= 90)
