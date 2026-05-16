@@ -4,7 +4,10 @@
 
 - ✅ **v1 MVP** — Phases 1–4 (shipped on `main` 2026-05-08 → 2026-05-11; Phase 4 is a launch-week observation checkpoint 2026-06-11 → 2026-06-14)
 - ✅ **v2.0 Consumer Landing & Signup Flow** — Phases 5–12 (shipped 2026-05-16, tagged `v1.0-consumer-landing`)
-- 📋 **v1.1** — not yet scoped (`/gsd-new-milestone`)
+
+No active milestone. Project is in launch-readiness mode until World Cup
+group stage on **2026-06-11** — see "Pending operator actions" below.
+Deferred (no schedule): Telegram bot, Lightning tip jar, niche-sport long tail.
 
 ## Phases
 

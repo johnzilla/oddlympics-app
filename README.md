@@ -55,8 +55,8 @@ to `main` (~40 seconds end-to-end).
 smoke-test one real kickoff notification before group stage opens; fire the
 launch blast. See `DEPLOY.md`.
 
-**Deferred to v1.1:** Telegram bot, Lightning tip jar, niche-sport long tail
-(strongman, cubing, etc.).
+**Deferred (no scheduled milestone):** Telegram bot, Lightning tip jar,
+niche-sport long tail (strongman, cubing, etc.).
 
 Roadmap, requirements, and per-phase plans + summaries live under `.planning/`.
 See `.planning/ROADMAP.md` for the v1 phase breakdown and `DEPLOY.md` for the

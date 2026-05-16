@@ -8,53 +8,66 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 for international sports fans, launching at the 2026 FIFA World Cup
 (group-stage kickoff **2026-06-11**).
 
-**v1 MVP status (in code on `main`):**
-- v1.0 teaser shipped: public landing + double-opt-in email capture
-- Phase 1 hardening shipped: `confirmed.astro` status fix, `/api/unsubscribe`,
-  CSP enforce, default-deny on missing Origin, 24h magic-link TTL
-- Phase 2 shipped: magic-link sign-in (`/manage`), team picker + personal
-  schedule (`/schedule`), browser-tz capture with manual override, World Cup
-  schedule ingestor (football-data.org → `teams`/`matches` SQLite tables),
-  cookie-based 30-day sliding-window sessions
-- Phase 2.5: `scripts/launch-blast.mjs` ready (manual `--send` to fire the
-  "pick your teams" email to existing teaser list); `/schedule` page also
-  captures an optional "which other championship next?" free-text demand signal
-  into the `feature_requests` table (v1.1 triage input)
-- Phase 3: kickoff notification cron (`oddlympics-notify.timer` every 5 min,
+**Status: v2.0 SHIPPED + ARCHIVED 2026-05-16.** Both milestones to date are
+complete and live on production (https://oddlympics.app, HTTP 200, launch gate
+green, tagged `v1.0-consumer-landing`). **No active milestone** — the project
+is in launch-readiness mode until World Cup group stage on **2026-06-11**
+(pre-launch operator actions below). `.planning/STATE.md` + `MILESTONES.md`
+are the source of truth for status; this section is a summary and can lag —
+trust `.planning/` over this paragraph.
+
+**v1 MVP — Phases 1–4 (shipped on `main` 2026-05-08 → 2026-05-11):**
+- Phase 1 hardening: `confirmed.astro` status fix, `/api/unsubscribe`, CSP
+  enforce, default-deny on missing Origin, 24h magic-link TTL
+- Phase 2 — Identity & Personal Schedule: magic-link sign-in (`/manage`), team
+  picker + personal schedule (`/schedule`), browser-tz capture with manual
+  override, World Cup schedule ingestor (football-data.org → `teams`/`matches`
+  SQLite tables), cookie-based 30-day sliding-window sessions
+- Phase 2.5 — Launch Comms: `scripts/launch-blast.mjs` ready (manual `--send`);
+  `/schedule` "which other championship next?" demand-capture into
+  `feature_requests`
+- Phase 3 — Kickoff Notifications: cron (`oddlympics-notify.timer` every 5 min,
   dry-run until `KICKOFF_NOTIFICATIONS_ENABLED=true`)
+- Phase 4 — Launch Week Observation: post-launch checkpoint, scheduled
+  2026-06-11 → 2026-06-14 (not yet executed — runs during World Cup group stage)
 
-**v2.0 milestone — Consumer Landing & Signup Flow (in code on `main`):**
-- Phase 5 shipped: `vip_signups.team` (single snake_case slug from
-  `references/teams.json`, 48 World Cup 2026 teams) + `timezone` columns. First
-  non-additive SQLite migration in project history — `selected_teams` dropped,
-  guarded by `pragma_table_info` probe + SQLite ≥ 3.35 version assert. NULL-tz
-  backfill `UPDATE` runs once. `POST /api/signup` widened (team allow-list
-  validation, tz validation with `America/New_York` fallback per CONTEXT D-03).
-  Two new lib helpers: `src/lib/teams.ts` (VALID_TEAMS Set from teams.json),
-  `src/lib/timezones.ts` (VALID_TZ from `Intl.supportedValuesOf('timeZone')`,
-  FALLBACK_TZ). Downstream consumers rewritten: kickoff cron JOINs
-  `vip_signups.team → teams.slug`, `/schedule` reads `user.team`,
-  `/api/save-selection` writes a single slug. Phase 5 verification:
-  `scripts/smoke-signup.mjs` (8/8 PASS end-to-end against the built server).
-  Pre-deploy operator action: `scripts/backup-pre-05.mjs` snapshots
-  `data/oddlympics.db` → `.pre-05.bak` (see `DEPLOY.md`).
-- Phases 6–9 shipped (in code on `main`): Phase 6 consumer landing rewrite
-  (`index.astro` + 48-team `<select>` + tz-label JS + Plausible event + meta
-  swap); Phase 7 `/privacy` + `/terms` legal pages; Phase 8 Open Graph image
-  (`public/og-image.png` via `scripts/render-og-image.mjs`); Phase 9 dual-mode
-  `/manage` editor + unsubscribe + per-purpose token TTLs.
-- Phase 10 (confirmation email update) — code shipped: 10-01 widened
-  `sendMagicLink()` to name team + timezone (D-04 value-prop, D-05 subject,
-  `Reply-To` + `List-Unsubscribe` headers); 10-02 offline smoke
-  `scripts/smoke-confirm-email.mjs`. Plan 10-03 is the operator close-out gate
-  (deploy + Mail-Tester ≥ 8/10 + Gmail/Proton/Outlook cross-client evidence).
-- Phase 11 (planned): E2E launch gate — AC1–AC12 on production, Lighthouse run,
-  real signup test, tag `v1.0-consumer-landing`. Target ship 2026-05-19. Full
-  roadmap in `.planning/ROADMAP.md`.
+**v2.0 Consumer Landing & Signup Flow — Phases 5–12, SHIPPED 2026-05-16**
+(8 phases / 32 plans / 42 tasks; archived to `.planning/milestones/v2.0-*`):
+- Phase 5 — Schema + signup payload: `vip_signups.team` (single slug from
+  `references/teams.json`, 48 teams) + `timezone`. First non-additive SQLite
+  migration in project history (`selected_teams` dropped, `pragma_table_info`
+  probe + SQLite ≥ 3.35 version assert, NULL-tz backfill). `/api/signup`
+  widened (team allow-list, tz fallback `America/New_York`, never rejects).
+  Lib helpers `src/lib/teams.ts` + `src/lib/timezones.ts`. `smoke-signup.mjs`
+  8/8 PASS.
+- Phase 6 — Landing page: full consumer World Cup rewrite of `index.astro`
+  (48-team confederation `<select>`, tz-label JS, Plausible event, 13 OG/Twitter
+  meta tags); Lighthouse mobile Perf 1.00 / A11y AA-fixed / BP 1.00 / SEO 1.00.
+- Phase 7 — Legal pages: `/privacy` + `/terms` on the shared site shell.
+- Phase 8 — Open Graph image: `/og-image.png` 1200×630 <300KB from checked-in
+  source SVG via vendored resvg + fonts.
+- Phase 9 — `/manage` editor + unsubscribe: dual-mode editor, per-purpose token
+  TTL table (1-year single-use unsubscribe), backfill banner, `/schedule`→
+  `/manage` 301.
+- Phase 10 — Confirmation email: body names team + human timezone; custom
+  Resend domain `hello@oddlympics.app` live, Mail-Tester 10/10, Gmail + Proton
+  cross-client verified.
+- Phase 11 — Launch gate: AC1–AC12 + Lighthouse green on production;
+  `v1.0-consumer-landing` tagged + pushed.
+- Phase 12 — Restore multi-team: `user_teams` join table, `/manage` 1–5
+  confederation checkboxes, kickoff-cron fan-out via `user_teams`
+  (one-email-per-match preserved), smoke M1–M16 green.
 
-**v1.1 deferrals:** Telegram bot, Lightning tip jar (vaultwarden integration),
-niche-sport long tail (strongman, cubing). (The shared `Layout.astro` refactor
-was pulled forward out of v1.1 and is now done — see Conventions.)
+**Pending operator actions (pre-launch, milestone-independent — before
+2026-06-11):** fire `scripts/launch-blast.mjs --send`; flip
+`KICKOFF_NOTIFICATIONS_ENABLED=true` + restart `oddlympics-notify.timer`; e2e
+smoke one real kickoff notification; verify football-data.org name→slug mapping
+(kickoff-cron silent-loss risk). See `.planning/ROADMAP.md`.
+
+**Deferred (no scheduled milestone):** Telegram bot, Lightning tip jar
+(vaultwarden integration), niche-sport long tail (strongman, cubing). Not on
+a schedule; revisit only if post-launch demand warrants. (The shared
+`Layout.astro` refactor was pulled forward and is done — see Conventions.)
 
 Roadmap, requirements, locked decisions, and per-phase plans live under
 `.planning/`. The full original design context is at
@@ -224,9 +237,9 @@ ops table (logs, restart, DB inspection, email-list export, backup).
   site footer. Every UI page (`index`, `pending`, `confirmed`, `unsubscribed`,
   `manage`, `privacy`, `terms`) wraps its content in `<Layout>` and keeps only
   its **page-specific** CSS in a scoped `<style>` (NOT `is:global`). A new
-  page imports `Layout` — it does NOT paste a `<style is:global>` head. The
-  v1.1-deferred extraction was pulled forward (the per-page style duplication
-  is what let the dark/light theme drift happen). `--mono` is an intentional
+  page imports `Layout` — it does NOT paste a `<style is:global>` head. This
+  extraction was originally deferred but pulled forward (the per-page style
+  duplication is what let the dark/light theme drift happen). `--mono` is an intentional
   back-compat alias to `--font-sans` so legacy `var(--mono)` component CSS
   still renders in the body face; a clean rename is fine but optional.
 - **Errors and pending state via URL params** (`?error=bad-email`,
@@ -303,7 +316,7 @@ vs. Iran kicks off in 60 minutes (your time)" email that lands when promised.
 | Var | Required | Default | Used in |
 |---|---|---|---|
 | `RESEND_API_KEY` | prod only | — | `src/lib/email.ts:3` (throws on prod boot if missing) |
-| `EMAIL_FROM` | optional | `oddlympics <onboarding@resend.dev>` (code/dev default) — **prod sets `oddlympics <hello@oddlympics.app>`** in `/etc/oddlympics.env`: the verified custom Resend domain went live in v2.0 Phase 10 (10/10 Mail-Tester), superseding the original v1.1 deferral | `src/lib/email.ts:4` |
+| `EMAIL_FROM` | optional | `oddlympics <onboarding@resend.dev>` (code/dev default) — **prod sets `oddlympics <hello@oddlympics.app>`** in `/etc/oddlympics.env`: the verified custom Resend domain went live in v2.0 Phase 10 (10/10 Mail-Tester), superseding the original sandbox-sender deferral | `src/lib/email.ts:4` |
 | `MAGIC_LINK_SECRET` | prod only | dev fallback string | `src/lib/token.ts:3` (throws on prod boot if missing) |
 | `PUBLIC_SITE_URL` | optional | `http://localhost:4321` | `src/lib/email.ts:5` (link base) |
 | `DATABASE_PATH` | optional | `./data/oddlympics.db` | `src/lib/db.ts:6` |

@@ -23,9 +23,10 @@ the app currently has.
 - **Email content:** Hardcoded plaintext + HTML in `sendMagicLink`
   (`src/lib/email.ts:16-40`). No templating engine; subject is fixed to
   "Confirm your spot — oddlympics".
-- **Domain status:** Currently using Resend's verified sandbox domain
-  (`onboarding@resend.dev`). DKIM/DMARC for `oddlympics.app` is deferred to
-  v1.1 (per `DEPLOY.md:135`).
+- **Domain status:** Production sends from the verified custom domain
+  `hello@oddlympics.app` (DKIM/DMARC for `oddlympics.app`) since v2.0 Phase 10
+  (10/10 Mail-Tester), set via `/etc/oddlympics.env` `EMAIL_FROM`. The
+  `onboarding@resend.dev` sandbox sender is the dev/fallback default only.
 
 ## SQLite (local datastore)
 
@@ -110,7 +111,6 @@ Per `DEPLOY.md:131-136` and `CLAUDE.md`:
 
 - **No off-droplet DB backup** (rclone → S3/B2 planned before launch).
 - **No SMS provider / A2P 10DLC** (deferred to v1.2).
-- **No custom Resend domain / DKIM+DMARC for oddlympics.app** (v1.1).
 - **No Lightning / BTCPay / Strike** integration (deferred until after launch).
 - **No webhooks inbound** — there is no `/api/webhook/*` route.
 - **No auth provider** — the only "auth" is the magic-link confirmation; there

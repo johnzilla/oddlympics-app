@@ -39,9 +39,9 @@ production before group-stage kickoff (2026-06-11).
 
 **Known deferred items at close:** 0
 
-**Standing v1.1 deferrals (not gaps):** Telegram bot (NOTIFY-02), Lightning
-tip jar via vaultwarden (TIP-01/02), niche-sport long tail. One pre-launch
-operator item, milestone-independent: football-data.org name→slug mapping
-check before 2026-06-11 (kickoff-cron silent-loss risk).
+**Deferred at close (not gaps; no scheduled milestone):** Telegram bot
+(NOTIFY-02), Lightning tip jar via vaultwarden (TIP-01/02), niche-sport long
+tail. One pre-launch operator item, milestone-independent: football-data.org
+name→slug mapping check before 2026-06-11 (kickoff-cron silent-loss risk).
 
 ---

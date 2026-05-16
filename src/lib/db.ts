@@ -168,7 +168,7 @@ db.exec(`
 // Phase 2.5 — LAUNCH-01-SC4: optional "which championship next?" demand-capture
 // field on /schedule. History-preserving (one row per submission), not a column
 // on vip_signups, so a user can submit multiple requests over time and we can
-// triage by `GROUP BY request_text` for v1.1.
+// triage by `GROUP BY request_text` later.
 db.exec(`
   CREATE TABLE IF NOT EXISTS feature_requests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -243,7 +243,7 @@ export const setSelection = db.prepare<[string, string, string]>(`
   RETURNING *
 `);
 
-// Phase 2.5 — LAUNCH-01-SC4: demand-capture for v1.1 prioritization.
+// Phase 2.5 — LAUNCH-01-SC4: demand-capture for future prioritization.
 export type FeatureRequest = {
   id: number;
   email: string;

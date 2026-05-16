@@ -40,14 +40,22 @@ covered by Phase 12, 11/11). Delivered:
 domination"/"personal Olympics" anywhere in `/`, `/privacy`, `/terms`,
 `/manage`, meta, OG image, inline assets.
 
-## Next Milestone
+## Status
 
-Not yet scoped. Standing v1.1 deferrals (see Out of Scope + REQUIREMENTS
-"Future"): Telegram bot notifications (NOTIFY-02), Lightning tip jar via
-vaultwarden (TIP-01/02), niche-sport long tail (strongman, cubing). One
-pre-launch operator item remains, independent of any milestone:
-football-data.org name→slug mapping check before 2026-06-11 (kickoff-cron
-silent-loss risk). Run `/gsd-new-milestone` to scope v1.1.
+v2.0 shipped and the product is live. No active development milestone — the
+project is in launch-readiness mode until World Cup group stage on
+**2026-06-11**.
+
+**Pre-launch operator actions (launch blockers, not a milestone):**
+- Fire `scripts/launch-blast.mjs --send` (currently dry-run)
+- Flip `KICKOFF_NOTIFICATIONS_ENABLED=true` + restart `oddlympics-notify.timer`
+- End-to-end smoke one real kickoff notification
+- Verify football-data.org name→slug mapping (kickoff-cron silent-loss risk)
+
+**Deferred (no scheduled milestone — see Out of Scope):** Telegram bot
+notifications, Lightning tip jar via vaultwarden, niche-sport long tail
+(strongman, cubing). Not on a schedule; revisit only if post-launch demand
+warrants.
 
 ## Requirements
 
@@ -87,9 +95,9 @@ silent-loss risk). Run `/gsd-new-milestone` to scope v1.1.
 
 ### Active
 
-<!-- Empty — v2.0 shipped 2026-05-16. Next milestone (v1.1) not yet scoped; run /gsd-new-milestone. -->
+<!-- Empty — v2.0 shipped 2026-05-16. No active milestone. -->
 
-(None — awaiting v1.1 scoping.)
+(None — v2.0 shipped; no active milestone.)
 
 ### Out of Scope
 
@@ -102,7 +110,7 @@ silent-loss risk). Run `/gsd-new-milestone` to scope v1.1.
 - **Web push (browser)** — service worker + per-platform quirks too risky for the deadline; Telegram fills the "instant push" slot.
 - **Multi-event coverage (Olympics, Tour de France, etc.)** — v2 territory after WC validates the personalization graph.
 - **Real backend with Postgres / multiple replicas** — single droplet + SQLite handles WC-launch scale; revisit only if traffic forces it.
-- **Custom Resend domain (DKIM/DMARC for oddlympics.app)** — LIVE in v2.0 (Phase 10, 2026-05-15): production sends from the verified custom domain `hello@oddlympics.app` (set via `/etc/oddlympics.env` `EMAIL_FROM`), scoring 10/10 on Mail-Tester. Decision pulled forward from v1.1 — the "sandbox sender first" plan was superseded once the custom domain was verified. (`src/lib/email.ts` keeps the `onboarding@resend.dev` default as the dev/fallback sender.)
+- **Custom Resend domain (DKIM/DMARC for oddlympics.app)** — LIVE in v2.0 (Phase 10, 2026-05-15): production sends from the verified custom domain `hello@oddlympics.app` (set via `/etc/oddlympics.env` `EMAIL_FROM`), scoring 10/10 on Mail-Tester. Originally a deferral — the "sandbox sender first" plan was superseded once the custom domain was verified. (`src/lib/email.ts` keeps the `onboarding@resend.dev` default as the dev/fallback sender.)
 - **DigitalOcean platform migration** — droplet is fine, no Vercel/Render migration on the table.
 - **Cashu / Nostr-native architecture** — Approach C from design doc; reconsider for a 2028 LA Olympics relaunch, not now.
 - **Native mobile apps** — web only, mobile-friendly responsive design.
@@ -122,7 +130,7 @@ existing email list or signup path; the migration from "teaser only" to
 foundation for the personalization sign-up flow.
 
 **Founder is the proof user.** John watches strongman + cubing himself; the
-v1.1 niche-sport long tail is a real personal need, not a hypothetical
+deferred niche-sport long tail is a real personal need, not a hypothetical
 market. For v1, John can also be the WC test user.
 
 **vaultwarden is the upstream integration.** The Lightning tip jar lives in
@@ -157,11 +165,11 @@ ships Approach A — concierge MVP, World Cup-only.
 |----------|-----------|---------|
 | Approach A from design doc (concierge MVP, WC-only) over Approach B (real backend, multi-event) or C (Nostr-native) | Only A ships before kickoff; A captures real demand signal that informs B's spec | — Pending (validates by 2026-06-11) |
 | Phase 1 = pre-launch hardening before building forward | Existing teaser has CONCERNS.md issues (confirmed.astro silent failure, no unsubscribe, no DB backup) that must be fixed before sending production email at scale | — Pending |
-| World Cup only for sport coverage; niche sports captured via VIP form only | Single-sport launch story is cleaner; niche coverage builds against v1.1 demand signal, not speculation | — Pending |
+| World Cup only for sport coverage; niche sports captured via VIP form only | Single-sport launch story is cleaner; niche coverage builds against post-launch demand signal, not speculation | — Pending |
 | Free football data API (e.g. football-data.org) over fully hand-curated schedule | API removes manual upkeep risk during knockout-bracket changes; manual override path covers ToS or rate-limit issues | — Pending |
 | Email + Telegram only for notifications (no SMS, no web push) | A2P 10DLC SMS registration is multi-week paperwork; web push has cross-platform quirks; email is shipping today and Telegram is one bot away | — Pending |
 | Magic-link auth (extend teaser pattern) over email+password | Identity is solved by the existing token + Resend flow; password adds reset/session/hashing surface we don't need on this timeline | — Pending |
-| Single global Lightning tip jar via vaultwarden; integration shape TBD at phase planning | Per-event/per-creator tipping is design-doc-explicit v1.1; vault integration shape may need vault-side work, defer locking until that phase | — Pending |
+| Single global Lightning tip jar via vaultwarden; integration shape TBD at phase planning | Per-event/per-creator tipping is design-doc-explicit deferred scope; vault integration shape may need vault-side work, defer locking until then | — Pending |
 | Stay on the existing droplet/Caddy/systemd stack | Stack is shipping reliably; no rewrites mid-deadline | ✓ Good (already proven) |
 | **v2.0 consumer pivot — strip BTC/Lightning/"world domination"/"personal Olympics" from public surfaces; rewrite landing for casual soccer fans** | Existing copy is optimized for indie/builder audience and converts poorly from cold paid/organic traffic; paid-ad reviewers also require `/privacy` + `/terms`. Backend, ESP, and infra are untouched except for additive `team`/`timezone` columns on the signup payload — magic-link, kickoff cron, schedule data all stay. | ✓ Shipped v2.0 (2026-05-16) — LAND-02 grep clean on all public surfaces; market validation pending real signups by 2026-06-11 |
 | **Single-team signup at intake; multi-team selection preserved post-signup on `/manage`** | Cold-traffic conversion favors one decision per field; multi-team is a returning-user need restored post-signup. | ✓ Shipped v2.0 (Phase 12, verified 11/11 2026-05-16): `user_teams` join table, `/manage` 1–5 confederation checkboxes, cron fan-out via `user_teams`, signup single-team (D-03), CR-01/CR-02 consent contract closed. Phase 11 launch gate re-ran post-Phase-12; `v1.0-consumer-landing` cut + pushed. Resolved — no open gate. |
@@ -186,4 +194,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-16 after v2.0 milestone (Consumer Landing & Signup Flow) shipped — 8 phases, `v1.0-consumer-landing` tagged + pushed, production launch gate green. Next: v1.1 scoping via /gsd-new-milestone.*
+*Last updated: 2026-05-16 after v2.0 milestone (Consumer Landing & Signup Flow) shipped — 8 phases, `v1.0-consumer-landing` tagged + pushed, production launch gate green. No active milestone; project in launch-readiness mode until 2026-06-11.*

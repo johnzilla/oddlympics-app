@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
-status: Awaiting next milestone
-stopped_at: "v2.0 SHIPPED + ARCHIVED 2026-05-16. v1.0-consumer-landing tagged + pushed; app live (HTTP 200); production launch gate green. Milestone archived to .planning/milestones/v2.0-*. Next: /gsd-new-milestone to scope v1.1. Pre-launch operator items (milestone-independent) remain — see ROADMAP Pending operator actions."
+status: Shipped — no active milestone
+stopped_at: "v2.0 SHIPPED + ARCHIVED 2026-05-16. v1.0-consumer-landing tagged + pushed; app live (HTTP 200); production launch gate green. Milestone archived to .planning/milestones/v2.0-*. No active milestone — launch-readiness mode until 2026-06-11. Pre-launch operator items remain — see ROADMAP Pending operator actions."
 last_updated: "2026-05-16T21:30:00.000Z"
 last_activity: 2026-05-16 — Milestone v2.0 completed and archived
 progress:
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-16, after v2.0 milestone)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** Planning next milestone (v1.1) — run `/gsd-new-milestone`
+**Current focus:** Launch readiness — pre-launch operator actions before 2026-06-11 (see ROADMAP). No active development milestone.
 
 ## Current Position
 
-Phase: Milestone v2.0 complete
+Phase: Milestone v2.0 complete — shipped + archived
 Plan: —
-Status: Awaiting next milestone
+Status: Shipped — no active milestone (launch-readiness mode until 2026-06-11)
 Last activity: 2026-05-16 — Milestone v2.0 completed and archived
 
 ## Performance Metrics
@@ -142,4 +142,9 @@ None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+Pre-launch operator actions before 2026-06-11 (launch blockers, not a milestone — see ROADMAP):
+
+- Fire `scripts/launch-blast.mjs --send` (currently dry-run)
+- Flip `KICKOFF_NOTIFICATIONS_ENABLED=true` + restart `oddlympics-notify.timer`
+- End-to-end smoke one real kickoff notification
+- Verify football-data.org name→slug mapping (kickoff-cron silent-loss risk)

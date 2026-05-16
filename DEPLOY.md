@@ -106,7 +106,7 @@ If everything works, https://oddlympics.app shows the teaser.
 | Restart manually | `systemctl restart oddlympics` |
 | Inspect the SQLite DB | `sqlite3 /var/lib/oddlympics/oddlympics.db` |
 | Export the confirmed email list | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, team, timezone, requested_sport, datetime(confirmed_at, "unixepoch") FROM vip_signups WHERE confirmed_at IS NOT NULL'` |
-| Export demand-capture requests (v1.1 triage) | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, request_text, datetime(created_at, "unixepoch") FROM feature_requests ORDER BY created_at DESC'` |
+| Export demand-capture requests (demand triage) | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, request_text, datetime(created_at, "unixepoch") FROM feature_requests ORDER BY created_at DESC'` |
 | See team distribution (post-Phase-5) | `sqlite3 -column -header /var/lib/oddlympics/oddlympics.db 'SELECT COALESCE(team, "(unset)") AS team, COUNT(*) AS n FROM vip_signups WHERE confirmed_at IS NOT NULL AND unsubscribed_at IS NULL GROUP BY team ORDER BY n DESC'` |
 | Roll Caddy config | edit `/etc/caddy/Caddyfile`, then `systemctl reload caddy` |
 | Back up the DB | `sqlite3 /var/lib/oddlympics/oddlympics.db ".backup /tmp/oddlympics-$(date +%F).db"` |
@@ -306,5 +306,5 @@ Throttles 1.5s between sends. Resend free tier is 100/day, 10/sec — well insid
 ## What is NOT in v1 (deferred)
 
 - **A2P 10DLC SMS registration.** Start it in parallel if you still want SMS for v1.2.
-- **Custom Resend domain.** v1 uses your verified Resend sender. DKIM + DMARC for `oddlympics.app` is v1.1.
+- **Custom Resend domain.** Live — production sends from the verified custom domain `hello@oddlympics.app` (DKIM + DMARC for `oddlympics.app`), set via `/etc/oddlympics.env` `EMAIL_FROM`, 10/10 Mail-Tester. The `onboarding@resend.dev` sandbox sender remains the dev/fallback default only.
 - **Lightning tip jar.** Out of scope until v1 ships and the `vaultwarden` integration shape is confirmed.
