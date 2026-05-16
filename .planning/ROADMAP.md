@@ -169,12 +169,12 @@ requires the plan to pin this. Document the choice in the plan, not the
 roadmap.
 
 ### Phase 10: Confirmation email update
-**Goal**: The confirmation email a new signup receives names the user's team and timezone in human-readable form, renders cleanly across Gmail/Proton/Outlook, and scores ≥ 8/10 on Mail-Tester.
+**Goal**: The confirmation email a new signup receives names the user's team and timezone in human-readable form, renders cleanly across Gmail + Proton (Outlook descoped to best-effort — see SC2 note), and scores ≥ 8/10 on Mail-Tester.
 **Depends on**: Phase 5 (template needs the `team` + `timezone` fields persisted)
 **Requirements**: SIGNUP-04
 **Success Criteria** (what must be TRUE):
   1. The confirmation email body names both the team and a human-readable timezone (e.g., "We'll email you 1 hour before every England match in Detroit time.") using the values from the signup row.
-  2. Test sends to Gmail, Proton, and Outlook inboxes render the email cleanly (no broken layout, links resolve, unsubscribe footer present, no prohibited terms).
+  2. Test sends to Gmail and Proton inboxes render the email cleanly (no broken layout, links resolve, unsubscribe footer present, no prohibited terms). [DESCOPED 2026-05-15 by operator: Outlook moved to best-effort, deferred to Phase 11 AC4 — no operator Outlook access; Outlook.com webmail is Blink-engine, near-identical to the passing Gmail render per RESEARCH §4. Gmail + Proton both PASS; Mail-Tester scored 10/10.]
   3. A Mail-Tester run against the production sender scores ≥ 8/10.
 **Plans:** 2/3 plans executed
 
