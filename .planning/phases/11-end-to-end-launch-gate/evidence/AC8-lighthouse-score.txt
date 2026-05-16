@@ -1,8 +1,8 @@
-AC8 Lighthouse mobile — 2026-05-16T02:31:05.583Z
+AC8 Lighthouse mobile — 2026-05-16T14:03:14.777Z
 Target: https://oddlympics.app
 Report: references/lighthouse-final.html
 
-performance: 97
+performance: 100
 accessibility: 100
 best-practices: 100
 seo: 100

@@ -1,0 +1,9 @@
+AC-MT multi-team /manage select+save+read-back — 2026-05-16T14:09:56.253Z
+Target: https://oddlympics.app
+Test email: johnturner+acmt@gmail.com
+Posted slugs: england, france, germany
+POST /api/save-selection → status=303 location=/manage?error=bad-token
+Per-slug checked read-back:
+FAIL: POST /api/save-selection returned 303 /manage?error=bad-token (expected 303 status=saved)
+Result: FAIL
+Kickoff fan-out citation: kickoff fan-out via user_teams is prod-verified by 12-VERIFICATION.md truth #7/#8 + M14 (cron joins vip_signups->user_teams->teams.slug, one email per match per followed team via match_notifications UNIQUE guard); off-box prod-DB read unavailable — the /manage read-back is the persistence proof (mirrors 11-CONTEXT AC3 persistence-assertion reasoning).

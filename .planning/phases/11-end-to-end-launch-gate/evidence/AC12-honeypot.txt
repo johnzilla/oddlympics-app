@@ -1,4 +1,4 @@
-AC12 honeypot redirect — 2026-05-16T02:31:05.727Z
+AC12 honeypot redirect — 2026-05-16T14:08:05.162Z
 Target: https://oddlympics.app/api/signup
 Status: 303
 Location: /pending

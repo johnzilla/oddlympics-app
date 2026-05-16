@@ -1,4 +1,4 @@
-AC3 puppeteer-core tz-spoof — 2026-05-16T02:30:39.019Z
+AC3 puppeteer-core tz-spoof — 2026-05-16T14:01:33.681Z
 Target: https://oddlympics.app/
 Locales: America/Detroit, Europe/London, Africa/Lagos
 DEVIATION: Used puppeteer-core (Phase-6 pattern) instead of Playwright per D-03

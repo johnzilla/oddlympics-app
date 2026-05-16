@@ -1,4 +1,4 @@
-AC9 bad-team redirect — 2026-05-16T02:31:05.648Z
+AC9 bad-team redirect — 2026-05-16T14:03:14.842Z
 Target: https://oddlympics.app/api/signup
 Status: 303
 Location: /?error=bad-form

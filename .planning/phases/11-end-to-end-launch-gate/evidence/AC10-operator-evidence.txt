@@ -1,2 +1,2 @@
-AC10 backfilled-row banner + save — 2026-05-16T02:31:05.661Z
-SKIPPED (no evidence provided)
+AC10 backfilled-row banner + save — 2026-05-16T14:06:08.170Z
+I selected England on sign-up, on going to /manage England is not checked

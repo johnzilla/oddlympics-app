@@ -1,2 +1,2 @@
-AC11 Plausible Signup Submit event — 2026-05-16T02:31:05.671Z
-SKIPPED (no evidence provided)
+AC11 Plausible Signup Submit event — 2026-05-16T14:08:04.520Z
+there is no goal "signup submit" only "form: submission"
