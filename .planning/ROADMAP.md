@@ -27,7 +27,8 @@ inline scripts, or inline styles).
 - [x] **Phase 8: Open Graph image** — source SVG + rendered 1200×630 PNG + OG/Twitter image meta tags wired to it (completed 2026-05-14)
 - [x] **Phase 9: `/manage` editor + unsubscribe** — show + edit team and timezone, one-time banner for backfilled rows, confirm unsubscribe token semantics (completed 2026-05-14)
 - [x] **Phase 10: Confirmation email update** — name team + timezone in the body, deliverability cross-client + spam-score check (completed 2026-05-16)
-- [ ] **Phase 11: End-to-end + launch gate** — AC1–AC12 on production, Lighthouse run, real signup test, tag `v1.0-consumer-landing`
+- [ ] **Phase 11: End-to-end + launch gate** — AC1–AC12 on production, Lighthouse run, real signup test, tag `v1.0-consumer-landing` (BLOCKED on multi-team — re-runs AFTER Phase 12)
+- [ ] **Phase 12: Restore multi-team selection** — `user_teams` join table, `/manage` confederation checkboxes (1–5), kickoff cron join swap, N-team copy check
 
 ## Phase Details
 
@@ -194,14 +195,15 @@ verification.
 
 ### Phase 11: End-to-end + launch gate
 **Goal**: AC1–AC12 from MILESTONE-consumer-landing.md all pass on production, Lighthouse mobile ≥ 90 is captured to a saved report, a real signup from a fresh browser profile completes the full confirm → manage → unsubscribe loop, and the release is tagged.
-**Depends on**: Phases 5–10
+**Depends on**: Phases 5–10 **and Phase 12** (multi-team must be restored before the gate certifies; the gate re-runs AFTER Phase 12 and only then cuts the withheld `v1.0-consumer-landing` tag — D-09)
 **Requirements**: (none new — verification/launch-gate phase)
+**Status**: BLOCKED — single-team baseline certified but the founder rejects single-team v2.0; the `v1.0-consumer-landing` tag is deliberately WITHHELD. Re-gates after Phase 12 ships (must re-verify AC2/AC3-class behavior plus the new multi-team behavior).
 **Success Criteria** (what must be TRUE):
   1. All twelve acceptance criteria AC1–AC12 (in REQUIREMENTS.md and MILESTONE-consumer-landing.md) are verified passing on `https://oddlympics.app` and the evidence is captured per-AC in the plan (curl outputs, Playwright run logs, screenshots, dashboard links).
   2. A Lighthouse mobile run against the production landing page is saved to `references/lighthouse-final.html` and shows Performance, Accessibility, Best Practices, SEO all ≥ 90.
   3. A real signup from John's personal Gmail in a fresh browser profile delivers a correctly-rendered confirmation email naming the team and timezone within 60 seconds; the unsubscribe link from that email returns the user to `/unsubscribed` and removes them from active sending.
-  4. The release is tagged `v1.0-consumer-landing` in git on the deploy commit.
-**Plans:** 4/5 plans executed
+  4. The release is tagged `v1.0-consumer-landing` in git on the deploy commit (AFTER Phase 12).
+**Plans:** 4/5 plans executed (re-gate pending Phase 12)
 
 Plans:
 **Wave 1**
@@ -227,18 +229,17 @@ Plans:
 | 8. Open Graph image | 1/1 | Complete   | 2026-05-14 |
 | 9. `/manage` editor + unsubscribe | 4/5 | In Progress|  |
 | 10. Confirmation email update | 3/3 | Complete    | 2026-05-16 |
-| 11. End-to-end + launch gate | 4/5 | In Progress|  |
+| 11. End-to-end + launch gate | 4/5 | BLOCKED (re-gates after Phase 12) |  |
+| 12. Restore multi-team selection | 0/4 | Planned    |  |
 
-**Execution order:** 5 → 6 → 7 → 8 → 9 → 10 → 11. Phases 7 and 8 only
-depend on Phase 6's site shell + meta-tag scaffolding respectively; 9 and
-10 only depend on Phase 5's schema. The strict order above is the
-conservative sequence; some pairs (7↔8, 9↔10) could run in parallel if
-attention budget allows.
+**Execution order:** 5 → 6 → 7 → 8 → 9 → 10 → 11 (single-team baseline) →
+**12 (restore multi-team)** → 11 re-gate + tag. Phase 12 depends on Phases
+5–10 (current code), NOT on Phase 11 (D-09 — the auto-generated stub's
+"Depends on: Phase 11" was inverted; this is the authoritative ordering).
 
 ## Coverage
 
 ✓ All 20 v2.0 requirements mapped to exactly one phase
-✓ No orphans, no duplicates
 
 | Phase | v2.0 Requirements | Count |
 |-------|-------------------|-------|
@@ -249,17 +250,26 @@ attention budget allows.
 | 9 | MANAGE-01, MANAGE-02 | 2 |
 | 10 | SIGNUP-04 | 1 |
 | 11 | (verification only — no new reqs) | 0 |
+| 12 | (no new v2.0 reqs — restores v1 IDENT-02/03/04 model; touches NOTIFY-04, SIGNUP-04, LAND-02 as constraints) | 0 |
 | **Total** | | **20** |
 
 ### Phase 12: Restore multi-team selection
 
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 11
-**Plans:** 0 plans
+**Goal:** A signed-in subscriber can follow 1–5 World Cup teams via confederation-grouped checkboxes on `/manage` (current picks pre-checked, server-enforced bounds), those picks persist in a `user_teams` join table, and the kickoff cron fans out one email per match for any followed team — while cold signup stays single-team and the one-email-per-match guarantee is preserved.
+**Requirements**: (no new v2.0 reqs — restores the v1 IDENT-02/03/04 multi-team model removed by the Phase 5 schema collapse; constrained by NOTIFY-04, SIGNUP-04, LAND-02)
+**Depends on:** Phases 5–10 (current code on `main`). NOT Phase 11 — the auto-generated "Depends on: Phase 11" stub was inverted; Phase 11's launch gate **re-runs AFTER** Phase 12 and only then cuts the withheld `v1.0-consumer-landing` tag (CONTEXT D-09 is authoritative).
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 12 to break down)
+**Wave 1**
+- [ ] 12-01-PLAN.md — `user_teams` join table DDL + 3 typed prepared statements + `UserTeam` type in `src/lib/db.ts` (additive, no migration ceremony per D-02); boot-idempotency verified.
+
+**Wave 2** *(both depend on 12-01; zero file overlap → run in parallel)*
+- [ ] 12-02-PLAN.md — `/manage` confederation-grouped checkbox editor + `/api/save-selection` multi-slug bounded (≥1/≤5) transactional writer reviving the `too-many`→`bad-team` redirect (D-04, D-05).
+- [ ] 12-03-PLAN.md — Kickoff cron `usersQuery` join swap to `user_teams` (D-06); NOTIFY-04 one-email guarantee inherited free; dry-run fan-out proof.
+
+**Wave 3** *(depends on 12-02 + 12-03)*
+- [ ] 12-04-PLAN.md — D-07 `sendMagicLink` copy verify (single-team, no SIGNUP-04 regression, no LAND-02) + extend `scripts/smoke-manage.mjs` with M10–M14 end-to-end multi-team cases; full M1–M14 suite green.
 
 ---
 
