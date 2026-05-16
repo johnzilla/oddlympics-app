@@ -61,6 +61,16 @@ if (valid && result) {
     : [];
   userTeamSlugs = new Set(userTeamRows.map((r) => r.team_slug));
 
+  // Fallback (mirrors the kickoff cron's COALESCE(ut.team_slug, v.team)): a user
+  // who signed up + confirmed but never opened /manage has no user_teams rows
+  // yet. Seed the editor from their single signup pick (vip_signups.team) so it
+  // shows their team checked and previews their schedule — instead of looking
+  // empty as if the signup never registered. Once they save, user_teams becomes
+  // authoritative and this branch no longer fires.
+  if (userTeamSlugs.size === 0 && user?.team) {
+    userTeamSlugs = new Set([user.team]);
+  }
+
   if (userTeamSlugs.size > 0) {
     // Resolve each followed slug → numeric team id (parameterized per slug — no string interpolation).
     for (const slug of userTeamSlugs) {
