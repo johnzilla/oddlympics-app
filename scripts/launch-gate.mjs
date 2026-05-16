@@ -241,22 +241,27 @@ await runCase('AC2-team-select-48-options', () => {
   // Load puppeteer-core via the project's existing node_modules (installed as
   // a Phase-6 pattern; kept out of package.json deps per 06-03 decision).
   // If not available, require operator to install once via npx.
-  let puppeteer;
-  try {
-    puppeteer = await import('puppeteer-core');
-  } catch {
-    // D-06: the gate must be one re-runnable command. puppeteer-core is kept out
-    // of package.json (D-03 / 06-03) — bootstrap it with --no-save so package.json
-    // stays untouched, then retry the import.
+  // D-06: one re-runnable command. puppeteer-core stays out of package.json
+  // (D-03 / 06-03). Install BEFORE the first import — Node's ESM loader
+  // negative-caches a failed specifier resolution for the whole process, so
+  // install-then-retry in the same process cannot work; an existence-gated
+  // pre-install can.
+  if (!existsSync(resolve(REPO_ROOT, 'node_modules/puppeteer-core/package.json'))) {
     console.log('[gate] AC3: puppeteer-core not found — installing (--no-save, package.json untouched)…');
     try {
       execSync('npm install --no-save puppeteer-core', { cwd: REPO_ROOT, stdio: 'inherit' });
-      puppeteer = await import('puppeteer-core');
     } catch (err) {
-      console.error(`[gate] FAIL: AC3 could not bootstrap puppeteer-core: ${err.message}`);
-      console.error('[gate] Install manually then re-run: npm install --no-save puppeteer-core && npm run smoke:gate');
+      console.error(`[gate] FAIL: AC3 could not install puppeteer-core: ${err.message}`);
       process.exit(2);
     }
+  }
+  let puppeteer;
+  try {
+    puppeteer = await import('puppeteer-core');
+  } catch (err) {
+    console.error(`[gate] FAIL: AC3 could not load puppeteer-core after install: ${err.message}`);
+    console.error('[gate] Install manually then re-run: npm install --no-save puppeteer-core && npm run smoke:gate');
+    process.exit(2);
   }
 
   const locales = [
