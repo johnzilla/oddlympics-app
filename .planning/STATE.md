@@ -132,7 +132,7 @@ None yet.
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| *(none)* | | | |
+| Security | Astro 6 / @astrojs/node 10 major upgrade (clears 2 moderate audit advisories: Server-Islands DoS/cache-poisoning, `define:vars` XSS) | Deferred to post-launch — **not exploitable here** (0 `server:defer`, 0 `define:vars` in `src/`); major migration vs. "no rewrites mid-deadline" 26 days from hard launch. See `.planning/notes/astro6-security-deferral.md` | 2026-05-16 |
 
 ## Session Continuity
 

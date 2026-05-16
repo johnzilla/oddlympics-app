@@ -28,5 +28,9 @@
   },
   "devDependencies": {
     "@resvg/resvg-js": "2.6.2"
+  },
+  "overrides": {
+    "devalue": "^5.8.1",
+    "yaml": "^2.8.3"
   }
 }
