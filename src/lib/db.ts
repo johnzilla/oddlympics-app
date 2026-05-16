@@ -255,3 +255,38 @@ export const insertFeatureRequest = db.prepare<[string, string]>(`
   INSERT INTO feature_requests (email, request_text)
   VALUES (?, ?)
 `);
+
+// Phase 12 — D-01: join table for multi-team subscriptions (additive; no ALTER/DROP on existing tables).
+// Purely additive — no probe, no version assert, no backup-pre (D-02 waives legacy-safety ceremony).
+db.exec(`
+  CREATE TABLE IF NOT EXISTS user_teams (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    team_slug TEXT NOT NULL,
+    UNIQUE(email, team_slug)
+  );
+  CREATE INDEX IF NOT EXISTS idx_user_teams_email ON user_teams(email);
+`);
+
+export type UserTeam = { id: number; email: string; team_slug: string };
+
+// Phase 12 — D-01: delete-all-then-insert save contract (called within a transaction by /api/save-selection).
+export const deleteUserTeams = db.prepare<[string]>(`
+  DELETE FROM user_teams WHERE email = ?
+`);
+
+// Phase 12 — D-01: INSERT OR IGNORE so concurrent/duplicate inserts are safe.
+export const insertUserTeam = db.prepare<[string, string]>(`
+  INSERT OR IGNORE INTO user_teams (email, team_slug) VALUES (?, ?)
+`);
+
+// Phase 12 — D-01: read all team slugs for a user (returns { team_slug: string }[]).
+export const getUserTeams = db.prepare<[string]>(`
+  SELECT team_slug FROM user_teams WHERE email = ?
+`);
+
+// Phase 12 — D-01: module-level timezone write consumed inside the /api/save-selection
+// db.transaction() so team picks + timezone commit atomically. Param order: (timezone, email).
+export const updateTimezone = db.prepare<[string, string]>(`
+  UPDATE vip_signups SET timezone = ? WHERE email = ?
+`);
