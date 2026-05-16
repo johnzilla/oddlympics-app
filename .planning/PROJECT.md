@@ -3,14 +3,15 @@
 ## What This Is
 
 **Personalized "when does MY thing happen" notifications for international sports
-fans, launching with the 2026 FIFA World Cup.** Users pick the team they care
+fans, launching with the 2026 FIFA World Cup.** Users pick the teams they care
 about and receive an email kickoff notification in their local time zone — one
 ping, one hour before each match. The teaser landing page launched at
 https://oddlympics.app; v1 MVP (magic-link sign-in, team picker, schedule,
-kickoff cron) shipped to `main`. The current milestone (**v2.0 Consumer Landing
-& Signup Flow**) replaces the indie/builder-themed public surface with a
-consumer-targeted World Cup landing before group stage kicks off on
-**2026-06-11**.
+kickoff cron) shipped to `main`. **v2.0 Consumer Landing & Signup Flow shipped
+2026-05-16** (`v1.0-consumer-landing` tagged + pushed): the public surface is
+now a consumer-targeted World Cup landing — two-field signup, legal pages, OG
+image, `/manage` multi-team editor, team+tz confirmation email — all live and
+gate-verified on production ahead of group-stage kickoff **2026-06-11**.
 
 ## Core Value
 
@@ -20,25 +21,33 @@ renders wrong, Plausible events drop, the dropdown is ugly — the user must
 still get a "USA vs. Iran kicks off in 60 minutes (your time)" email that
 lands when promised.
 
-## Current Milestone: v2.0 Consumer Landing & Signup Flow
+## Current State
 
-**Goal:** Replace the indie/builder-themed teaser with a consumer-targeted
-World Cup 2026 landing page (team + email signup, browser-timezone capture,
-legal pages, Open Graph image) — paid-ad-reviewable and bot-resistant before
-group-stage kickoff on 2026-06-11. **Target completion: 2026-05-19.**
+**v2.0 Consumer Landing & Signup Flow — SHIPPED 2026-05-16.** 8 phases (5–12),
+32 plans, tagged `v1.0-consumer-landing` (annotated, pushed to origin). App
+live at https://oddlympics.app (HTTP 200), production launch gate green
+(AC1/AC2/AC5/AC7/AC9/AC12 PASS direct against prod; multi-team `/manage`
+covered by Phase 12, 11/11). Delivered:
+- Consumer landing rewrite — headline, JS tz label, banner pill, four below-fold sections, consumer footer, 48-team confederation-grouped `<select>`, OG/Twitter meta, zero prohibited terms
+- Two-field signup (`team` + `email` + hidden `timezone`), additive `/api/signup` widening with allow-list + IANA-tz fallback
+- `/privacy` + `/terms` legal pages on the shared site shell
+- `/og-image.png` (1200×630, <300KB) from a checked-in source SVG
+- `/manage` multi-team editor (1–5 confederation-grouped checkboxes, `user_teams` join table) + one-click unsubscribe with per-purpose token TTLs
+- Confirmation email naming team + timezone; custom Resend domain `hello@oddlympics.app` live, Mail-Tester 10/10
+- Kickoff cron fans out via `user_teams`, one-email-per-match guarantee preserved
 
-**Target features:**
-- Landing page rewrite — consumer headline, JS-populated timezone label, banner pill, How it works / Why this exists / After the World Cup / FAQ sections, consumer footer (R1)
-- Two-field signup — team dropdown (48 teams, confederation-grouped) + email + hidden timezone (R2)
-- `/api/signup` payload widening — `team` allow-list + IANA `timezone` w/ fallback, additive contract (R3)
-- `/privacy` + `/terms` legal pages (R4, R5)
-- `/og-image.png` (1200×630, <300KB) + checked-in source SVG (R6)
-- Meta tags rewrite — title, description, OG, Twitter (R7)
-- Plausible `Signup Submit` event with `team` prop (R8)
-- `/manage` team + timezone editor; one-time backfill banner for legacy rows (R9, R10)
-- 12 acceptance criteria (AC1–AC12) — including Lighthouse mobile ≥90, Playwright across 3 locales, full signup→confirm→unsubscribe loop
+**Public-surface constraint held:** no `bitcoin`/`lightning`/`crypto`/"world
+domination"/"personal Olympics" anywhere in `/`, `/privacy`, `/terms`,
+`/manage`, meta, OG image, inline assets.
 
-**Constraint:** No visible references to crypto, Lightning, Bitcoin, "world domination," or "personal Olympics" anywhere in the public surface (landing, /privacy, /terms, /manage, OG image, meta tags). Public copy is consumer soccer fan — not crypto, not dev Twitter.
+## Next Milestone
+
+Not yet scoped. Standing v1.1 deferrals (see Out of Scope + REQUIREMENTS
+"Future"): Telegram bot notifications (NOTIFY-02), Lightning tip jar via
+vaultwarden (TIP-01/02), niche-sport long tail (strongman, cubing). One
+pre-launch operator item remains, independent of any milestone:
+football-data.org name→slug mapping check before 2026-06-11 (kickoff-cron
+silent-loss risk). Run `/gsd-new-milestone` to scope v1.1.
 
 ## Requirements
 
@@ -67,47 +76,20 @@ group-stage kickoff on 2026-06-11. **Target completion: 2026-05-19.**
 - ✓ Kickoff notification cron (`oddlympics-notify.timer`, dry-run pending `KICKOFF_NOTIFICATIONS_ENABLED=true`) — v1 MVP Phase 3 (NOTIFY-01, NOTIFY-03, NOTIFY-04)
 - ✓ Consumer landing page rewrite (`src/pages/index.astro`): consumer headline + JS-populated tz label + banner pill + four below-fold sections + consumer footer + 48-team confederation-grouped `<select>` + OG/Twitter meta tags + zero prohibited terms — v2.0 Phase 6 (LAND-01, LAND-02, LAND-03, LAND-04, FORM-01, FORM-02, FORM-03, META-01)
 - ✓ Plausible `Signup Submit` custom event + dashboard custom goal configured — v2.0 Phase 6 (ANLTC-01)
+- ✓ Two-field signup (`team` 48-team confederation-grouped dropdown + `email` + hidden JS `timezone`), honeypot + `requested_sport=world_cup` retained — v2.0 Phase 5 (FORM-01, FORM-02, FORM-03)
+- ✓ `/api/signup` widened — `team` allow-list + IANA `timezone` (fallback `America/New_York`, never rejects), additive contract, `bad-form` reused, no new error codes — v2.0 Phase 5 (SIGNUP-01, SIGNUP-02, SIGNUP-03, COMPAT-02; verified Phase 5 smoke 8/8 + Phase 11 prod launch gate)
+- ✓ Pre-milestone-row backfill + `/manage` one-time "pick a team" banner — v2.0 Phase 5/9 (COMPAT-01)
+- ✓ `/privacy` + `/terms` legal pages on the shared site shell, last-updated matches deploy — v2.0 Phase 7 (LEGAL-01, LEGAL-02)
+- ✓ `/og-image.png` (1200×630, <300KB) from checked-in source SVG + OG/Twitter image meta — v2.0 Phase 8 (OG-01)
+- ✓ `/manage` multi-team editor (1–5 confederation-grouped checkboxes, `user_teams` join table) + HMAC unsubscribe (1y TTL, single-use), no new auth surface — v2.0 Phase 9/12 (MANAGE-01, MANAGE-02; restores v1 IDENT-02/03/04 multi-team model)
+- ✓ Confirmation email names team + human-readable timezone; custom Resend domain `hello@oddlympics.app` live, Mail-Tester 10/10 — v2.0 Phase 10 (SIGNUP-04)
+- ✓ Production launch gate AC1–AC12 green; `v1.0-consumer-landing` tagged + pushed — v2.0 Phase 11
 
 ### Active
 
-<!-- v2.0 Consumer Landing scope — target 2026-05-19, before WC group stage 2026-06-11 -->
+<!-- Empty — v2.0 shipped 2026-05-16. Next milestone (v1.1) not yet scoped; run /gsd-new-milestone. -->
 
-#### Signup flow widening (Phase 5)
-
-- [ ] Two-field signup form: `team` (48-team dropdown, confederation-grouped) + `email`, plus hidden `timezone` populated by JS
-- [ ] Team dropdown — snake_case slugs, UEFA → CONMEBOL → CONCACAF → CAF → AFC → OFC grouping, all 48 qualified teams
-- [ ] Retain honeypot (`name="website"`) and `requested_sport=world_cup` hidden field for forward compat
-- [ ] `/api/signup` accepts + validates `team` (allow-list) + `timezone` (IANA), persists alongside `email`/`requested_sport`/`created_at`, reuses `bad-form` error code
-- [ ] Invalid/empty timezone falls back to `America/Detroit` and flags row for later correction — does NOT reject
-- [ ] Confirmation email body names the team and timezone in human-readable form
-
-#### Legal pages (Phase 7) — Complete (2026-05-14)
-
-- [x] `/privacy` page — what's collected, retention (logs ≤30 days), no third-party tracking cookies, Plausible cookie-free, GDPR/CCPA deletion path (`privacy@oddlympics.app`, 30 days), ESP named
-- [x] `/terms` page — free service through 2026-07-19, best-effort delivery, no FIFA/ESPN/team affiliation, governing law (Michigan, USA), `hello@oddlympics.app`
-- [x] Last-updated date in headers matches deploy date
-- [x] Same site shell (fonts, footer) as landing — no nav menu required
-
-#### Open Graph image (Phase 8)
-
-- [ ] `references/og-image.svg` checked into repo so OG image is rebuildable from source
-- [ ] Built/rendered `/og-image.png` at exact 1200×630, <300KB — shows wordmark, banner, headline, sub, URL, "Not affiliated with FIFA" tag
-- [ ] `og:image`, `og:image:width`, `og:image:height`, `og:image:alt`, `twitter:image` meta tags point to it
-- [ ] opengraph.xyz preview, Slack share, iMessage share render cleanly
-
-#### `/manage` updates + backward compat (Phase 9)
-
-- [ ] `/manage` displays + allows editing current team and timezone (update endpoint TBD — `/api/save-selection` or new `/api/manage`; pin in plan)
-- [ ] Unsubscribe via HMAC-signed token (expires 1y, single-use per action) — no auth beyond the email link
-- [ ] Pre-milestone subscribers with NULL `team`/default `timezone` load `/manage` without errors; one-time banner prompts them to pick a team
-- [ ] No new error codes — bad-team and bad-timezone reuse `bad-form` (server-side log distinguishes)
-
-#### End-to-end + launch gate (Phase 11)
-
-- [ ] AC1–AC12 all pass on production
-- [ ] Lighthouse mobile report saved to `references/lighthouse-final.html`, all categories ≥ 90
-- [ ] Real signup test from a fresh browser profile (John's personal Gmail) delivers correctly-rendered confirmation email within 60 s
-- [ ] Release tagged `v1.0-consumer-landing` in git
+(None — awaiting v1.1 scoping.)
 
 ### Out of Scope
 
@@ -181,8 +163,8 @@ ships Approach A — concierge MVP, World Cup-only.
 | Magic-link auth (extend teaser pattern) over email+password | Identity is solved by the existing token + Resend flow; password adds reset/session/hashing surface we don't need on this timeline | — Pending |
 | Single global Lightning tip jar via vaultwarden; integration shape TBD at phase planning | Per-event/per-creator tipping is design-doc-explicit v1.1; vault integration shape may need vault-side work, defer locking until that phase | — Pending |
 | Stay on the existing droplet/Caddy/systemd stack | Stack is shipping reliably; no rewrites mid-deadline | ✓ Good (already proven) |
-| **v2.0 consumer pivot — strip BTC/Lightning/"world domination"/"personal Olympics" from public surfaces; rewrite landing for casual soccer fans** | Existing copy is optimized for indie/builder audience and converts poorly from cold paid/organic traffic; paid-ad reviewers also require `/privacy` + `/terms`. Backend, ESP, and infra are untouched except for additive `team`/`timezone` columns on the signup payload — magic-link, kickoff cron, schedule data all stay. | — Pending (validates by 2026-05-19) |
-| **Single-team signup at intake; multi-team selection preserved post-signup on `/manage`** | ✅ RESTORED in Phase 12 (verified PASSED 2026-05-16, 11/11): `user_teams` join table, `/manage` confederation checkboxes (1–5), kickoff cron fan-out via `user_teams`, signup still single-team (D-03). Consent contract enforced (CR-01/CR-02 gap-closure). The originally-approved "single at signup, multi post-signup" model is whole again. | ⚠ **Gate remaining (not the multi-team blocker):** Phase 11 launch gate must RE-RUN after Phase 12 per D-09 and only then cut the still-withheld `v1.0-consumer-landing` tag. See STATE.md Blockers. |
+| **v2.0 consumer pivot — strip BTC/Lightning/"world domination"/"personal Olympics" from public surfaces; rewrite landing for casual soccer fans** | Existing copy is optimized for indie/builder audience and converts poorly from cold paid/organic traffic; paid-ad reviewers also require `/privacy` + `/terms`. Backend, ESP, and infra are untouched except for additive `team`/`timezone` columns on the signup payload — magic-link, kickoff cron, schedule data all stay. | ✓ Shipped v2.0 (2026-05-16) — LAND-02 grep clean on all public surfaces; market validation pending real signups by 2026-06-11 |
+| **Single-team signup at intake; multi-team selection preserved post-signup on `/manage`** | Cold-traffic conversion favors one decision per field; multi-team is a returning-user need restored post-signup. | ✓ Shipped v2.0 (Phase 12, verified 11/11 2026-05-16): `user_teams` join table, `/manage` 1–5 confederation checkboxes, cron fan-out via `user_teams`, signup single-team (D-03), CR-01/CR-02 consent contract closed. Phase 11 launch gate re-ran post-Phase-12; `v1.0-consumer-landing` cut + pushed. Resolved — no open gate. |
 | **Bot-resistant via existing honeypot + Origin check + rate limit; no CAPTCHA in v2.0** | Adding visible CAPTCHA tanks conversion; existing controls survived the v1 teaser without spam load and the consumer audience isn't worth more than that yet. Revisit if real attack pattern emerges. | — Pending |
 | **No IP-based country preselection for the team dropdown in v2.0** | Adds geo-lookup dependency + privacy surface for marginal UX gain; defer until we see real signup data show user-team mismatch is a problem. | — Pending |
 
@@ -204,4 +186,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-16 after Phase 12 (restore-multi-team-selection) verified passed (11/11; CR-01/CR-02 gap-closure complete). v2.0 milestone gated on Phase 11 launch-gate re-run + `v1.0-consumer-landing` tag (D-09).*
+*Last updated: 2026-05-16 after v2.0 milestone (Consumer Landing & Signup Flow) shipped — 8 phases, `v1.0-consumer-landing` tagged + pushed, production launch gate green. Next: v1.1 scoping via /gsd-new-milestone.*

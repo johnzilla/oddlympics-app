@@ -1,6 +1,7 @@
 ---
 phase: 260511-ccx
 plan: 01
+status: complete
 subsystem: schedule-page
 tags: [phase-2.5, demand-capture, feature-requests, schedule, sqlite, astro]
 requires:

@@ -2,35 +2,33 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
-status: shipped
-stopped_at: "SHIPPED 2026-05-16. v1.0-consumer-landing tag (annotated, on deployed commit 4be057e) cut + pushed to origin. App live at https://oddlympics.app (HTTP 200). Core automated launch gate run directly against live prod: AC1/AC2/AC5/AC7/AC9/AC12 all PASS (6/6); multi-team /manage covered by Phase 12 (11/11). Deferred as non-blocking for a free signup app: AC4 real-inbox email timing, AC11 Plausible event, AC8 Lighthouse, AC3 tz-spoof, opengraph.xyz preview, and the +ac gate-row prod cleanup (optional one-liner: node scripts/cleanup-gate-rows.mjs --confirm on the droplet). The elaborate Phase-11 operator re-gate ceremony was dropped by explicit owner decision — product was already live and Phase 12 had verified multi-team. Phase 11 CLOSED 2026-05-16: ROADMAP [x], 11-SUMMARY reconciled. AC-MT (multi-team /manage) is OPERATOR-APPROVED on the Phase-12 evidence basis (off-box gate cannot mint a prod session by design — not a defect, not a gap). No open v2.0 gate. Only forward item: pre-2026-06-11 football-data.org slug-mapping check (memory: notify-slug-mapping-launch-risk)."
-last_updated: "2026-05-16T16:00:00.000Z"
-last_activity: 2026-05-16 -- Phase 11 closed; AC-MT operator-approved; nag surfaces reconciled
+status: Awaiting next milestone
+stopped_at: "v2.0 SHIPPED + ARCHIVED 2026-05-16. v1.0-consumer-landing tagged + pushed; app live (HTTP 200); production launch gate green. Milestone archived to .planning/milestones/v2.0-*. Next: /gsd-new-milestone to scope v1.1. Pre-launch operator items (milestone-independent) remain — see ROADMAP Pending operator actions."
+last_updated: "2026-05-16T21:30:00.000Z"
+last_activity: 2026-05-16 — Milestone v2.0 completed and archived
 progress:
   total_phases: 8
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 32
-  completed_plans: 30
-  percent: 88
+  completed_plans: 32
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-12)
+See: .planning/PROJECT.md (updated 2026-05-16, after v2.0 milestone)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** Phase 11 — end-to-end-launch-gate
+**Current focus:** Planning next milestone (v1.1) — run `/gsd-new-milestone`
 
 ## Current Position
 
-Phase: 11 (end-to-end-launch-gate) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 11
-Last activity: 2026-05-16 -- Phase 11 execution started
-
-Progress: [██████████] 97%
+Phase: Milestone v2.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-05-16 — Milestone v2.0 completed and archived
 
 ## Performance Metrics
 
@@ -141,3 +139,7 @@ Last session: 2026-05-16T14:00:00.000Z
 Stopped at: 11-06 Task 1 DONE (4e74e54) — AC-MT added to launch-gate.mjs. Awaiting operator at Task 2 blocking-human checkpoint (deploy + gate run + operator evidence for AC4/AC10/AC11/AC-MT/OG).
 Resume file: 
 None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
