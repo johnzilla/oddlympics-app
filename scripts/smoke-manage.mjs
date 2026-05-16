@@ -2,11 +2,16 @@
 // Phase 9 — Plan 09-05.
 // Extended in Phase 12 — Plan 12-04 with M10–M14 (multi-team save, reload
 // pre-check, too-many, empty-bad-team, cron-visibility through user_teams).
+// Extended in Phase 12 — Plan 12-06 with M15–M16 (unsubscribed-POST rejected,
+// unsubscribe clears user_teams → reconfirm → cron sees zero teams).
+// WR-04 closed: negative-path behavioral proof for CR-01 and CR-02 fixes.
 // End-to-end smoke for /manage editor + /schedule redirect + unsubscribe
-// token TTL + single-use semantics + re-subscribe DB path + multi-team save.
-// Covers M1–M14 from RESEARCH.md Q12. Provides goal-backward proof for
+// token TTL + single-use semantics + re-subscribe DB path + multi-team save +
+// consent/unsubscribe contract enforcement.
+// Covers M1–M16. Provides goal-backward proof for
 // ROADMAP SC1–SC4, MANAGE-01, MANAGE-02, COMPAT-01, D-01 (DB), D-04/D-05
-// (checkbox editor), D-06 (cron join visibility), NOTIFY-04, IDENT-02/03/04.
+// (checkbox editor), D-06 (cron join visibility), NOTIFY-04, IDENT-02/03/04,
+// SIGNUP-04, LAND-02 (consent/unsubscribe contract: CR-01 + CR-02 closed).
 //
 // How to run:
 //   Boot a dev server in another terminal:
@@ -42,6 +47,8 @@
 //   M12-too-many                — POST 6 valid slugs → 303 status=too-many; user_teams unchanged
 //   M13-empty-save              — POST 0 slugs → 303 status=bad-team; user_teams unchanged
 //   M14-cron-visibility         — DB: usersQuery-equivalent JOIN confirms user appears for match team
+//   M15-unsub-save-rejected     — CR-01 proof: unsubscribed user POST → status=unknown, zero user_teams writes, tz preserved
+//   M16-unsub-reconfirm-no-stale — CR-02 proof: real /api/unsubscribe clears user_teams; post-reconfirm cron JOIN yields zero rows
 //
 // Cleanup (operator, post-run, optional):
 //   sqlite3 data/oddlympics.db \
@@ -836,6 +843,169 @@ await runCase('M14-cron-visibility', async () => {
     console.error(`  expected exactly 1 row for ${email}, got ${matchingUsers.length} (total rows: ${users.length})`);
     return false;
   }
+  return true;
+});
+
+// ---------------------------------------------------------------------------
+// M15 — CR-01 behavioral proof: unsubscribed user POST → status=unknown,
+//        zero user_teams writes, tz preserved (12-05 state-gate proof)
+// ---------------------------------------------------------------------------
+await runCase('M15-unsub-save-rejected', async () => {
+  const ts = Date.now();
+  const email = `smoke-m15-${ts}@example.com`;
+
+  // 1. Seed a CONFIRMED-but-UNSUBSCRIBED row.
+  //    confirmed_at is set (via opts.confirmedAt default = now) AND
+  //    unsubscribed_at is non-null — the exact CR-01 scenario.
+  dbInsertSmokeRow(email, {
+    team: 'argentina',
+    timezone: 'America/New_York',
+    unsubscribedAt: Math.floor(Date.now() / 1000),
+  });
+
+  // 2. Pre-seed a known user_teams state to prove zero writes on reject.
+  const preSlugs = ['argentina', 'brazil'];
+  dbInsertUserTeams(email, preSlugs);
+  const seededTz = dbRowFor(email).timezone;
+
+  // 3. Mint a still-valid 30-day session token.
+  const sessionToken = mintToken(email, { purpose: 'session', ttlSeconds: 60 * 60 * 24 * 30 });
+
+  // 4. POST 3 different valid slugs + a DIFFERENT valid tz.
+  const { status, location } = await postMultiTeam(
+    ['england', 'france', 'germany'],
+    'Europe/London',
+    `${COOKIE_NAME}=${sessionToken}`,
+  );
+
+  // 5a. Response must be 303 with status=unknown.
+  if (status !== 303) {
+    console.error(`  expected status 303, got ${status}`);
+    return false;
+  }
+  if (!location?.includes('status=unknown')) {
+    console.error(`  expected status=unknown in Location, got ${location}`);
+    return false;
+  }
+
+  // 5b. user_teams must be UNCHANGED — POSTed england/france/germany were NOT
+  //     inserted and the originals were NOT deleted (transaction rolled back).
+  const afterSlugs = dbUserTeamSlugs(email);
+  const sortedPre = [...preSlugs].sort();
+  if (
+    afterSlugs.length !== sortedPre.length ||
+    !sortedPre.every((s, i) => s === afterSlugs[i])
+  ) {
+    console.error(
+      `  expected user_teams UNCHANGED=[${sortedPre.join(',')}], got [${afterSlugs.join(',')}]`,
+    );
+    return false;
+  }
+
+  // 5c. vip_signups.timezone must NOT have been overwritten (gated UPDATE matched 0 rows).
+  const afterRow = dbRowFor(email);
+  if (afterRow.timezone !== seededTz) {
+    console.error(
+      `  expected timezone UNCHANGED=${seededTz}, got ${afterRow.timezone}`,
+    );
+    return false;
+  }
+
+  return true;
+});
+
+// ---------------------------------------------------------------------------
+// M16 — CR-02 behavioral proof: real /api/unsubscribe clears user_teams;
+//        post-reconfirm cron JOIN yields zero rows (no stale fan-out)
+// ---------------------------------------------------------------------------
+await runCase('M16-unsub-reconfirm-no-stale', async () => {
+  const ts = Date.now();
+  const email = `smoke-m16-${ts}@example.com`;
+
+  // 1. Seed a CONFIRMED, ACTIVE row.
+  dbInsertSmokeRow(email, { team: 'argentina', timezone: 'Europe/London' });
+
+  // 2. Seed two smoke teams in the teams table (unique ids/slugs, same namespace
+  //    as M14 — the footer cleanup hint covers them via id >= 9900000).
+  const gammaSlug = 'smoke-team-gamma';
+  const deltaSlug = 'smoke-team-delta';
+  dbWrite.prepare(`
+    INSERT OR IGNORE INTO teams (id, tla, name, crest_url, slug, last_updated)
+    VALUES (?, ?, ?, NULL, ?, strftime('%s','now'))
+  `).run(9900003, 'STG', 'Smoke Team Gamma', gammaSlug);
+  dbWrite.prepare(`
+    INSERT OR IGNORE INTO teams (id, tla, name, crest_url, slug, last_updated)
+    VALUES (?, ?, ?, NULL, ?, strftime('%s','now'))
+  `).run(9900004, 'STD', 'Smoke Team Delta', deltaSlug);
+
+  // Seed user_teams with both slugs; assert 2 rows as pre-state.
+  dbInsertUserTeams(email, [gammaSlug, deltaSlug]);
+  const preCount = dbUserTeamSlugs(email).length;
+  if (preCount !== 2) {
+    console.error(`  expected 2 pre-seeded user_teams rows, got ${preCount}`);
+    return false;
+  }
+
+  // 3. Unsubscribe via the REAL route (the unit under test for the CR-02 fix).
+  const unsubToken = mintToken(email, { purpose: 'unsubscribe', ttlSeconds: 60 * 60 * 24 * 365 });
+  const unsubRes = await get(`/api/unsubscribe?token=${encodeURIComponent(unsubToken)}`);
+  if (unsubRes.status !== 303) {
+    console.error(`  unsubscribe: expected 303, got ${unsubRes.status}`);
+    return false;
+  }
+  if (!unsubRes.location?.startsWith('/unsubscribed?status=ok')) {
+    console.error(`  unsubscribe: expected /unsubscribed?status=ok, got ${unsubRes.location}`);
+    return false;
+  }
+  // CR-02 fix assertion: deleteUserTeams.run inside the unsubscribe route cleared the rows.
+  const afterUnsubSlugs = dbUserTeamSlugs(email);
+  if (afterUnsubSlugs.length !== 0) {
+    console.error(
+      `  expected 0 user_teams after unsubscribe (CR-02 fix), got ${afterUnsubSlugs.length}: [${afterUnsubSlugs.join(',')}]`,
+    );
+    return false;
+  }
+
+  // 4. Re-confirm: dbMarkConfirmed clears unsubscribed_at = NULL (simulates the user
+  //    clicking a later confirmation magic link).
+  const confirmed = dbMarkConfirmed(email);
+  if (!confirmed) {
+    console.error('  dbMarkConfirmed returned no row — WHERE did not match');
+    return false;
+  }
+  const afterConfirmRow = dbRowFor(email);
+  if (afterConfirmRow.unsubscribed_at !== null) {
+    console.error(
+      `  expected unsubscribed_at=NULL after reconfirm, got ${afterConfirmRow.unsubscribed_at}`,
+    );
+    return false;
+  }
+  if (!afterConfirmRow.confirmed_at) {
+    console.error('  expected confirmed_at to be set after reconfirm');
+    return false;
+  }
+
+  // 5. Run the usersQuery-equivalent JOIN (mirrors M14 lines 822-830 verbatim).
+  //    The t.id IN (...) clause is omitted here because the JOIN through the now-empty
+  //    user_teams short-circuits to zero rows regardless of which teams exist.
+  //    Filter to just this email to avoid interference from other smoke rows.
+  const users = dbRead.prepare(`
+    SELECT DISTINCT v.email AS email
+    FROM vip_signups v
+    JOIN user_teams ut ON ut.email = v.email
+    JOIN teams t ON t.slug = ut.team_slug
+    WHERE v.confirmed_at IS NOT NULL
+      AND v.unsubscribed_at IS NULL
+  `).all();
+
+  const matchingUsers = users.filter((u) => u.email === email);
+  if (matchingUsers.length !== 0) {
+    console.error(
+      `  expected 0 cron rows for re-confirmed user (no stale fan-out), got ${matchingUsers.length}`,
+    );
+    return false;
+  }
+
   return true;
 });
 
