@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 002 — /manage trust + multi-sport IA</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+  body { padding-top: 46px; }
+  .page { padding: var(--pad) 0 80px; }
+
+  /* ---- shared chrome (mirrors manage.astro) ---- */
+  .flash { font-size: 13px; padding: 10px 14px; border-radius: var(--radius-md); margin: 0 0 20px; border: 1px solid var(--ok); color: var(--ok); }
+  .legend { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-dim); margin: 0 0 12px; }
+  .conf-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-dim); margin: 0 0 8px; }
+  .conf-teams { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .team-option { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg); cursor: pointer; }
+  .team-option input { accent-color: var(--accent); width: 15px; height: 15px; }
+  .team-option input:disabled { opacity: 0.4; cursor: not-allowed; }
+  .save-btn { padding: 12px 18px; font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: var(--radius-md); cursor: pointer; transition: filter .15s; }
+  .save-btn:hover { filter: brightness(1.08); }
+
+  /* ---- the no-account trust block (the thing being sold) ---- */
+  .trust {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--accent-soft); border: 1px solid var(--accent);
+    border-radius: var(--radius-lg); padding: 14px 16px; margin: 0 0 28px;
+    max-width: 560px;
+  }
+  .trust .key { font-family: var(--font-mono); font-size: 20px; line-height: 1; color: var(--accent); }
+  .trust p { margin: 0; font-size: 13px; color: var(--fg); line-height: 1.5; }
+  .trust strong { color: var(--accent); }
+
+  /* ---- request (signed-out) screen ---- */
+  .cta-form { display: flex; gap: 8px; max-width: 460px; margin: 0 0 10px; }
+  .cta-form input { flex: 1; min-width: 0; padding: 12px 14px; font-family: var(--font-mono); font-size: 14px; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); }
+  .cta-form input:focus { outline: none; border-color: var(--accent); }
+  .cta-form button { padding: 12px 18px; font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: var(--radius-md); cursor: pointer; white-space: nowrap; transition: filter .15s; }
+  .cta-form button:hover { filter: brightness(1.08); }
+
+  /* ---- IA: variant A (flat, sport-prefixed) ---- */
+  .sport-section { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); padding: 16px 18px; margin: 0 0 14px; max-width: 560px; }
+  .sport-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 14px; }
+  .sport-head .ico { font-size: 17px; }
+  .sport-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+  .sport-head .meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-dim); }
+  .future { max-width: 560px; border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); padding: 14px 18px; color: var(--fg-dim); font-size: 13px; }
+  .future strong { color: var(--fg); }
+
+  /* ---- IA: variant B (accordion) ---- */
+  .acc { max-width: 560px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); margin: 0 0 12px; overflow: hidden; }
+  .acc-head { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 14px 18px; background: none; border: 0; cursor: pointer; font: inherit; }
+  .acc-head:hover { background: var(--bg); }
+  .acc-head .ico { font-size: 17px; }
+  .acc-head .t { font-weight: 700; font-size: 15px; flex: 1; }
+  .acc-head .meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-dim); }
+  .acc-head .chev { color: var(--fg-dim); transition: transform .15s; }
+  .acc.collapsed .chev { transform: rotate(-90deg); }
+  .acc-body { padding: 0 18px 16px; }
+  .acc.collapsed .acc-body { display: none; }
+  .acc.future .acc-head { color: var(--fg-dim); cursor: default; }
+
+  /* ---- IA: variant C (two-pane) ---- */
+  .twopane { display: grid; grid-template-columns: 190px 1fr; gap: 18px; max-width: 720px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); overflow: hidden; }
+  .rail { background: var(--bg); border-right: 1px solid var(--line); padding: 14px 0; }
+  .rail button { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 10px 16px; background: none; border: 0; border-left: 3px solid transparent; cursor: pointer; font: inherit; font-size: 13px; color: var(--fg-dim); }
+  .rail button:hover { color: var(--fg); }
+  .rail button.active { color: var(--accent); border-left-color: var(--accent); font-weight: 700; background: var(--surface); }
+  .rail .browse { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 12px; color: var(--accent); }
+  .pane { padding: 18px 20px; }
+  .pane-empty { color: var(--fg-dim); font-size: 13px; }
+
+  /* match rows (real shape from manage.astro) */
+  .match-list { list-style: none; padding: 0; margin: 16px 0 0; display: flex; flex-direction: column; gap: 6px; max-width: 560px; }
+  .match { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 8px; align-items: center; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); font-size: 13px; }
+  .twopane .match { background: var(--bg); }
+  .match-stage { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--fg-dim); }
+  .match-teams { font-weight: 700; text-align: right; }
+  .match-teams .dim { font-weight: 400; color: var(--fg-dim); }
+
+  /* ---- state toggle ---- */
+  #state-toggle { margin: 0 0 26px; display: flex; gap: 8px; font-family: system-ui; }
+  #state-toggle button { font: inherit; font-size: 12px; padding: 5px 11px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--fg-dim); border-radius: var(--radius-pill); cursor: pointer; }
+  #state-toggle button.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .state { display: none; } .state.on { display: block; }
+
+  /* tabs + toolbar (shared) */
+  #variant-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9998; background: var(--surface); border-bottom: 1px solid var(--line-strong); padding: 8px 14px; display: flex; gap: 8px; font-family: system-ui; }
+  .variant-tab { font: inherit; font-size: 12px; padding: 5px 11px; border: 1px solid var(--line-strong); background: var(--bg); color: var(--fg-dim); border-radius: var(--radius-pill); cursor: pointer; transition: all .15s; }
+  .variant-tab:hover { border-color: var(--accent); color: var(--accent); }
+  .variant-tab.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .variant { display: none; } .variant.active { display: block; }
+  #sketch-tools { position: fixed; bottom: 12px; right: 12px; z-index: 9999; font-family: system-ui; font-size: 12px; background: rgba(0,0,0,.72); color: #fff; padding: 8px 12px; border-radius: 8px; opacity: .4; transition: opacity .2s; display: flex; gap: 10px; align-items: center; }
+  #sketch-tools:hover { opacity: 1; }
+  #sketch-tools select, #sketch-tools button { font: inherit; font-size: 11px; background: #222; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 3px 6px; cursor: pointer; }
+  .vp-frame { max-width: var(--vpw, 100%); margin: 0 auto; transition: max-width .2s; }
+  .annotate [data-tag]:hover { outline: 2px dashed var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<div id="variant-nav">
+  <button class="variant-tab" onclick="showVariant('a',this)">A: Flat, sport-prefixed</button>
+  <button class="variant-tab active" onclick="showVariant('b',this)">B: Sport accordion ★ Selected</button>
+  <button class="variant-tab" onclick="showVariant('c',this)">C: Two-pane sport rail</button>
+</div>
+
+<div class="vp-frame">
+<div class="page"><div class="wrap">
+
+  <div id="state-toggle">
+    <button class="on" onclick="setState('in',this)">Signed in (the editor)</button>
+    <button onclick="setState('out',this)">Signed out (request a link)</button>
+  </div>
+
+  <!-- ========= SIGNED-OUT: trust-forward request screen (shared) ========= -->
+  <div id="state-out" class="state">
+    <span class="banner">Already on oddlympics</span>
+    <h1 class="headline">Manage what you follow.</h1>
+    <p class="subhead">Enter your email and we'll send a one-time link that takes you right back in.</p>
+    <div class="trust" data-tag=".trust">
+      <span class="key">⌗</span>
+      <p><strong>No password. No account.</strong> You never made one — and there's nothing to leak or reset. The link we email you <em>is</em> the login. It works for 24 hours, once.</p>
+    </div>
+    <form class="cta-form" onsubmit="fakeLink(event)">
+      <input type="email" placeholder="you@example.com" required>
+      <button type="submit">Email me the link</button>
+    </form>
+    <p class="subhead" style="font-size:13px;margin-top:14px">Not on oddlympics yet? <a href="#" class="link" onclick="event.preventDefault()">Sign up here</a>.</p>
+  </div>
+
+  <!-- ========= SIGNED-IN: the editor (variants differ here) ========= -->
+  <div id="state-in" class="state on">
+    <span class="banner">Your oddlympics</span>
+    <h1 class="headline">Everything you follow.</h1>
+    <p class="subhead">We email you about an hour before each one starts, in your local time. Change anytime — this device stays signed in for 30 days.</p>
+    <p class="flash" role="status">Saved. Your schedule is updated below.</p>
+
+    <!-- VARIANT A — flat sport sections, current structure + sport prefix -->
+    <div id="variant-a" class="variant">
+      <p class="legend">Following · 2 of 5 teams</p>
+      <div class="sport-section" data-tag=".sport-section">
+        <div class="sport-head"><span class="ico">⚽</span><h2>Football</h2><span class="meta">World Cup 2026</span></div>
+        <p class="conf-label">CONMEBOL — South America</p>
+        <div class="conf-teams">
+          <label class="team-option"><input type="checkbox" checked> Argentina</label>
+          <label class="team-option"><input type="checkbox" checked> Brazil</label>
+          <label class="team-option"><input type="checkbox"> Uruguay</label>
+        </div>
+        <p class="conf-label">CONCACAF — North &amp; Central America</p>
+        <div class="conf-teams">
+          <label class="team-option"><input type="checkbox"> USA</label>
+          <label class="team-option"><input type="checkbox"> Mexico</label>
+        </div>
+        <button class="save-btn" onclick="fakeSave(this)">Save selection</button>
+      </div>
+      <div class="future" data-tag=".future"><strong>More sports are coming to oddlympics.</strong> When strongman, speedcubing and the rest land, each becomes another section right here — same screen, nothing to relearn.</div>
+      <ol class="match-list">
+        <li class="match"><span>Sat Jun 13, 3:00 PM</span><span class="match-stage">Group C</span><span class="match-teams">ARG <span class="dim">vs</span> KSA</span></li>
+        <li class="match"><span>Wed Jun 17, 12:00 PM</span><span class="match-stage">Group C</span><span class="match-teams">ARG <span class="dim">vs</span> MEX</span></li>
+      </ol>
+    </div>
+
+    <!-- VARIANT B — accordion, one block per sport -->
+    <div id="variant-b" class="variant active">
+      <p class="legend">Following · 2 of 5 teams</p>
+      <div class="acc" data-tag=".acc">
+        <button class="acc-head" onclick="this.parentElement.classList.toggle('collapsed')">
+          <span class="ico">⚽</span><span class="t">Football</span>
+          <span class="meta">World Cup 2026 · 2 teams</span><span class="chev">▾</span>
+        </button>
+        <div class="acc-body">
+          <p class="conf-label">CONMEBOL — South America</p>
+          <div class="conf-teams">
+            <label class="team-option"><input type="checkbox" checked> Argentina</label>
+            <label class="team-option"><input type="checkbox" checked> Brazil</label>
+            <label class="team-option"><input type="checkbox"> Uruguay</label>
+          </div>
+          <p class="conf-label">CONCACAF — North &amp; Central America</p>
+          <div class="conf-teams">
+            <label class="team-option"><input type="checkbox"> USA</label>
+            <label class="team-option"><input type="checkbox"> Mexico</label>
+          </div>
+          <button class="save-btn" onclick="fakeSave(this)">Save selection</button>
+        </div>
+      </div>
+      <div class="acc collapsed future" data-tag=".acc.future">
+        <button class="acc-head">
+          <span class="ico">🪨</span><span class="t">Strongman</span>
+          <span class="meta">Coming soon</span><span class="chev">▾</span>
+        </button>
+      </div>
+      <div class="acc collapsed future">
+        <button class="acc-head">
+          <span class="ico">🧩</span><span class="t">Speedcubing</span>
+          <span class="meta">Coming soon</span><span class="chev">▾</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- VARIANT C — two-pane: sport rail + detail -->
+    <div id="variant-c" class="variant">
+      <div class="twopane" data-tag=".twopane">
+        <nav class="rail">
+          <button class="active" onclick="pickSport('football',this)">⚽ Football</button>
+          <button onclick="pickSport('soon',this)" style="opacity:.55">🪨 Strongman</button>
+          <button onclick="pickSport('soon',this)" style="opacity:.55">🧩 Speedcubing</button>
+          <button class="browse" onclick="pickSport('soon',this)">+ Browse all sports</button>
+        </nav>
+        <div class="pane">
+          <div id="pane-football">
+            <div class="sport-head"><span class="ico">⚽</span><h2>Football</h2><span class="meta">World Cup 2026</span></div>
+            <p class="conf-label">CONMEBOL — South America</p>
+            <div class="conf-teams">
+              <label class="team-option"><input type="checkbox" checked> Argentina</label>
+              <label class="team-option"><input type="checkbox" checked> Brazil</label>
+              <label class="team-option"><input type="checkbox"> Uruguay</label>
+            </div>
+            <p class="conf-label">CONCACAF — North &amp; Central America</p>
+            <div class="conf-teams">
+              <label class="team-option"><input type="checkbox"> USA</label>
+              <label class="team-option"><input type="checkbox"> Mexico</label>
+            </div>
+            <button class="save-btn" onclick="fakeSave(this)">Save selection</button>
+            <ol class="match-list">
+              <li class="match"><span>Sat Jun 13, 3:00 PM</span><span class="match-stage">Group C</span><span class="match-teams">ARG <span class="dim">vs</span> KSA</span></li>
+              <li class="match"><span>Wed Jun 17, 12:00 PM</span><span class="match-stage">Group C</span><span class="match-teams">ARG <span class="dim">vs</span> MEX</span></li>
+            </ol>
+          </div>
+          <div id="pane-soon" style="display:none">
+            <p class="pane-empty">Not live yet — oddlympics is football-only for now. When this sport launches, you'll pick what you follow right here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div></div>
+</div>
+
+<div id="sketch-tools">
+  <span>theme</span>
+  <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'"><option value="default">default</option></select>
+  <span>vp</span>
+  <button onclick="setVp('375px')">📱</button>
+  <button onclick="setVp('768px')">▭</button>
+  <button onclick="setVp('100%')">🖥</button>
+  <button onclick="document.body.classList.toggle('annotate')">annotate</button>
+</div>
+
+<script>
+  function showVariant(id, btn) {
+    document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('variant-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+  function setState(s, btn) {
+    document.querySelectorAll('.state').forEach(x => x.classList.remove('on'));
+    document.getElementById('state-' + s).classList.add('on');
+    document.querySelectorAll('#state-toggle button').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+  function pickSport(which, btn) {
+    document.querySelectorAll('.rail button').forEach(b => b.classList.remove('active'));
+    if (!btn.classList.contains('browse')) btn.classList.add('active');
+    document.getElementById('pane-football').style.display = which === 'football' ? '' : 'none';
+    document.getElementById('pane-soon').style.display = which === 'football' ? 'none' : '';
+  }
+  function fakeSave(b) {
+    const t = b.textContent; b.textContent = 'Saving…';
+    setTimeout(() => { b.textContent = '✓ Saved'; b.style.background = 'var(--ok)'; }, 600);
+    setTimeout(() => { b.textContent = t; b.style.background = 'var(--accent)'; }, 2200);
+  }
+  function fakeLink(e) {
+    e.preventDefault();
+    const b = e.target.querySelector('button');
+    const t = b.textContent; b.textContent = 'Sending…';
+    setTimeout(() => { b.textContent = '✓ Check your inbox'; b.style.background = 'var(--ok)'; }, 700);
+    setTimeout(() => { b.textContent = t; b.style.background = 'var(--accent)'; }, 2600);
+  }
+  function setVp(w) { document.querySelector('.vp-frame').style.setProperty('--vpw', w); }
+</script>
+</body>
+</html>

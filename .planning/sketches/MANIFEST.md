@@ -23,5 +23,5 @@ generic mockup. No external references; the brand is already established.
 | # | Name | Design Question | Winner | Tags |
 |---|------|----------------|--------|------|
 | 001 | landing-reentry-affordance | Where does a returning user spot "let me back in" on the landing page without cannibalizing new-signup conversion? | **B — quiet link under the signup form** | entry, landing, conversion |
-| 002 | manage-trust-screen | How does the `/manage` request screen sell the no-account model + scale to multiple sports? | TBD | trust, manage, IA |
+| 002 | manage-trust-screen | How does the `/manage` request screen sell the no-account model + scale to multiple sports? | **B — sport accordion (collapsible block per sport)** | trust, manage, IA |
 | 003 | confirmation-email-cta | What does the durable re-entry CTA inside the confirmation email look like (table/inline-CSS, no JS)? | TBD | email, entry |
