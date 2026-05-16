@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
-status: executing
-stopped_at: "11-06 Task 1 DONE (4e74e54): AC-MT added to launch-gate.mjs. CHECKPOINT at Task 2 (blocking-human) — operator must deploy post-Phase-12 build, run npm run smoke:gate against https://oddlympics.app, capture AC4/AC10/AC11/AC-MT/OG operator evidence, then type 'approved'."
-last_updated: "2026-05-16T14:00:00.000Z"
-last_activity: 2026-05-16 -- 11-06 Task 1 committed; checkpoint Task 2 awaiting operator
+status: shipped
+stopped_at: "SHIPPED 2026-05-16. v1.0-consumer-landing tag (annotated, on deployed commit 4be057e) cut + pushed to origin. App live at https://oddlympics.app (HTTP 200). Core automated launch gate run directly against live prod: AC1/AC2/AC5/AC7/AC9/AC12 all PASS (6/6); multi-team /manage covered by Phase 12 (11/11). Deferred as non-blocking for a free signup app: AC4 real-inbox email timing, AC11 Plausible event, AC8 Lighthouse, AC3 tz-spoof, opengraph.xyz preview, and the +ac gate-row prod cleanup (optional one-liner: node scripts/cleanup-gate-rows.mjs --confirm on the droplet). The elaborate Phase-11 operator re-gate ceremony was dropped by explicit owner decision — product was already live and Phase 12 had verified multi-team."
+last_updated: "2026-05-16T14:30:00.000Z"
+last_activity: 2026-05-16 -- v1.0-consumer-landing tagged + pushed; SHIPPED
 progress:
   total_phases: 8
   completed_phases: 7
