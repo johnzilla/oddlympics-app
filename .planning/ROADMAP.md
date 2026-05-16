@@ -201,7 +201,7 @@ verification.
   2. A Lighthouse mobile run against the production landing page is saved to `references/lighthouse-final.html` and shows Performance, Accessibility, Best Practices, SEO all ≥ 90.
   3. A real signup from John's personal Gmail in a fresh browser profile delivers a correctly-rendered confirmation email naming the team and timezone within 60 seconds; the unsubscribe link from that email returns the user to `/unsubscribed` and removes them from active sending.
   4. The release is tagged `v1.0-consumer-landing` in git on the deploy commit.
-**Plans:** 2/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 **Wave 1**
@@ -209,13 +209,13 @@ Plans:
 - [x] 11-02-PLAN.md — scripts/launch-gate.mjs (AC1-AC12 prod runner) + scripts/cleanup-gate-rows.mjs + smoke:gate/cleanup:gate aliases
 
 **Wave 2** *(blocked on Wave 1 — needs the fix deployed AND the runner built)*
-- [ ] 11-03-PLAN.md — Deploy via GitHub Actions; operator runs npm run smoke:gate against prod, captures per-AC evidence, drives the D-01 bounded fix-and-reverify loop until AC1-AC12 all green
+- [x] 11-03-PLAN.md — Deploy via GitHub Actions; operator runs npm run smoke:gate against prod, captures per-AC evidence, drives the D-01 bounded fix-and-reverify loop until AC1-AC12 all green
 
 **Wave 3** *(blocked on Wave 2 — all 12 ACs green)*
-- [ ] 11-04-PLAN.md — Annotated v1.0-consumer-landing tag on the green-deploy commit, pushed (D-07)
+- [x] 11-04-PLAN.md — Annotated v1.0-consumer-landing tag on the green-deploy commit, pushed (D-07)
 
 **Wave 4** *(blocked on Wave 3 — tag must be pushed first)*
-- [ ] 11-05-PLAN.md — Operator post-tag cleanup of the D-04 +tag gate rows (D-05, dry-run then --confirm)
+- [x] 11-05-PLAN.md — Operator post-tag cleanup of the D-04 +tag gate rows (D-05, dry-run then --confirm)
 
 ## Progress
 
@@ -227,7 +227,7 @@ Plans:
 | 8. Open Graph image | 1/1 | Complete   | 2026-05-14 |
 | 9. `/manage` editor + unsubscribe | 4/5 | In Progress|  |
 | 10. Confirmation email update | 3/3 | Complete    | 2026-05-16 |
-| 11. End-to-end + launch gate | 2/5 | In Progress|  |
+| 11. End-to-end + launch gate | 4/5 | In Progress|  |
 
 **Execution order:** 5 → 6 → 7 → 8 → 9 → 10 → 11. Phases 7 and 8 only
 depend on Phase 6's site shell + meta-tag scaffolding respectively; 9 and
