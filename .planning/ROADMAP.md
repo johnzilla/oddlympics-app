@@ -251,6 +251,16 @@ attention budget allows.
 | 11 | (verification only — no new reqs) | 0 |
 | **Total** | | **20** |
 
+### Phase 12: Restore multi-team selection
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 11
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 12 to break down)
+
 ---
 
 ## Previous milestones
