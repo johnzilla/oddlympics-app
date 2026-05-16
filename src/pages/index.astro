@@ -1,4 +1,5 @@
 ---
+import Layout from '../components/Layout.astro';
 import { TEAMS } from '../lib/teams';
 
 export const prerender = true;
@@ -38,36 +39,21 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
   teams: TEAMS.filter((t) => t.confederation === conf),
 }));
 ---
-
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{TITLE}</title>
-  <meta name="description" content={DESCRIPTION} />
-  <meta property="og:title" content={OG_TITLE} />
-  <meta property="og:description" content={OG_DESCRIPTION} />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content={SITE_URL} />
-  <meta property="og:site_name" content="Oddlympics" />
-  <meta property="og:image" content={OG_IMAGE} />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content={OG_IMAGE_ALT} />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={OG_TITLE} />
-  <meta name="twitter:description" content={TWITTER_DESCRIPTION} />
-  <meta name="twitter:image" content={OG_IMAGE} />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <!-- Privacy-friendly analytics by Plausible -->
-  <script async src="https://plausible.io/js/pa-wRAab3seDWDDBnGbRbe0K.js"></script>
-  <script is:inline>
-    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-    plausible.init()
-  </script>
-</head>
-<body>
+<Layout
+  title={TITLE}
+  description={DESCRIPTION}
+  analytics
+  og={{
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    type: 'website',
+    url: SITE_URL,
+    siteName: 'Oddlympics',
+    image: OG_IMAGE,
+    imageAlt: OG_IMAGE_ALT,
+    twitterDescription: TWITTER_DESCRIPTION,
+  }}
+>
   <main>
     <section class="hero">
       <div class="wrap">
@@ -183,18 +169,6 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="wrap">
-      <nav class="links">
-        <a href="/manage">Manage subscription</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="mailto:hello@oddlympics.app">Contact</a>
-      </nav>
-      <p class="copy">© 2026 Oddlympics · Independent project · Not affiliated with FIFA</p>
-    </div>
-  </footer>
-
   <script is:inline>
     // tz-label swap + hidden tz field (CONTEXT D-03 / D-04 / D-05)
     try {
@@ -246,85 +220,13 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
       }
     } catch {}
   </script>
-</body>
-</html>
+</Layout>
 
-<style is:global>
-  :root {
-    --bg: #fafaf7;
-    --fg: #14151a;
-    --fg-dim: #5a5d68;
-    --line: #e4e4dd;
-    --line-strong: #c9cbc4;
-    --surface: #ffffff;
-    --accent: #b8350d;
-    --accent-ink: #ffffff;
-    --accent-soft: #fbe9e0;
-    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    --max: 720px;
-    --pad-x: clamp(20px, 5vw, 48px);
-  }
-
-  * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: var(--font-sans);
-    font-size: 15px;
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  body { min-height: 100dvh; }
-
-  .wrap {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding-left: var(--pad-x);
-    padding-right: var(--pad-x);
-  }
-
+<style>
   /* Hero */
   .hero {
     padding-top: 64px;
     padding-bottom: 32px;
-  }
-
-  .banner {
-    display: inline-block;
-    margin: 0 0 24px;
-    padding: 6px 12px;
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--accent);
-    background: var(--accent-soft);
-    border: 1px solid var(--accent);
-    border-radius: 999px;
-  }
-
-  .headline {
-    margin: 0 0 16px;
-    font-family: var(--font-sans);
-    font-size: clamp(28px, 5vw, 40px);
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.015em;
-    color: var(--fg);
-  }
-
-  .subhead {
-    margin: 0 0 32px;
-    font-size: 17px;
-    line-height: 1.55;
-    color: var(--fg-dim);
-    max-width: 620px;
   }
 
   /* Form card — primary focal point */
@@ -558,40 +460,6 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
     outline: none;
     box-shadow: 0 0 0 3px rgba(184, 53, 13, 0.15);
     border-radius: 4px;
-  }
-
-  /* Footer */
-  .site-footer {
-    border-top: 1px solid var(--line);
-    padding: 32px 0 64px;
-  }
-
-  .site-footer .links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .site-footer a {
-    font-size: 13px;
-    color: var(--fg-dim);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .site-footer a:hover { filter: brightness(0.92); }
-
-  .site-footer a:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(184, 53, 13, 0.15);
-    border-radius: 4px;
-  }
-
-  .site-footer .copy {
-    margin: 16px 0 0;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--fg-dim);
   }
 
   /* Mobile breakpoint */
