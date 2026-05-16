@@ -100,7 +100,10 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
 
           <p class="fineprint">One email per match for the team you pick. Unsubscribe in one click.</p>
           <p id="error" class="error" role="alert" hidden></p>
+          <p class="form-note">Follow up to 5 teams — add or change them anytime, no account needed.</p>
         </form>
+
+        <p class="reentry-inline">Already signed up? <a href="/manage" class="link">Manage what you follow on oddlympics →</a></p>
 
         <p class="trust">Built by one person in Michigan. No app to install. We'll never sell your email.</p>
       </div>
@@ -330,6 +333,9 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
     font-size: 13px;
     color: var(--fg-dim);
   }
+
+  .form-note { font-size: 13px; color: var(--fg-dim); margin: 4px 0 0; }
+  .reentry-inline { font-size: 14px; color: var(--fg-dim); margin: 18px 0 0; }
 
   /* Honeypot — keep verbatim from v1 */
   .hp {
