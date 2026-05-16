@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
-status: in_progress
-stopped_at: Phase 12 complete (6/6 plans, 11/11 verified, CR-01/CR-02 gaps closed). Milestone NOT complete — Phase 11 launch gate must RE-RUN after Phase 12 per D-09; v1.0-consumer-landing tag still WITHHELD until then.
-last_updated: 2026-05-16T12:48:52.747Z
-last_activity: 2026-05-16
+status: executing
+stopped_at: "Phase 12 COMPLETE — gap-closure 12-05/12-06 executed; CR-01/CR-02 consent regressions closed; smoke M1–M16 green (pass=17 fail=0); verification PASSED 11/11. Multi-team restored end-to-end. NEXT: re-run Phase 11 launch gate (D-09) — v1.0-consumer-landing tag still withheld until that re-gate certifies."
+last_updated: "2026-05-16T13:23:14.027Z"
+last_activity: 2026-05-16 -- Phase 11 planning complete
 progress:
   total_phases: 8
   completed_phases: 7
-  total_plans: 31
-  completed_plans: 37
+  total_plans: 32
+  completed_plans: 30
   percent: 88
 ---
 
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-05-12)
 
 Phase: 12
 Plan: Not started
-Status: Milestone complete
-Last activity: 2026-05-16
+Status: Ready to execute
+Last activity: 2026-05-16 -- Phase 11 planning complete
 
 Progress: [██████████] 97%
 
