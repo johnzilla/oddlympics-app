@@ -101,6 +101,7 @@ const STATUS_COPY: Record<string, { kind: 'ok' | 'err'; text: string }> = {
   'bad-team':  { kind: 'err', text: 'Team not recognized. Pick 1–5 teams from the list and save again.' },
   'too-many':  { kind: 'err', text: 'You can follow at most 5 teams. Uncheck some and save again.' },
   server:      { kind: 'err', text: 'Server hiccup. Try again in a minute.' },
+  'unknown':   { kind: 'err', text: 'Your account is not an active subscription. Re-confirm your email or sign up again.' },
 };
 
 const statusMsg = status ? STATUS_COPY[status] ?? null : null;
