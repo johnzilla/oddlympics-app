@@ -37,6 +37,28 @@ Unexplained, the same flow reads as broken or sketchy when a user clicks
 "manage account" and just gets asked for their email with no context.
 Whatever we ship here should *sell* the model, not just describe it.
 
+## Strategic constraint — durable, sport-agnostic re-entry (future oddlympics)
+
+The product roadmap is **not World Cup forever** — oddlympics is the
+"weird sports" play (strongman, cubing, niche long tail). The expected user
+behaviour is *recurring return visits* to manage which sports/teams they
+follow, across tournaments and eventually across sports. Today's only
+surface is the WC landing, but the re-entry affordance and `/manage` must
+be designed as the **durable, account-less home for whatever you follow on
+oddlympics** — not a World-Cup-specific screen.
+
+Concrete implications for this work:
+- Entry affordance + `/manage` copy is sport-agnostic ("manage what you
+  follow on oddlympics"), not "your World Cup teams".
+- `/manage` information architecture must visibly scale to multiple sports
+  (e.g. a "Football — World Cup 2026" group that structurally implies future
+  groups), so adding non-football sports later is not a rewrite.
+- The magic-link email is the durable re-entry point to the *whole*
+  oddlympics relationship, reinforcing the no-account model as a long-term
+  trust feature, not one-tournament plumbing.
+
+This is cheap to honour now (copy + IA framing) and expensive to retrofit.
+
 ## Scope decision reached
 
 Not a visual-polish problem and not a backend change — it is a content +

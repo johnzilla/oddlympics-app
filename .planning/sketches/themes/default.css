@@ -1,0 +1,64 @@
+/* oddlympics sketch theme — verbatim from the locked production design
+   system in src/components/Layout.astro. Do not drift; these sketches must
+   read as the real site. Editorial minimalist: off-white on near-black ink,
+   deep-rust accent, sans body + mono accents, no framework. */
+:root {
+  /* Colors */
+  --bg: #fafaf7;
+  --fg: #14151a;
+  --fg-dim: #5a5d68;
+  --line: #e4e4dd;
+  --line-strong: #c9cbc4;
+  --surface: #ffffff;
+  --accent: #b8350d;
+  --accent-ink: #ffffff;
+  --accent-soft: #fbe9e0;
+  --ok: #1a7f37;
+  --err: #b3261e;
+
+  /* Typography */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --mono: var(--font-sans); /* back-compat alias (matches production) */
+
+  /* Layout */
+  --max: 720px;
+  --pad-x: clamp(20px, 5vw, 48px);
+  --pad: 48px;
+
+  /* Shapes */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 999px;
+}
+
+/* Base reset mirrors Layout.astro so sketch bodies match production metrics */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Shared chrome — canonical versions from Layout.astro */
+.wrap { max-width: var(--max); margin: 0 auto; padding-left: var(--pad-x); padding-right: var(--pad-x); }
+.banner {
+  display: inline-block; margin: 0 0 24px; padding: 6px 12px;
+  font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent); background: var(--accent-soft);
+  border: 1px solid var(--accent); border-radius: var(--radius-pill);
+}
+.headline {
+  margin: 0 0 16px; font-family: var(--font-sans);
+  font-size: clamp(28px, 5vw, 40px); font-weight: 700;
+  line-height: 1.15; letter-spacing: -0.015em; color: var(--fg);
+}
+.subhead { margin: 0 0 32px; font-size: 17px; line-height: 1.55; color: var(--fg-dim); max-width: 620px; }
+.link { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
