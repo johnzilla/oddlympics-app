@@ -243,8 +243,9 @@ exits 1 with `[backup] refusing to overwrite ...`. If you need to redo the
 backup, rename or delete the existing file explicitly first.
 
 After the deploy lands and you've confirmed `/api/signup` accepts team +
-timezone (see "Phase 5 post-deploy smoke" below) and the operator's `team`
-slug is set via `/schedule`, the `.pre-05.bak` file can be removed
+timezone (see "Phase 5 post-deploy smoke" below) and the operator's team
+selection is set via `/manage` (`/schedule` 301-redirects there), the
+`.pre-05.bak` file can be removed
 (~1 week post-deploy). DigitalOcean Backups remain as the DR floor.
 
 ## Phase 5 post-deploy smoke (v2.0)

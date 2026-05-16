@@ -5,7 +5,8 @@
 Personalized "when does MY thing happen" notifications for international sports
 fans, launching with the 2026 FIFA World Cup. Pick your team, get every match
 in your local time zone, and one email an hour before each kickoff. Signup is a
-two-field form (team + email) confirmed via a magic-link double-opt-in flow.
+two-field form (team + email) confirmed via a magic-link double-opt-in flow;
+after confirming you can follow up to 5 teams from the `/manage` editor.
 
 **Live:** https://oddlympics.app
 
@@ -16,70 +17,44 @@ Resend for transactional email, Caddy in front of a `systemd`-managed Node
 process on a single DigitalOcean droplet. GitHub Actions auto-deploys on push
 to `main` (~40 seconds end-to-end).
 
-**v1 MVP shipped (toward 2026-06-11 World Cup kickoff):**
-- ✅ Public teaser landing + double-opt-in email capture (v1.0)
-- ✅ Phase 1 hardening — `/api/unsubscribe` + `/unsubscribed`, CSP enforce in
-  Caddy, default-deny on missing Origin, 24h magic-link TTL, `confirmed.astro`
-  status copy fixed
-- ✅ Phase 2 — magic-link sign-in (`/manage`), team picker + personal schedule
-  (`/schedule`), browser-tz capture with manual override, World Cup schedule
-  ingestor (football-data.org → `teams`/`matches` tables) with a daily 03:00
-  systemd timer
-- ✅ Phase 2.5 — `scripts/launch-blast.mjs` (idempotent, dry-run by default);
-  `/schedule` also captures an optional "which other championship next?"
-  demand-signal into the `feature_requests` table (v1.1 triage input)
-- ✅ Phase 3 — kickoff notification cron every 5 min (`oddlympics-notify.timer`,
-  dry-run until `KICKOFF_NOTIFICATIONS_ENABLED=true`)
-- 🎯 Phase 4 (planned) — Launch Week Observation: watch real notifications fire
-  during the World Cup group-stage opening weekend (2026-06-11 → 2026-06-14),
-  confirm delivery health, capture early feedback
+**Shipped and live (toward 2026-06-11 World Cup kickoff):**
+- ✅ **v1 MVP** — teaser landing + double-opt-in capture, Phase 1 hardening
+  (`/api/unsubscribe`, CSP enforce, default-deny origin, 24h TTL), Phase 2
+  magic-link sign-in + tz capture + football-data.org schedule ingestor
+  (daily 03:00 timer), Phase 2.5 launch-blast + demand-capture, Phase 3
+  kickoff notification cron (5-min timer, dry-run until
+  `KICKOFF_NOTIFICATIONS_ENABLED=true`).
+- ✅ **v2.0 — Consumer Landing & Signup Flow** — Phase 5 schema/payload
+  (`vip_signups.team` slug + IANA `timezone`, first non-additive migration),
+  Phase 6 consumer landing, Phase 7 `/privacy` + `/terms`, Phase 8 Open Graph
+  image, Phase 9 dual-mode `/manage` editor, Phase 10 confirmation-email
+  rework (custom verified sender, 10/10 Mail-Tester). Phase 11 launch gate
+  run against production (AC1–AC12 + Lighthouse all green: Perf 0.97 / A11y
+  1.0 / Best-Practices 1.0 / SEO 1.0). Tagged **`v1.0-consumer-landing`**.
+- ✅ **Phase 12 — multi-team restore** — `/manage` is a 1–5 team
+  confederation-grouped checkbox editor backed by a `user_teams` join table;
+  signup stays single-team (one slug); the kickoff cron fans out per followed
+  team. Verified 11/11.
 
-**v2.0 milestone in progress — Consumer Landing & Signup Flow** (target
-**2026-05-19**, full scope in `.planning/ROADMAP.md`):
-- ✅ Phase 5 — Schema + signup payload: `vip_signups.team` (snake_case slug from
-  `references/teams.json`, 48 World Cup 2026 teams) + `timezone` (IANA-validated
-  with `America/New_York` fallback). `POST /api/signup` widened; downstream
-  consumers (kickoff cron, `/schedule`, `/api/save-selection`) rewritten to read
-  the new shape. End-to-end smoke at `scripts/smoke-signup.mjs` (8/8 PASS,
-  AC2/AC9/AC12 evidence). First non-additive SQLite migration in project
-  history — `selected_teams` dropped, idempotent, version-asserted; pre-deploy
-  backup tool at `scripts/backup-pre-05.mjs`.
-- ✅ Phase 6 — Consumer landing rewrite: `src/pages/index.astro` replaced with
-  the consumer template (48-team confederation-grouped `<select>`, tz-label JS,
-  Plausible `Signup Submit` event, swapped OG/Twitter meta tags). Smoke at
-  `scripts/smoke-landing.mjs`.
-- ✅ Phase 7 — Legal pages: `/privacy` and `/terms` routes (prerendered, same
-  site shell as the landing page) serving the canonical reference copy.
-- ✅ Phase 8 — Open Graph image: source SVG + rendered 1200×630 `public/og-image.png`
-  (`scripts/render-og-image.mjs` via `@resvg/resvg-js`) wired into the head meta.
-- ✅ Phase 9 — `/manage` editor + unsubscribe: dual-mode `/manage` (signed-out
-  magic-link form + signed-in team/timezone editor with backfill banner),
-  per-purpose token TTLs, re-subscribe support. Smoke at `scripts/smoke-manage.mjs`.
-- 🔄 Phase 10 — Confirmation email update: `sendMagicLink()` widened to name the
-  team + timezone in the body (D-04 value-prop line, D-05 subject, `Reply-To` +
-  `List-Unsubscribe` headers). Code shipped (10-01) with an offline smoke
-  `scripts/smoke-confirm-email.mjs` (10-02). Closing on an operator gate —
-  deploy + Mail-Tester ≥ 8/10 + Gmail/Proton/Outlook cross-client evidence (10-03).
-- ⏳ Phase 11 — End-to-end + launch gate: AC1–AC12 on production, Lighthouse run,
-  one real signup test, tag `v1.0-consumer-landing`.
+**Recent fixes (post-v2.0 hardening):**
+- 🐛 **Kickoff notification path restored.** Phase 12 had repointed the cron at
+  an INNER JOIN on `user_teams`, which is only written by the `/manage`
+  editor — so users who signed up and confirmed but never opened `/manage`
+  (the primary funnel) silently received **no notifications**. Fixed: the
+  cron now `LEFT JOIN`s `user_teams` and `COALESCE(ut.team_slug, v.team)` so
+  every confirmed subscriber is reached (and a deselected `/manage` team is
+  not resurrected). `/manage` got the same first-visit fallback.
+- 🎨 **Unified light UI + `Layout.astro` extraction.** All seven pages now
+  share `src/components/Layout.astro` (one light "editorial minimalist"
+  theme; the old per-page dark/light drift is gone).
 
-**Operator actions remaining (v1):** fire the launch blast, flip the kickoff
-cron live (`KICKOFF_NOTIFICATIONS_ENABLED=true` in `/etc/oddlympics.env`),
-end-to-end smoke-test one real kickoff notification before group stage opens.
-
-**Operator actions remaining (v2.0):**
-- Before the deploy that lands the Phase 5 commits, run
-  `scripts/backup-pre-05.mjs` on the droplet — see `DEPLOY.md`. (The migration
-  is idempotent and runs on boot, but the backup is the recovery floor for the
-  one-row, one-shot `selected_teams` drop.)
-- Phase 10 close-out gate (Plan 10-03): confirm the GitHub Actions deploy is
-  green and live, then run one Mail-Tester signup from the prod sender
-  (`onboarding@resend.dev`) for a ≥ 8/10 score, plus three real cross-client
-  signups (Gmail / Proton / Outlook) for render evidence. Screenshots land
-  under `.planning/phases/10-confirmation-email-update/evidence/`.
+**Operator actions remaining:** flip the kickoff cron live
+(`KICKOFF_NOTIFICATIONS_ENABLED=true` in `/etc/oddlympics.env`) and
+smoke-test one real kickoff notification before group stage opens; fire the
+launch blast. See `DEPLOY.md`.
 
 **Deferred to v1.1:** Telegram bot, Lightning tip jar, niche-sport long tail
-(strongman, cubing, etc.), shared `Layout.astro` refactor.
+(strongman, cubing, etc.).
 
 Roadmap, requirements, and per-phase plans + summaries live under `.planning/`.
 See `.planning/ROADMAP.md` for the v1 phase breakdown and `DEPLOY.md` for the
@@ -92,13 +67,13 @@ operator runbook.
 | `/` | GET | Static hero + signup form |
 | `/pending` | GET | "Check your email" — shown after a successful signup |
 | `/confirmed` | GET | Confirmation result page (renders correct copy per `?status=` via inline script) |
-| `/manage` | GET | Magic-link sign-in (uses existing session cookie if valid; otherwise asks for email and sends a `purpose=manage` link) |
-| `/schedule` | GET | Authenticated team picker + personal schedule. Browser-detected tz with manual override. Reads `teams`/`matches`. |
+| `/manage` | GET | Dual-mode: signed-out magic-link form, or (session/`?token=` valid) the 1–5 team confederation-checkbox editor + tz override + schedule preview. Uses the session cookie if valid; otherwise sends a `purpose=manage` link. |
+| `/schedule` | GET | **301 → `/manage`**, preserving `?token=` (the editor + schedule live on `/manage` since Phase 9). |
 | `/unsubscribed` | GET | Confirmation page after one-click unsubscribe |
 | `/api/signup` | POST | Validates email + **team** (48-slug allow-list) + **timezone** (IANA-validated, falls back to `America/New_York`), rate-limits, writes SQLite row, mints magic-link, sends via Resend. Bad team rejects with `?error=bad-form`; bad/empty tz falls back silently. |
-| `/api/confirm` | GET | Verifies token (purpose=confirm), marks row confirmed, redirects to `/confirmed` |
-| `/api/manage` | POST | Sends a magic-link with purpose=manage; landing on `/schedule` mints a session cookie |
-| `/api/save-selection` | POST | Persists `team` (single slug) + `timezone` for the authenticated user via `setSelection`; also inserts the optional demand-capture field into `feature_requests` if non-empty (non-blocking — never gates the team-save) |
+| `/api/confirm` | GET | Verifies token (purpose=confirm), marks row confirmed (re-subscribe restores an unsubscribed row), redirects to `/confirmed?status=` |
+| `/api/manage` | POST | Sends a magic-link with purpose=manage; the link lands on `/manage`, which mints a 30-day session cookie |
+| `/api/save-selection` | POST | Authenticated (form token or session). Persists **1–5 team slugs** into `user_teams` (delete-all-then-insert) + `timezone`, atomically in one transaction (a non-active/unsubscribed row is rejected, whole txn rolls back); also inserts the optional demand-capture field into `feature_requests` if non-empty (non-blocking — never gates the team-save) |
 | `/api/unsubscribe` | GET | Verifies token (purpose=unsubscribe), sets `unsubscribed_at`, redirects to `/unsubscribed` |
 | `/api/logout` | POST | Clears the session cookie |
 
@@ -130,22 +105,24 @@ In production this runs as a `systemd` unit; see `DEPLOY.md`.
 
 ```
 src/
+  components/
+    Layout.astro           # shared shell: <html>/<head> (title/description/OG/noindex/analytics/footer props), unified :root tokens, base reset, shared chrome (.wrap/.banner/.headline/.subhead/.link), site footer. Every page wraps its content in <Layout> and keeps only page-specific scoped CSS.
   pages/
     index.astro            # hero + signup (prerendered, reads ?error= client-side)
     pending.astro          # post-signup "check email" (prerendered, reads ?email= client-side)
     confirmed.astro        # confirm result (prerendered, reads ?status= client-side)
-    manage.astro           # magic-link sign-in (server-rendered, checks session cookie)
-    schedule.astro         # team picker + personal schedule (server-rendered, gated by session)
-    unsubscribed.astro     # post-unsubscribe (prerendered)
+    manage.astro           # dual-mode sign-in + 1–5 team editor (server-rendered, token/session)
+    schedule.astro         # 301 → /manage, preserves ?token= (thin redirect)
+    unsubscribed.astro     # post-unsubscribe (prerendered, reads ?status= client-side)
     api/
       signup.ts            # POST → validate team + tz, mint purpose=confirm magic-link
-      confirm.ts           # GET ?token → mark confirmed, mint session, redirect to /schedule
-      manage.ts            # POST → mint purpose=manage magic-link
-      save-selection.ts    # POST → persist single team slug + timezone
-      unsubscribe.ts       # GET ?token → set unsubscribed_at
+      confirm.ts           # GET ?token → markConfirmed (restores re-subscribers) → 303 /confirmed?status=
+      manage.ts            # POST → mint purpose=manage magic-link (lands on /manage)
+      save-selection.ts    # POST → atomic txn: updateTimezoneActive + replace user_teams (1–5 slugs)
+      unsubscribe.ts       # GET ?token → set unsubscribed_at + clear user_teams (CR-02)
       logout.ts            # POST → clear session cookie
   lib/
-    db.ts                  # better-sqlite3 singleton + prepared statements + schema (vip_signups w/ team + timezone, teams w/ slug, matches, match_notifications, feature_requests; idempotent ALTER + DROP guards)
+    db.ts                  # better-sqlite3 singleton + prepared statements + schema (vip_signups w/ team + timezone, teams w/ slug, matches, match_notifications, feature_requests, user_teams join table; idempotent ALTER + DROP guards)
     teams.ts               # VALID_TEAMS Set built from references/teams.json (48 slugs); TEAMS ordered array; isValidTeamSlug
     timezones.ts           # VALID_TZ Set built at module load from Intl.supportedValuesOf('timeZone'); FALLBACK_TZ=America/New_York; isValidTimezone
     token.ts               # HMAC-SHA256 signed tokens, 24h TTL, 4 purposes (confirm/manage/unsubscribe/session)
@@ -157,7 +134,7 @@ references/
 scripts/
   ingest-schedule.mjs      # pull WC 2026 teams + matches from football-data.org (idempotent upsert); maps teams.json labels to teams.slug
   backfill-team-slugs.mjs  # one-shot teams.slug backfill from references/teams.json (dry-run by default)
-  send-kickoff-notifications.mjs  # ~60min-before-kickoff sender, idempotent (UNIQUE on user+match+channel); JOINs vip_signups.team → teams.slug
+  send-kickoff-notifications.mjs  # ~60min-before-kickoff sender, idempotent (UNIQUE on user+match+channel); LEFT JOIN user_teams, joins teams ON slug = COALESCE(ut.team_slug, vip_signups.team) so single-team signups AND multi-team /manage users are both reached
   launch-blast.mjs         # one-time "pick your teams" email to existing teaser list (manual --send)
   backup-pre-05.mjs        # pre-Phase-5-migration SQLite snapshot (operator runs on droplet before the deploy that drops selected_teams)
   render-og-image.mjs      # Phase 8: render references/og-image.svg → public/og-image.png at 1200×630 (@resvg/resvg-js) + byte/LAND-02 checks
@@ -182,16 +159,24 @@ DEPLOY.md                  # step-by-step production deploy + Day 2 ops + per-cr
 
 ## Design choices worth knowing
 
-- **`output: 'server'`** on the Astro side, but the three HTML pages set
-  `export const prerender = true;`. Result: static pages cached by Caddy with
-  `max-age=31536000`, dynamic API routes served by Node. Tiny edge cache, real
-  server logic.
-- **Client-side URL param reads** in `index.astro`, `pending.astro`, and
-  `confirmed.astro` (for `?error=...`, `?email=...`, `?status=...`). The
-  pages stay statically prerendered; a small inline `<script is:inline>`
-  hydrates the dynamic bits. No JS framework. The two server-rendered
-  pages (`manage.astro`, `schedule.astro`) read params normally in the
-  Astro frontmatter because they're not prerendered.
+- **`output: 'server'`**, but the four content pages (`index`, `pending`,
+  `confirmed`, `unsubscribed`) set `export const prerender = true;`. Result:
+  static pages cached by Caddy with `max-age=31536000`, dynamic API routes +
+  the server-rendered `/manage` served by Node. Tiny edge cache, real server
+  logic.
+- **Shared `Layout.astro`, one light theme, no JS framework.** Every page
+  wraps its content in `src/components/Layout.astro`, which owns the
+  `<html>`/`<head>` shell (title/description/OG/`noindex`/`analytics`/`footer`
+  as props), the unified `:root` design tokens, the base reset, and the shared
+  chrome + footer. Pages keep only their own page-specific CSS in a scoped
+  `<style>`. Aesthetic is light "editorial minimalist" (`--bg #fafaf7`,
+  `--fg #14151a`, accent `#b8350d`); the earlier per-page-inline-style model
+  let a dark/light drift creep in, so it was consolidated here.
+- **Client-side URL param reads** in the prerendered pages (`?error=`,
+  `?email=`, `?status=`) via a small inline `<script is:inline>` — the pages
+  stay statically cacheable. `manage.astro` is server-rendered and reads
+  `?token=`/cookies in the Astro frontmatter; `/schedule` is a thin 301 to
+  `/manage` that preserves `?token=`.
 - **Cookie-based sessions, 30-day sliding window** (`src/lib/session.ts`).
   Magic-link flows mint a session token after token verification; the
   cookie is HttpOnly + Secure + SameSite=Lax. `/manage` and `/schedule`
