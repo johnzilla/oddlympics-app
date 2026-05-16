@@ -53,7 +53,8 @@ for international sports fans, launching at the 2026 FIFA World Cup
   roadmap in `.planning/ROADMAP.md`.
 
 **v1.1 deferrals:** Telegram bot, Lightning tip jar (vaultwarden integration),
-niche-sport long tail (strongman, cubing), shared `Layout.astro` refactor.
+niche-sport long tail (strongman, cubing). (The shared `Layout.astro` refactor
+was pulled forward out of v1.1 and is now done — see Conventions.)
 
 Roadmap, requirements, locked decisions, and per-phase plans live under
 `.planning/`. The full original design context is at
@@ -209,18 +210,25 @@ ops table (logs, restart, DB inspection, email-list export, backup).
 
 - **No framework JS.** Plain Astro + tiny `<script is:inline>` blocks where
   needed. If you find yourself reaching for React/Vue, ask first.
-- **One mono font** (`ui-monospace, SFMono-Regular, Menlo, ...`) across every
-  page. Aesthetic is "Bitcoin minimalist on near-black."
-- **Accent color** is `hsl(18 70% 56%)` (a warm orange). Defined as `--accent`
-  in each page's inline `<style is:global>`.
-- **Astro CSS lives inline per page** in `<style is:global>` blocks — no
-  global stylesheet, no `Layout.astro` component. The original "refactor when
-  a 4th page lands" trigger has fired (we're at 6 pages: `/`, `/pending`,
-  `/confirmed`, `/manage`, `/schedule`, `/unsubscribed`), but the refactor
-  itself is **deferred to v1.1** — the deadline is hard, the duplication is
-  manageable, and any new page in the meantime should just paste the same
-  `<style is:global>` head as a copy from `index.astro`. When you do extract
-  Layout, do it as one focused commit, not bundled with feature work.
+- **Sans body, mono accents.** `--font-sans` for body/headlines/forms,
+  `--font-mono` for the banner pill, FAQ markers, step numbers, footer copy.
+  Aesthetic is light "editorial minimalist" — off-white `--bg: #fafaf7` on
+  near-black `--fg: #14151a`. (The original dark "Bitcoin minimalist on
+  near-black" was reworked away; do not reintroduce `#0b0b0e` backgrounds.)
+- **Accent color** is `#b8350d` (a deep rust red, WCAG-AA on the light bg —
+  vetted in Phase 11-01). Defined as `--accent` once, in `Layout.astro`.
+- **Shared `Layout.astro` is the chrome.** `src/components/Layout.astro` owns
+  the `<html>`/`<head>` shell (title/description/OG/`noindex`/`analytics`/
+  `footer` all props), the unified `:root` design tokens, the base reset, the
+  shared chrome (`.wrap`/`.banner`/`.headline`/`.subhead`/`.link`), and the
+  site footer. Every UI page (`index`, `pending`, `confirmed`, `unsubscribed`,
+  `manage`, `privacy`, `terms`) wraps its content in `<Layout>` and keeps only
+  its **page-specific** CSS in a scoped `<style>` (NOT `is:global`). A new
+  page imports `Layout` — it does NOT paste a `<style is:global>` head. The
+  v1.1-deferred extraction was pulled forward (the per-page style duplication
+  is what let the dark/light theme drift happen). `--mono` is an intentional
+  back-compat alias to `--font-sans` so legacy `var(--mono)` component CSS
+  still renders in the body face; a clean rename is fine but optional.
 - **Errors and pending state via URL params** (`?error=bad-email`,
   `?email=foo@bar`). Server endpoints redirect with 303; client scripts read
   the param and inject the message. Keeps pages CDN-cacheable.
