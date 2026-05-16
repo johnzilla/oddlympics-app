@@ -28,7 +28,7 @@
 //   via npx/tmp at runtime only, and the underlying Chrome behavior is identical.
 //   This deviation is recorded here, in 11-SUMMARY.md, and in the per-AC evidence.
 
-import { readFileSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, mkdirSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline';
@@ -43,6 +43,27 @@ const BASE = process.env.SMOKE_BASE_URL ?? 'https://oddlympics.app';
 const GATE_IP = '192.0.2.44';
 
 const EVIDENCE_DIR = resolve(REPO_ROOT, '.planning/phases/11-end-to-end-launch-gate/evidence');
+
+// chrome-headless-shell installs into a version-pinned dir that changes per
+// install (e.g. chrome-headless-shell/mac_arm-148.../chrome-headless-shell-mac-arm64/).
+// Making the operator hand-build that path is brittle (D-01 in-phase fix):
+// honor an explicit CHROME_PATH override, else auto-discover the binary.
+function resolveChromePath() {
+  const override = process.env.CHROME_PATH;
+  if (override && existsSync(override)) return override;
+  const root = resolve(REPO_ROOT, 'chrome-headless-shell');
+  if (!existsSync(root)) return null;
+  const stack = [root];
+  while (stack.length) {
+    const dir = stack.pop();
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const full = resolve(dir, ent.name);
+      if (ent.isDirectory()) stack.push(full);
+      else if (ent.name === 'chrome-headless-shell' || ent.name === 'chrome-headless-shell.exe') return full;
+    }
+  }
+  return null;
+}
 
 console.log(`[gate] target: ${BASE}`);
 console.log(`[gate] evidence: ${EVIDENCE_DIR}`);
@@ -202,19 +223,20 @@ await runCase('AC2-team-select-48-options', () => {
 //        after VALID_TZ validation; all three locales are valid IANA zones).
 // ---------------------------------------------------------------------------
 {
-  const CHROME_PATH = process.env.CHROME_PATH;
-  if (!CHROME_PATH || !existsSync(CHROME_PATH)) {
+  const CHROME_PATH = resolveChromePath();
+  if (!CHROME_PATH) {
     console.error(
-      '[gate] FAIL: AC3 requires CHROME_PATH pointing to chrome-headless-shell binary.',
+      '[gate] FAIL: AC3 needs the chrome-headless-shell binary (not found).',
     );
     console.error(
       '[gate] Install once: npx @puppeteer/browsers install chrome-headless-shell@stable',
     );
     console.error(
-      '[gate] Then: CHROME_PATH=./chrome-headless-shell/<platform>/chrome-headless-shell npm run smoke:gate',
+      '[gate] It auto-discovers under ./chrome-headless-shell/ after install; or set CHROME_PATH explicitly.',
     );
     process.exit(2);
   }
+  console.log(`[gate] AC3: using chrome-headless-shell at ${CHROME_PATH}`);
 
   // Load puppeteer-core via the project's existing node_modules (installed as
   // a Phase-6 pattern; kept out of package.json deps per 06-03 decision).
@@ -383,9 +405,9 @@ await runCase('AC6-og-image', async () => {
 //        Path is EXACTLY references/lighthouse-final.html (SC2 / done-def #5).
 // ---------------------------------------------------------------------------
 await runCase('AC8-lighthouse-mobile', async () => {
-  const CHROME_PATH = process.env.CHROME_PATH;
-  if (!CHROME_PATH || !existsSync(CHROME_PATH)) {
-    console.error('[gate] AC8: CHROME_PATH not set or binary missing — cannot run Lighthouse');
+  const CHROME_PATH = resolveChromePath();
+  if (!CHROME_PATH) {
+    console.error('[gate] AC8: chrome-headless-shell binary not found — cannot run Lighthouse');
     return false;
   }
 
