@@ -621,6 +621,122 @@ await runCase('AC12-honeypot', async () => {
 });
 
 // ---------------------------------------------------------------------------
+// AC-MT — multi-team /manage select+save+read-back (D-09 re-gate, operator-gated
+// for the authenticated session; fetch+cookie, no browser launch needed).
+// Test email: johnturner+acmt@gmail.com (+ac infix satisfies D-04 cleanup reach).
+// runCase name: AC-MT-multi-team-manage
+// ---------------------------------------------------------------------------
+console.log('\n[gate] --- OPERATOR ACTION REQUIRED: AC-MT ---');
+console.log('[gate] AC-MT: Verify multi-team /manage save+read-back on post-Phase-12 prod.');
+console.log('[gate] AC-MT:   1. In a browser, go to ' + BASE + '/manage');
+console.log('[gate] AC-MT:   2. Enter email: johnturner+acmt@gmail.com and request the magic link');
+console.log('[gate] AC-MT:   3. Click the magic link in the email to sign in — a session cookie will be set');
+console.log('[gate] AC-MT:   4. Open DevTools → Application → Cookies → ' + BASE);
+console.log('[gate] AC-MT:   5. Copy the value of the "oddlympics_session" cookie');
+console.log('[gate] AC-MT:   6. Paste it below as: oddlympics_session=<value>');
+const acmtCookieRaw = await prompt('[gate] AC-MT: Paste session Cookie header (e.g. oddlympics_session=...) or press Enter to skip: ');
+
+if (!acmtCookieRaw) {
+  // Operator skipped — write SKIPPED evidence; do NOT count as PASS or FAIL.
+  writeFileSync(
+    resolve(EVIDENCE_DIR, 'AC-MT-multi-team.txt'),
+    `AC-MT multi-team /manage select+save+read-back — ${new Date().toISOString()}\n` +
+    `Target: ${BASE}\n` +
+    `Test email: johnturner+acmt@gmail.com\n` +
+    `Result: SKIPPED (no session cookie provided — operator skipped)\n` +
+    `Kickoff fan-out citation: kickoff fan-out via user_teams is prod-verified by ` +
+    `12-VERIFICATION.md truth #7/#8 + M14 (cron joins vip_signups->user_teams->teams.slug, ` +
+    `one email per match per followed team via match_notifications UNIQUE guard); ` +
+    `off-box prod-DB read unavailable — the /manage read-back is the persistence proof ` +
+    `(mirrors 11-CONTEXT AC3 persistence-assertion reasoning).\n`,
+  );
+  console.log('[gate] AC-MT: OPERATOR-GATED-SKIPPED (no cookie — not silently PASS)');
+} else {
+  // Automated assertion with the operator-supplied session cookie.
+  // runCase('AC-MT-multi-team-manage') counts into pass/fail tally.
+  await runCase('AC-MT-multi-team-manage', async () => {
+    const acmtCookieHeader = acmtCookieRaw.trim();
+    const acmtSlugs = ['england', 'france', 'germany'];
+
+    // POST multi-team selection using repeated team= appends (smoke-manage postMultiTeam shape).
+    // URLSearchParams(object) only serializes one value per key — must append per slug.
+    const acmtBody = new URLSearchParams();
+    for (const slug of acmtSlugs) acmtBody.append('team', slug);
+    acmtBody.append('timezone', 'America/New_York');
+
+    let acmtSaveStatus;
+    let acmtSaveLocation;
+    let acmtVerdict = 'FAIL';
+    let acmtDetails = '';
+
+    const saveRes = await fetch(`${BASE}/api/save-selection`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Origin: BASE,
+        Cookie: acmtCookieHeader,
+      },
+      body: acmtBody,
+      redirect: 'manual',
+    });
+    acmtSaveStatus = saveRes.status;
+    acmtSaveLocation = saveRes.headers.get('location') ?? '';
+
+    const savedOk = acmtSaveStatus === 303 && acmtSaveLocation.includes('status=saved');
+    if (!savedOk) {
+      acmtDetails += `FAIL: POST /api/save-selection returned ${acmtSaveStatus} ${acmtSaveLocation} (expected 303 status=saved)\n`;
+    } else {
+      // GET /manage and assert checked checkboxes + no <select name="team">.
+      const manageRes = await fetch(`${BASE}/manage`, {
+        method: 'GET',
+        headers: { Cookie: acmtCookieHeader },
+        redirect: 'manual',
+      });
+      const acmtManageBody = await manageRes.text();
+
+      // Assert no legacy <select name="team"> (Phase-12 replaced it with checkboxes).
+      if (acmtManageBody.includes('<select name="team"')) {
+        acmtDetails += `FAIL: GET /manage body contains <select name="team"> (expected checkboxes post-12-02)\n`;
+      } else {
+        // Assert each posted slug renders as a CHECKED checkbox (smoke-manage M11 regex).
+        const slugResults = [];
+        let allChecked = true;
+        for (const slug of acmtSlugs) {
+          const pattern = new RegExp(`value="${slug}"[^>]*checked|checked[^>]*value="${slug}"`, 'i');
+          const checked = pattern.test(acmtManageBody);
+          slugResults.push(`  slug="${slug}": ${checked ? 'CHECKED (PASS)' : 'NOT CHECKED (FAIL)'}`);
+          if (!checked) allChecked = false;
+        }
+        acmtDetails += slugResults.join('\n') + '\n';
+        if (allChecked) {
+          acmtVerdict = 'PASS';
+          acmtDetails += 'All 3 slugs render as checked confederation checkboxes — multi-team persistence confirmed.\n';
+        } else {
+          acmtDetails += 'One or more slugs missing from checked checkboxes — multi-team persistence FAILED.\n';
+        }
+      }
+    }
+
+    const acmtEvidenceText =
+      `AC-MT multi-team /manage select+save+read-back — ${new Date().toISOString()}\n` +
+      `Target: ${BASE}\n` +
+      `Test email: johnturner+acmt@gmail.com\n` +
+      `Posted slugs: ${acmtSlugs.join(', ')}\n` +
+      `POST /api/save-selection → status=${acmtSaveStatus} location=${acmtSaveLocation}\n` +
+      `Per-slug checked read-back:\n${acmtDetails}` +
+      `Result: ${acmtVerdict}\n` +
+      `Kickoff fan-out citation: kickoff fan-out via user_teams is prod-verified by ` +
+      `12-VERIFICATION.md truth #7/#8 + M14 (cron joins vip_signups->user_teams->teams.slug, ` +
+      `one email per match per followed team via match_notifications UNIQUE guard); ` +
+      `off-box prod-DB read unavailable — the /manage read-back is the persistence proof ` +
+      `(mirrors 11-CONTEXT AC3 persistence-assertion reasoning).\n`;
+
+    writeFileSync(resolve(EVIDENCE_DIR, 'AC-MT-multi-team.txt'), acmtEvidenceText);
+    return acmtVerdict === 'PASS';
+  });
+}
+
+// ---------------------------------------------------------------------------
 // opengraph.xyz preview — operator-gated (done-definition #4).
 // ---------------------------------------------------------------------------
 console.log('\n[gate] --- OPERATOR ACTION REQUIRED: opengraph.xyz preview ---');
@@ -659,6 +775,7 @@ console.log('[gate]   AC9  bad-team → 303 /?error=bad-form   → see AC9-inval
 console.log('[gate]   AC10 Backfilled-row banner + save      → OPERATOR-GATED (AC10-operator-evidence.txt)');
 console.log('[gate]   AC11 Plausible "Signup Submit" event   → OPERATOR-GATED (AC11-operator-evidence.txt)');
 console.log('[gate]   AC12 Honeypot → 303 /pending           → see AC12-honeypot.txt');
+console.log('[gate]   AC-MT Multi-team /manage select+save+read-back  → OPERATOR-GATED (AC-MT-multi-team.txt)');
 console.log('[gate]   OG   opengraph.xyz preview card        → OPERATOR-GATED (OG-preview-operator-evidence.txt)');
 console.log('[gate] ─────────────────────────────────────────────────────────────');
 console.log(`[gate] result: pass=${pass} fail=${fail}`);
