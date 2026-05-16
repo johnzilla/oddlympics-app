@@ -230,7 +230,7 @@ Plans:
 | 9. `/manage` editor + unsubscribe | 4/5 | In Progress|  |
 | 10. Confirmation email update | 3/3 | Complete    | 2026-05-16 |
 | 11. End-to-end + launch gate | 4/5 | BLOCKED (re-gates after Phase 12) |  |
-| 12. Restore multi-team selection | 2/4 | In Progress|  |
+| 12. Restore multi-team selection | 3/4 | In Progress|  |
 
 **Execution order:** 5 → 6 → 7 → 8 → 9 → 10 → 11 (single-team baseline) →
 **12 (restore multi-team)** → 11 re-gate + tag. Phase 12 depends on Phases
@@ -258,7 +258,7 @@ Plans:
 **Goal:** A signed-in subscriber can follow 1–5 World Cup teams via confederation-grouped checkboxes on `/manage` (current picks pre-checked, server-enforced bounds), those picks persist in a `user_teams` join table, and the kickoff cron fans out one email per match for any followed team — while cold signup stays single-team and the one-email-per-match guarantee is preserved.
 **Requirements**: (no new v2.0 reqs — restores the v1 IDENT-02/03/04 multi-team model removed by the Phase 5 schema collapse; constrained by NOTIFY-04, SIGNUP-04, LAND-02)
 **Depends on:** Phases 5–10 (current code on `main`). NOT Phase 11 — the auto-generated "Depends on: Phase 11" stub was inverted; Phase 11's launch gate **re-runs AFTER** Phase 12 and only then cuts the withheld `v1.0-consumer-landing` tag (CONTEXT D-09 is authoritative).
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 **Wave 1**
@@ -266,7 +266,7 @@ Plans:
 
 **Wave 2** *(both depend on 12-01; zero file overlap → run in parallel)*
 - [x] 12-02-PLAN.md — `/manage` confederation-grouped checkbox editor + `/api/save-selection` multi-slug bounded (≥1/≤5) transactional writer reviving the `too-many`→`bad-team` redirect (D-04, D-05).
-- [ ] 12-03-PLAN.md — Kickoff cron `usersQuery` join swap to `user_teams` (D-06); NOTIFY-04 one-email guarantee inherited free; dry-run fan-out proof.
+- [x] 12-03-PLAN.md — Kickoff cron `usersQuery` join swap to `user_teams` (D-06); NOTIFY-04 one-email guarantee inherited free; dry-run fan-out proof.
 
 **Wave 3** *(depends on 12-02 + 12-03)*
 - [ ] 12-04-PLAN.md — D-07 `sendMagicLink` copy verify (single-team, no SIGNUP-04 regression, no LAND-02) + extend `scripts/smoke-manage.mjs` with M10–M14 end-to-end multi-team cases; full M1–M14 suite green.
