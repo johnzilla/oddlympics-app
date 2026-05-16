@@ -28,7 +28,7 @@ inline scripts, or inline styles).
 - [x] **Phase 9: `/manage` editor + unsubscribe** — show + edit team and timezone, one-time banner for backfilled rows, confirm unsubscribe token semantics (completed 2026-05-14)
 - [x] **Phase 10: Confirmation email update** — name team + timezone in the body, deliverability cross-client + spam-score check (completed 2026-05-16)
 - [ ] **Phase 11: End-to-end + launch gate** — AC1–AC12 on production, Lighthouse run, real signup test, tag `v1.0-consumer-landing` (BLOCKED on multi-team — re-runs AFTER Phase 12)
-- [x] **Phase 12: Restore multi-team selection** — `user_teams` join table, `/manage` confederation checkboxes (1–5), kickoff cron join swap, N-team copy check (4/4 plans executed; verification GAPS_FOUND 2026-05-16 — 2 BLOCKER consent regressions, gap closure pending) (completed 2026-05-16)
+- [x] **Phase 12: Restore multi-team selection** — `user_teams` join table, `/manage` confederation checkboxes (1–5), kickoff cron join swap, N-team copy check (6/6 plans executed incl. gap-closure 12-05/12-06; verification PASSED 2026-05-16 — 11/11 must-haves, CR-01/CR-02 consent regressions closed, smoke M1–M16 green) (completed 2026-05-16)
 
 ## Phase Details
 
@@ -230,7 +230,7 @@ Plans:
 | 9. `/manage` editor + unsubscribe | 4/5 | In Progress|  |
 | 10. Confirmation email update | 3/3 | Complete    | 2026-05-16 |
 | 11. End-to-end + launch gate | 4/5 | BLOCKED (re-gates after Phase 12) |  |
-| 12. Restore multi-team selection | 6/6 | Complete   | 2026-05-16 |
+| 12. Restore multi-team selection | 6/6 | Complete    | 2026-05-16 |
 
 **Execution order:** 5 → 6 → 7 → 8 → 9 → 10 → 11 (single-team baseline) →
 **12 (restore multi-team)** → 11 re-gate + tag. Phase 12 depends on Phases

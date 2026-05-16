@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Consumer Landing & Signup Flow
-status: executing
-stopped_at: Phase 12 Plan 04 complete — D-07 verify-only + M10-M14 smoke; pass=15 fail=0; Phase 12 MVP fence D-08 done
-last_updated: "2026-05-16T12:17:31.145Z"
+status: in_progress
+stopped_at: Phase 12 complete (6/6 plans, 11/11 verified, CR-01/CR-02 gaps closed). Milestone NOT complete — Phase 11 launch gate must RE-RUN after Phase 12 per D-09; v1.0-consumer-landing tag still WITHHELD until then.
+last_updated: 2026-05-16T12:48:52.747Z
 last_activity: 2026-05-16
 progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 31
-  completed_plans: 30
+  completed_plans: 37
   percent: 88
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-12)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** Phase 12 — restore-multi-team-selection
+**Current focus:** Milestone complete
 
 ## Current Position
 
-Phase: 12 (restore-multi-team-selection) — EXECUTING
-Plan: 3 of 6
-Status: Ready to execute
+Phase: 12
+Plan: Not started
+Status: Milestone complete
 Last activity: 2026-05-16
 
 Progress: [██████████] 97%
@@ -36,7 +36,7 @@ Progress: [██████████] 97%
 
 **Velocity:**
 
-- Total plans completed: 14
+- Total plans completed: 20
 - Average duration: —
 - Total execution time: 0 hours
 
@@ -48,6 +48,7 @@ Progress: [██████████] 97%
 | 06 | 3 | - | - |
 | 07 | 2 | - | - |
 | 10 | 3 | - | - |
+| 12 | 6 | - | - |
 
 **Recent Trend:**
 
@@ -115,6 +116,7 @@ None yet.
 
 ### Blockers/Concerns
 
+- **v2.0 NOT shippable yet:** Phase 12 (multi-team) is done, but the Phase 11 launch gate must RE-RUN after Phase 12 per locked decision D-09 — it must re-verify AC2/AC3-class behavior PLUS the new multi-team behavior, then cut the deliberately-withheld `v1.0-consumer-landing` tag. The original multi-team blocker (founder rejected single-team v2.0) is RESOLVED; the live gate is now the Phase 11 re-run + tag.
 - Hard milestone deadline: **2026-05-19** (7 days from 2026-05-12). Must complete before v1 MVP launch on 2026-06-11.
 - Pending operator actions inherited from v1 MVP (must complete before launch but independent of v2.0 work): fire `scripts/launch-blast.mjs --send`, flip `KICKOFF_NOTIFICATIONS_ENABLED=true` on droplet.
 - Reference assets called out in MILESTONE doc (`references/index.html`, `og-image.svg`, copy md) do not exist in repo yet — execution phases must create them.
@@ -136,6 +138,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-16T12:17:31.140Z
-Stopped at: Phase 12 Plan 04 complete — D-07 verify-only + M10-M14 smoke; pass=15 fail=0; Phase 12 MVP fence D-08 done
+Stopped at: Phase 12 COMPLETE — gap-closure 12-05/12-06 executed; CR-01/CR-02 consent regressions closed; smoke M1–M16 green (pass=17 fail=0); verification PASSED 11/11. Multi-team restored end-to-end. NEXT: re-run Phase 11 launch gate (D-09) — v1.0-consumer-landing tag still withheld until that re-gate certifies.
 Resume file: 
 None
