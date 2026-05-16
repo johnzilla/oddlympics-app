@@ -1,12 +1,11 @@
 import type { APIRoute } from 'astro';
-import { db, setSelection, insertFeatureRequest } from '../../lib/db';
+import { db, deleteUserTeams, insertUserTeam, updateTimezone, insertFeatureRequest } from '../../lib/db';
 import { verifyToken } from '../../lib/token';
 import { buildSessionCookie, readSessionFromCookie } from '../../lib/session';
 import { VALID_TEAMS } from '../../lib/teams';
 
 export const prerender = false;
 
-const TEAM_ID_RE = /^\d{1,8}$/;
 // IANA timezones are like "America/New_York" or "UTC" — tolerate +/-, _, /, and word chars.
 const TZ_RE = /^[A-Za-z][A-Za-z0-9_+\-/]{0,63}$/;
 
@@ -48,37 +47,36 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  // Phase 9 — D-03: primary input is team=<slug> from the /manage editor select.
-  // team_ids[] fallback retained for the deploy-window transition (stale /manage
-  // tabs mid-deploy still post the old checkbox form). Remove fallback after
-  // 1 week of stable deploy (target removal: 2026-05-26).
-  let teamSlug: string | null = null;
+  // Parse all `team` values from the multi-checkbox form.
+  const rawSlugs = (form.getAll('team') as string[])
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => s.length > 0);
 
-  const slugInput = ((form.get('team') as string) ?? '').trim().toLowerCase();
-  if (slugInput && VALID_TEAMS.has(slugInput)) {
-    teamSlug = slugInput;
-  } else {
-    // Fallback: resolve first valid team_ids[] integer to slug (transition window only)
-    const rawIds = form.getAll('team_ids') as string[];
-    for (const raw of rawIds) {
-      const s = (raw ?? '').trim();
-      if (!TEAM_ID_RE.test(s)) continue;
-      const n = Number(s);
-      if (n <= 0) continue;
-      const row = db.prepare('SELECT slug FROM teams WHERE id = ?').get(n) as { slug: string | null } | undefined;
-      if (row?.slug) { teamSlug = row.slug; break; }
-    }
-  }
-  if (!teamSlug) {
+  // Validate all slugs against VALID_TEAMS allow-list.
+  const validSlugs = rawSlugs.filter((s) => VALID_TEAMS.has(s));
+  const hasBadSlug = rawSlugs.length !== validSlugs.length;
+
+  if (hasBadSlug || validSlugs.length === 0) {
+    console.error(`[save-selection] bad-team: raw=${rawSlugs.join(',')} valid=${validSlugs.join(',')}`);
     return redirectTo(formToken, 'bad-team');
+  }
+  if (validSlugs.length > 5) {
+    console.error(`[save-selection] too-many: count=${validSlugs.length}`);
+    return redirectTo(formToken, 'too-many');
   }
 
   const tz = ((form.get('timezone') as string) ?? '').trim();
   if (!isValidIanaTz(tz)) return redirectTo(formToken, 'bad-tz');
 
   try {
-    const updated = setSelection.get(teamSlug, tz, result.email);
-    if (!updated) return redirectTo(formToken, 'unknown');
+    // Team picks and timezone are one atomic unit — a rolled-back transaction
+    // leaves both unchanged, preventing a state where team rows changed but tz did not.
+    const saveSelection = db.transaction((email: string, slugs: string[], timezone: string) => {
+      deleteUserTeams.run(email);
+      for (const slug of slugs) insertUserTeam.run(email, slug);
+      updateTimezone.run(timezone, email);
+    });
+    saveSelection(result.email, validSlugs, tz);
 
     // Phase 2.5 — LAUNCH-01-SC4: optional demand-capture textarea.
     // Whitespace-only is treated as empty (no insert). Length-cap server-side
