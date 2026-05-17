@@ -127,6 +127,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260511-ccx | Phase 2.5 SC4: demand-capture textarea on /schedule + feature_requests table | 2026-05-11 | 6129910 | [260511-ccx-implement-phase-2-5-success-criterion-4-](./quick/260511-ccx-implement-phase-2-5-success-criterion-4-/) |
 | 260516-q33 | manage discoverability content and entry pass (sketches 001-B/002-B/003-B) | 2026-05-16 | eb67661 | [260516-q33-manage-discoverability-content-and-entry](./quick/260516-q33-manage-discoverability-content-and-entry/) |
+| 260517-px5 | Harden football-data.org team-name→slug mapping; shared resolver + offline smoke + launch-gate NULL-slug AC | 2026-05-17 | 4684248 | [260517-px5-harden-football-data-org-team-name-to-sl](./quick/260517-px5-harden-football-data-org-team-name-to-sl/) |
 
 ## Deferred Items
 
@@ -136,8 +137,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-16T14:00:00.000Z
-Stopped at: 11-06 Task 1 DONE (4e74e54) — AC-MT added to launch-gate.mjs. Awaiting operator at Task 2 blocking-human checkpoint (deploy + gate run + operator evidence for AC4/AC10/AC11/AC-MT/OG).
+Last session: 2026-05-17T00:00:00.000Z
+Stopped at: quick-260517-px5 DONE (4684248) — shared resolver + offline smoke + launch-gate NULL-slug AC all complete.
 Resume file: 
 None
 
