@@ -12,6 +12,7 @@
 import Database from 'better-sqlite3';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { createTeamSlugResolver } from './lib/resolve-team-slug.mjs';
 
 const API_KEY = process.env.FOOTBALL_DATA_API_KEY;
 if (!API_KEY) {
@@ -33,7 +34,6 @@ const TEAMS_JSON_PATH = resolve(
   process.env.TEAMS_JSON_PATH ?? './references/teams.json',
 );
 const teamsCatalog = JSON.parse(readFileSync(TEAMS_JSON_PATH, 'utf-8'));
-const labelToSlug = new Map(teamsCatalog.map((t) => [t.label, t.slug]));
 
 async function api(path) {
   const r = await fetch(`${API_BASE}${path}`, {
@@ -111,6 +111,9 @@ const upsertMatch = db.prepare(`
     last_updated = strftime('%s','now')
 `);
 
+// Built once from the catalog — O(1) per call inside the ingest transaction.
+const resolveTeamSlug = createTeamSlugResolver(teamsCatalog);
+
 console.log(`[ingest] DB: ${DB_PATH}`);
 console.log(`[ingest] competition: ${COMP}`);
 
@@ -122,7 +125,7 @@ console.log(`[ingest] got ${teams.length} teams from API`);
 let noSlugCount = 0;
 const ingestTeams = db.transaction(() => {
   for (const t of teams) {
-    const slug = labelToSlug.get(t.name) ?? null;
+    const slug = resolveTeamSlug(t.name);
     if (slug === null) {
       console.log(`[ingest] no-slug team-name=${t.name} id=${t.id}`);
       noSlugCount++;

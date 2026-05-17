@@ -27,6 +27,7 @@
 import Database from 'better-sqlite3';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { createTeamSlugResolver } from './lib/resolve-team-slug.mjs';
 
 const DB_PATH = resolve(process.env.DATABASE_PATH ?? './data/oddlympics.db');
 const TEAMS_JSON_PATH = resolve(
@@ -37,10 +38,10 @@ const args = process.argv.slice(2);
 const WRITE = args.includes('--write');
 
 const teamsCatalog = JSON.parse(readFileSync(TEAMS_JSON_PATH, 'utf-8'));
-const labelToSlug = new Map(teamsCatalog.map((t) => [t.label, t.slug]));
+const resolveTeamSlug = createTeamSlugResolver(teamsCatalog);
 
 console.log(`[backfill] DB: ${DB_PATH}`);
-console.log(`[backfill] teams.json: ${TEAMS_JSON_PATH} (${labelToSlug.size} entries)`);
+console.log(`[backfill] teams.json: ${TEAMS_JSON_PATH} (${teamsCatalog.length} entries)`);
 console.log(`[backfill] mode: ${WRITE ? 'WRITE' : 'dry-run'} (use --write to apply)`);
 
 const db = new Database(DB_PATH);
@@ -73,9 +74,9 @@ let missing = 0;
 
 const apply = db.transaction(() => {
   for (const row of rows) {
-    const expected = labelToSlug.get(row.name);
+    const expected = resolveTeamSlug(row.name);
     if (row.slug !== null) {
-      if (expected === undefined) {
+      if (expected === null) {
         // Row has a slug but our catalog doesn't know this label. Operator-managed.
         console.log(`  ok-extra ${row.name} db=${row.slug} (label not in teams.json)`);
         ok++;
@@ -88,7 +89,7 @@ const apply = db.transaction(() => {
         // Do NOT auto-overwrite — operator must resolve.
       }
     } else {
-      if (expected !== undefined) {
+      if (expected !== null) {
         console.log(`  fill ${row.name} → ${expected}${WRITE ? '' : ' (dry-run)'}`);
         if (WRITE) update.run(expected, row.id);
         fill++;
