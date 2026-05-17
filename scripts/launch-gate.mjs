@@ -265,7 +265,7 @@ await runCase('AC2-team-select-48-options', () => {
   }
 
   const locales = [
-    { tz: 'America/Detroit', city: 'Detroit' },
+    { tz: 'America/New_York', city: 'New York' },
     { tz: 'Europe/London',   city: 'London'  },
     { tz: 'Africa/Lagos',    city: 'Lagos'   },
   ];
@@ -314,7 +314,7 @@ await runCase('AC2-team-select-48-options', () => {
   writeFileSync(
     resolve(EVIDENCE_DIR, 'AC3-locales.txt'),
     `AC3 puppeteer-core tz-spoof — ${new Date().toISOString()}\nTarget: ${BASE}/\n` +
-    `Locales: America/Detroit, Europe/London, Africa/Lagos\n` +
+    `Locales: America/New_York, Europe/London, Africa/Lagos\n` +
     `DEVIATION: Used puppeteer-core (Phase-6 pattern) instead of Playwright per D-03\n`,
   );
 }

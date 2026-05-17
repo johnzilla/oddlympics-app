@@ -127,17 +127,17 @@ console.log('[smoke] target: offline composer (no network, no DB)');
 // ---------------------------------------------------------------------------
 
 // Case 1 — canonical pair (single-word team + standard IANA tz)
-await runCase('confirm-canonical-england-detroit', () => {
+await runCase('confirm-canonical-england-new-york', () => {
   const { text, html } = composeBody({
     url: `${SITE_URL}/api/confirm?token=tok1`,
     team: 'england',
-    timezone: 'America/Detroit',
+    timezone: 'America/New_York',
   });
-  if (!text.includes('every England match in Detroit time.')) {
+  if (!text.includes('every England match in New York time.')) {
     console.error('  text missing canonical line');
     return false;
   }
-  if (!html.includes('every <strong>England</strong> match in Detroit time.')) {
+  if (!html.includes('every <strong>England</strong> match in New York time.')) {
     console.error('  html missing canonical line with <strong>');
     return false;
   }
@@ -217,7 +217,7 @@ await runCase('confirm-subject-literal', () => {
   const { subject } = composeBody({
     url: `${SITE_URL}/api/confirm?token=tok7`,
     team: 'england',
-    timezone: 'America/Detroit',
+    timezone: 'America/New_York',
   });
   const expected = 'Confirm your World Cup alerts — oddlympics';
   if (subject !== expected) {
@@ -237,7 +237,7 @@ await runCase('confirm-land-02-grep-zero-hits', () => {
   const { subject, text, html } = composeBody({
     url: `${SITE_URL}/api/confirm?token=tok8`,
     team: 'england',
-    timezone: 'America/Detroit',
+    timezone: 'America/New_York',
   });
   const haystack = `${subject}\n${text}\n${html}`;
   return !/([b]itcoin|[l]ightning|[c]rypto|[w]orld domination|[p]ersonal olympics)/i.test(haystack);
@@ -249,10 +249,10 @@ await runCase('confirm-unknown-slug-fallback-zzz', () => {
   const { text, html } = composeBody({
     url: `${SITE_URL}/api/confirm?token=tok9`,
     team: 'zzz_unknown',
-    timezone: 'America/Detroit',
+    timezone: 'America/New_York',
   });
-  if (!text.includes('every zzz_unknown match in Detroit time.')) return false;
-  if (!html.includes('every <strong>zzz_unknown</strong> match in Detroit time.')) return false;
+  if (!text.includes('every zzz_unknown match in New York time.')) return false;
+  if (!html.includes('every <strong>zzz_unknown</strong> match in New York time.')) return false;
   return true;
 });
 

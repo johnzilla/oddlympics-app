@@ -208,7 +208,7 @@ await runCase('FORM-01-post-303', async () => {
   const { status, location } = await post({
     team: 'england',
     email: `smoke-landing-${Date.now()}@example.com`,
-    timezone: 'America/Detroit',
+    timezone: 'America/New_York',
     requested_sport: 'world_cup',
     website: '',
   });
@@ -220,7 +220,7 @@ await runCase('FORM-01-bad-team-303-error', async () => {
   const { status, location } = await post({
     team: 'not_a_real_team',
     email: `smoke-landing-${Date.now()}@example.com`,
-    timezone: 'America/Detroit',
+    timezone: 'America/New_York',
     requested_sport: 'world_cup',
     website: '',
   });
