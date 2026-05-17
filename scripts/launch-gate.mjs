@@ -28,6 +28,7 @@
 //   via npx/tmp at runtime only, and the underlying Chrome behavior is identical.
 //   This deviation is recorded here, in 11-SUMMARY.md, and in the per-AC evidence.
 
+import Database from 'better-sqlite3';
 import { readFileSync, mkdirSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -772,6 +773,83 @@ if (ogEvidence) {
 }
 
 // ---------------------------------------------------------------------------
+// AC-SLUG — local-DB-only NULL-slug guard.
+// Reads the SQLite DB and FAILS if any teams row has slug IS NULL while the
+// teams table is non-empty. No API call — this is the offline structural guard
+// that catches silent-loss divergences after ingest has run.
+// The DEFINITIVE empirical check (comparing live API names against teams.json
+// labels) remains a MANUAL one-off operator command (see DEPLOY.md "verify
+// slug mapping" step). Do NOT automate or schedule that check — it burns
+// free-tier quota and that is the ingestor's concern, not the gate's.
+// ---------------------------------------------------------------------------
+await runCase('AC-SLUG-no-null-slugs', () => {
+  const dbPath = resolve(process.env.DATABASE_PATH ?? './data/oddlympics.db');
+  const evidencePath = resolve(EVIDENCE_DIR, 'AC-SLUG-null-slug.txt');
+  const ts = new Date().toISOString();
+
+  if (!existsSync(dbPath)) {
+    writeFileSync(
+      evidencePath,
+      `AC-SLUG ${ts}\nDB path: ${dbPath}\nSKIP: DB file absent (fresh machine / pre-fixture)\n`,
+    );
+    return true;
+  }
+
+  let db;
+  try {
+    db = new Database(dbPath, { readonly: true, fileMustExist: true });
+  } catch (err) {
+    writeFileSync(
+      evidencePath,
+      `AC-SLUG ${ts}\nDB path: ${dbPath}\nSKIP: could not open DB — ${err.message}\n`,
+    );
+    return true;
+  }
+
+  try {
+    let total;
+    try {
+      total = db.prepare('SELECT COUNT(*) AS n FROM teams').get().n;
+    } catch (err) {
+      // teams table not yet created — pre-WC-draw state; skip cleanly.
+      writeFileSync(
+        evidencePath,
+        `AC-SLUG ${ts}\nDB path: ${dbPath}\nSKIP: teams table absent — ${err.message}\n`,
+      );
+      return true;
+    }
+
+    if (total === 0) {
+      writeFileSync(
+        evidencePath,
+        `AC-SLUG ${ts}\nDB path: ${dbPath}\nSKIP: teams table empty (pre-WC-draw, no fixtures loaded)\n`,
+      );
+      return true;
+    }
+
+    const nullRows = db.prepare('SELECT name FROM teams WHERE slug IS NULL').all();
+    if (nullRows.length === 0) {
+      writeFileSync(
+        evidencePath,
+        `AC-SLUG ${ts}\nDB path: ${dbPath}\nPASS: all ${total} team(s) have a non-NULL slug\n`,
+      );
+      return true;
+    }
+
+    // At least one NULL slug — silent notification loss guaranteed for that team.
+    writeFileSync(
+      evidencePath,
+      `AC-SLUG ${ts}\nDB path: ${dbPath}\nFAIL: ${nullRows.length} team(s) with NULL slug (out of ${total} total):\n` +
+        nullRows.map((r) => `  ${r.name}`).join('\n') + '\n' +
+        'Run: node --env-file=.env scripts/backfill-team-slugs.mjs --write to fill them.\n',
+    );
+    return false;
+  } finally {
+    db.close();
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Final per-AC PASS/FAIL table + result line.
 // ---------------------------------------------------------------------------
 console.log('\n[gate] ─────────────────────────────────────────────────────────────');
@@ -788,6 +866,7 @@ console.log('[gate]   AC10 Backfilled-row banner + save      → OPERATOR-GATED 
 console.log('[gate]   AC11 Plausible "Signup Submit" event   → OPERATOR-GATED (AC11-operator-evidence.txt)');
 console.log('[gate]   AC12 Honeypot → 303 /pending           → see AC12-honeypot.txt');
 console.log('[gate]   AC-MT Multi-team /manage select+save+read-back  → OPERATOR-APPROVED via Phase 12 (AC-MT-multi-team.txt)');
+console.log('[gate]   AC-SLUG No NULL teams.slug (local DB)  → see AC-SLUG-null-slug.txt');
 console.log('[gate]   OG   opengraph.xyz preview card        → OPERATOR-GATED (OG-preview-operator-evidence.txt)');
 console.log('[gate] ─────────────────────────────────────────────────────────────');
 console.log(`[gate] result: pass=${pass} fail=${fail}`);
