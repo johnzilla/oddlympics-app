@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Consumer Landing & Signup Flow
-status: Shipped — no active milestone
-stopped_at: "v2.0 SHIPPED + ARCHIVED 2026-05-16. v1.0-consumer-landing tagged + pushed; app live (HTTP 200); production launch gate green. Milestone archived to .planning/milestones/v2.0-*. No active milestone — launch-readiness mode until 2026-06-11. Pre-launch operator items remain — see ROADMAP Pending operator actions."
-last_updated: "2026-05-16T22:46:55.016Z"
-last_activity: 2026-05-16 - Completed quick task 260516-q33: manage discoverability content and entry pass
+milestone: v2.1
+milestone_name: Referral & Social Sharing
+status: planning
+last_updated: "2026-05-22T14:51:44.049Z"
+last_activity: 2026-05-22
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 32
-  completed_plans: 32
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-05-16, after v2.0 milestone)
 
 ## Current Position
 
-Phase: Milestone v2.0 complete — shipped + archived
+Phase: Not started (defining requirements)
 Plan: —
-Status: Shipped — no active milestone (launch-readiness mode until 2026-06-11)
-Last activity: 2026-05-16 - Completed quick task 260516-q33: manage discoverability content and entry pass
+Status: Defining requirements
+Last activity: 2026-05-22 — Milestone v2.1 started
 
 ## Performance Metrics
 

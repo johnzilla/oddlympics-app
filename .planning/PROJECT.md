@@ -42,9 +42,11 @@ domination"/"personal Olympics" anywhere in `/`, `/privacy`, `/terms`,
 
 ## Status
 
-v2.0 shipped and the product is live. No active development milestone — the
-project is in launch-readiness mode until World Cup group stage on
-**2026-06-11**.
+**Active milestone: v2.1 Referral & Social Sharing** (started 2026-05-22) —
+v2.0 shipped and is live; v2.1 adds a referral/share loop on top of the
+consumer landing (see Current Milestone below). The project stays in
+launch-readiness mode until World Cup group stage on **2026-06-11**, and v2.1
+targets that same hard date.
 
 **Pre-launch operator actions (launch blockers, not a milestone):**
 - Fire `scripts/launch-blast.mjs --send` (currently dry-run)
@@ -56,6 +58,32 @@ project is in launch-readiness mode until World Cup group stage on
 notifications, Lightning tip jar via vaultwarden, niche-sport long tail
 (strongman, cubing). Not on a schedule; revisit only if post-launch demand
 warrants.
+
+## Current Milestone: v2.1 Referral & Social Sharing
+
+**Goal:** Turn every new signup into a referral channel — let a user share
+their personalized World Cup signup and track which signups it drives back.
+
+**Target features:**
+- **Per-user referral link + attribution** — a referral code per signup; the
+  landing page reads `?ref=CODE` and threads it through `/api/signup` into a
+  `referred_by` column so share-driven signups are measurable.
+- **Personalized share content** — share text names the user's team + flag
+  ("I'm following USA 🇺🇸 — get your team's World Cup kickoff alerts"); a
+  per-team Open Graph image so the unfurl shows their team.
+- **Share prompts in four places** — `/pending`, `/confirmed`, the
+  confirmation email body, and `/manage` for returning users.
+
+**Key context:**
+- **Hard deadline 2026-06-11** (20 days from start) — shares the runway with
+  the four outstanding operator launch tasks.
+- **Long pole: per-team OG images** (~48 variants) — feasible with the resvg
+  render toolchain vendored in Phase 8, pre-rendered at build time. First
+  thing to trim to "personalized text, shared `/og-image.png`" if the runway
+  gets tight.
+- **Attribution stays lightweight** — a code + ref param, no rewards or
+  leaderboard. A full referral *program* is explicitly out of scope.
+- Phase numbering continues from 12 → this milestone starts at **Phase 13**.
 
 ## Requirements
 
@@ -95,9 +123,11 @@ warrants.
 
 ### Active
 
-<!-- Empty — v2.0 shipped 2026-05-16. No active milestone. -->
+<!-- v2.1 Referral & Social Sharing — started 2026-05-22. Detailed REQ-IDs in REQUIREMENTS.md. -->
 
-(None — v2.0 shipped; no active milestone.)
+- [ ] Per-user referral link with attribution (`?ref=CODE` → `referred_by` column)
+- [ ] Personalized share content — team-named share text + per-team OG image
+- [ ] Share prompts on `/pending`, `/confirmed`, the confirmation email, and `/manage`
 
 ### Out of Scope
 
@@ -194,4 +224,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-16 after v2.0 milestone (Consumer Landing & Signup Flow) shipped — 8 phases, `v1.0-consumer-landing` tagged + pushed, production launch gate green. No active milestone; project in launch-readiness mode until 2026-06-11.*
+*Last updated: 2026-05-22 — started milestone v2.1 (Referral & Social Sharing). Continues phase numbering at Phase 13; hard target 2026-06-11.*
