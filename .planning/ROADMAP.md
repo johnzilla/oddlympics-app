@@ -68,11 +68,13 @@ no rewards, no leaderboard. Hard target **2026-06-11**.
   2. Visiting `/?ref=CODE` carries the code through the signup form so it is submitted with the POST (hidden field, read client-side on the prerendered landing page — same pattern as the `?error=`/`?email=` inline-script trick).
   3. After a signup that arrived via `/?ref=CODE`, the new `vip_signups` row has its `referred_by` column set to that code; a direct (no-ref) signup leaves `referred_by` NULL.
   4. An unknown, malformed, or self-referencing `?ref=` value never blocks or errors the signup — it is silently ignored (`referred_by` stays NULL), preserving the v2.0 "signup never rejects" contract.
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 13-01: TBD
-- [ ] 13-02: TBD
+- [ ] 13-01-PLAN.md — Schema: referral_code + referred_by columns, unique index, backfill, code generator, 8-param COALESCE-protected upsert, lookupByReferralCode (Wave 1)
+- [ ] 13-02-PLAN.md — `/api/signup` ref resolution: generate code, resolve submitted ref to referred_by, never reject on bad ref (Wave 2)
+- [ ] 13-03-PLAN.md — `index.astro` carry-through: hidden ref field + defensive inline-script reading ?ref= and localStorage (Wave 1)
+- [ ] 13-04-PLAN.md — Verification + measurement: smoke-signup.mjs referral cases + DEPLOY.md Day-2 referral-counting SQL recipe (Wave 3)
 
 ### Phase 14: Share Experience
 **Goal**: A user who has signed up is prompted, in every natural place, to share their personalized referral link with team-named copy and a native share sheet — closing the referral loop the codes from Phase 13 enable.
@@ -135,6 +137,6 @@ Phases execute in numeric order: 13 → 14 → 15
 | 10. Confirmation email update | v2.0 | 3/3 | Complete | 2026-05-16 |
 | 11. End-to-end + launch gate | v2.0 | 4/6 | Complete | 2026-05-16 |
 | 12. Restore multi-team selection | v2.0 | 6/6 | Complete | 2026-05-16 |
-| 13. Referral Code & Attribution | v2.1 | 0/TBD | Not started | - |
+| 13. Referral Code & Attribution | v2.1 | 0/4 | Not started | - |
 | 14. Share Experience | v2.1 | 0/TBD | Not started | - |
 | 15. Personalized Open Graph | v2.1 | 0/TBD | Not started | - |
