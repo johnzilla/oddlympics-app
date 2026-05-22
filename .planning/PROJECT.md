@@ -120,12 +120,12 @@ their personalized World Cup signup and track which signups it drives back.
 - ✓ `/manage` multi-team editor (1–5 confederation-grouped checkboxes, `user_teams` join table) + HMAC unsubscribe (1y TTL, single-use), no new auth surface — v2.0 Phase 9/12 (MANAGE-01, MANAGE-02; restores v1 IDENT-02/03/04 multi-team model)
 - ✓ Confirmation email names team + human-readable timezone; custom Resend domain `hello@oddlympics.app` live, Mail-Tester 10/10 — v2.0 Phase 10 (SIGNUP-04)
 - ✓ Production launch gate AC1–AC12 green; `v1.0-consumer-landing` tagged + pushed — v2.0 Phase 11
+- ✓ Per-user referral link with attribution — unique 8-char `[a-z0-9]` code per signup (additive `pragma_table_info` migration + idempotent backfill + UNIQUE index + collision-retry on insert); landing page reads `?ref=CODE` (with 30-day first-touch localStorage fallback) and `/api/signup` records `referred_by` without ever rejecting; smoke 14/14, DEPLOY.md attribution recipe — Validated in Phase 13: Referral Code & Attribution (REF-01, REF-02, REF-03)
 
 ### Active
 
 <!-- v2.1 Referral & Social Sharing — started 2026-05-22. Detailed REQ-IDs in REQUIREMENTS.md. -->
 
-- [ ] Per-user referral link with attribution (`?ref=CODE` → `referred_by` column)
 - [ ] Personalized share content — team-named share text + per-team OG image
 - [ ] Share prompts on `/pending`, `/confirmed`, the confirmation email, and `/manage`
 
@@ -224,4 +224,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-22 — started milestone v2.1 (Referral & Social Sharing). Continues phase numbering at Phase 13; hard target 2026-06-11.*
+*Last updated: 2026-05-22 — Phase 13 (Referral Code & Attribution) complete; REF-01/02/03 validated, 4 human-UAT items pending. Next: Phase 14 (Share Experience). Milestone v2.1, hard target 2026-06-11.*
