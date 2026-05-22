@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Referral & Social Sharing
-status: executing
-stopped_at: Phase 13 context gathered
-last_updated: "2026-05-22T21:24:42.465Z"
+status: verifying
+stopped_at: Completed 13-04-PLAN.md — Phase 13 all 4 plans done
+last_updated: "2026-05-22T21:29:35.584Z"
 last_activity: 2026-05-22
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 0
+  completed_plans: 4
+  percent: 33
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-05-22, started milestone v2.1)
 
 Phase: 13 (referral-code-attribution) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-22
 
 Next: `/gsd:plan-phase 13`
@@ -75,6 +75,7 @@ Next: `/gsd:plan-phase 13`
 | Phase 13-referral-code-attribution P01 | 289 | 3 tasks | 2 files |
 | Phase 13-referral-code-attribution P03 | 5min | 2 tasks | 1 files |
 | Phase 13 P02 | 52 | 1 tasks | 1 files |
+| Phase 13-referral-code-attribution P04 | 161 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,7 @@ Recent decisions affecting current work:
 - v2.1: a referral code is a public short identifier, NOT a signed HMAC token — do not over-engineer it onto the existing `purpose`-claimed token system.
 - v2.1: attribution stays lightweight — a `referred_by` column + `?ref=` param, no rewards/leaderboard. A full referral program is explicitly out of scope.
 - v2.1 OG (Phase 15) reuses the resvg render toolchain + fonts vendored in v2.0 Phase 8; per-team images pre-render at build time. Phase 15 is the milestone's long pole and first scope-trim candidate.
+- [Phase ?]: SELF_REF_IP (192.0.2.44) added alongside REF_IP for smoke REF-self-ref case — REF_IP exhausts at 5 valid POSTs, self-ref needs a third RFC 5737 address to avoid rate-limit
 
 ### Pending Todos
 
@@ -124,8 +126,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-22T21:24:42.460Z
-Stopped at: Phase 13 context gathered
+Last session: 2026-05-22T21:29:35.578Z
+Stopped at: Completed 13-04-PLAN.md — Phase 13 all 4 plans done
 Resume file:
 None
 
