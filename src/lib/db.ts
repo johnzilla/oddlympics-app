@@ -122,23 +122,31 @@ export type VipSignup = {
   team: string | null; // Phase 5: snake_case slug from references/teams.json
   timezone: string | null; // IANA TZ, e.g. "America/New_York"
   manage_blast_sent_at: number | null; // Phase 2.5: launch-blast tracking
+  referral_code: string | null; // Phase 13: stable public short code, unique per user
+  referred_by: string | null; // Phase 13: first-touch attribution — code of the referrer
 };
 
 // Phase 5 — SIGNUP-01/02/03: writes team + timezone alongside the existing
 // teaser columns. team is COALESCE-protected (a future re-signup without a
 // team must not clobber a previously-set slug); timezone is always overwritten
 // because validation+fallback guarantees the incoming value is good.
+// Phase 13 — REF-01: extended to 8 params. referral_code is COALESCE-protected
+// (D-04: once set, a re-signup must never regenerate the code — breaks shared links).
+// referred_by is COALESCE-protected (D-06: first-touch attribution — once set, the
+// original referrer is never overwritten by a later re-signup without a ref).
 export const upsertVipSignup = db.prepare<
-  [string, string, string | null, string | null, string | null, string]
+  [string, string, string | null, string | null, string | null, string, string, string | null]
 >(`
-  INSERT INTO vip_signups (email, requested_sport, ip, user_agent, team, timezone)
-  VALUES (?, ?, ?, ?, ?, ?)
+  INSERT INTO vip_signups (email, requested_sport, ip, user_agent, team, timezone, referral_code, referred_by)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(email) DO UPDATE SET
     requested_sport = excluded.requested_sport,
     ip = COALESCE(excluded.ip, vip_signups.ip),
     user_agent = COALESCE(excluded.user_agent, vip_signups.user_agent),
     team = COALESCE(excluded.team, vip_signups.team),
-    timezone = excluded.timezone
+    timezone = excluded.timezone,
+    referral_code = COALESCE(excluded.referral_code, vip_signups.referral_code),
+    referred_by = COALESCE(excluded.referred_by, vip_signups.referred_by)
   RETURNING *
 `);
 
@@ -159,6 +167,12 @@ export const markConfirmed = db.prepare<[string]>(`
 
 export const getByEmail = db.prepare<[string]>(`
   SELECT * FROM vip_signups WHERE email = ?
+`);
+
+// Phase 13 — REF-01 (D-07): resolves a submitted ?ref= code to its owner for attribution.
+// Narrowed SELECT (not SELECT *) — /api/signup only needs email and referral_code.
+export const lookupByReferralCode = db.prepare<[string]>(`
+  SELECT email, referral_code FROM vip_signups WHERE referral_code = ?
 `);
 
 export const markUnsubscribed = db.prepare<[string]>(`
