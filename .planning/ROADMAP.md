@@ -81,7 +81,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 13-02-PLAN.md — `/api/signup` ref resolution: generate code, resolve submitted ref to referred_by, never reject on bad ref (Wave 2)
+- [x] 13-02-PLAN.md — `/api/signup` ref resolution: generate code, resolve submitted ref to referred_by, never reject on bad ref (Wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -156,6 +156,6 @@ Phases execute in numeric order: 13 → 14 → 15
 | 10. Confirmation email update | v2.0 | 3/3 | Complete | 2026-05-16 |
 | 11. End-to-end + launch gate | v2.0 | 4/6 | Complete | 2026-05-16 |
 | 12. Restore multi-team selection | v2.0 | 6/6 | Complete | 2026-05-16 |
-| 13. Referral Code & Attribution | v2.1 | 2/4 | In Progress|  |
+| 13. Referral Code & Attribution | v2.1 | 3/4 | In Progress|  |
 | 14. Share Experience | v2.1 | 0/TBD | Not started | - |
 | 15. Personalized Open Graph | v2.1 | 0/TBD | Not started | - |

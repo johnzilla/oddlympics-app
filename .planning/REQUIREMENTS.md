@@ -12,7 +12,7 @@ Requirements for the Referral & Social Sharing milestone. Each maps to exactly o
 
 - [x] **REF-01**: Every signup is assigned a unique, stable referral code
 - [x] **REF-02**: The landing page accepts a `?ref=CODE` param and carries it through the signup form
-- [ ] **REF-03**: `/api/signup` records the referring code on the new signup (`referred_by` column) so share-driven signups are measurable
+- [x] **REF-03**: `/api/signup` records the referring code on the new signup (`referred_by` column) so share-driven signups are measurable
 
 ### Share Experience
 
@@ -55,7 +55,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 |-------------|-------|--------|
 | REF-01 | Phase 13 | Complete |
 | REF-02 | Phase 13 | Complete |
-| REF-03 | Phase 13 | Pending |
+| REF-03 | Phase 13 | Complete |
 | SHARE-01 | Phase 14 | Pending |
 | SHARE-02 | Phase 14 | Pending |
 | SHARE-03 | Phase 14 | Pending |
