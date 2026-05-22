@@ -112,22 +112,42 @@ export const POST: APIRoute = async ({ request, site }) => {
 
   // Generate a fresh referral_code for this new row (D-04).
   // COALESCE in upsertVipSignup preserves the existing code on re-signup — breaks are avoided.
-  // Collision risk ~3.6e-13 at current row counts; no retry loop needed here.
-  const referralCode = generateReferralCode();
-
-  try {
-    upsertVipSignup.get(
-      rawEmail,
-      requestedSport,
-      ip === 'unknown' ? null : ip,
-      request.headers.get('user-agent'),
-      rawTeam,
-      tz,
-      referralCode,
-      referredBy,
-    );
-  } catch (err) {
-    console.error('[signup] db error', err);
+  // The referral_code UNIQUE index can raise SQLITE_CONSTRAINT_UNIQUE on the INSERT
+  // branch; regenerate + retry on collision so a code clash never drops a legitimate
+  // signup (mirrors the backfill retry loop in db.ts — both paths must stay consistent).
+  let referralCode = generateReferralCode();
+  let upserted = false;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      upsertVipSignup.get(
+        rawEmail,
+        requestedSport,
+        ip === 'unknown' ? null : ip,
+        request.headers.get('user-agent'),
+        rawTeam,
+        tz,
+        referralCode,
+        referredBy,
+      );
+      upserted = true;
+      break;
+    } catch (err: unknown) {
+      if (
+        err instanceof Error &&
+        'code' in err &&
+        (err as { code: string }).code === 'SQLITE_CONSTRAINT_UNIQUE'
+      ) {
+        // referral_code collision (astronomically rare at ~3.6e-13 per attempt); regenerate
+        referralCode = generateReferralCode();
+        continue;
+      }
+      // Not a collision — a real DB fault.
+      console.error('[signup] db error', err);
+      return back('server');
+    }
+  }
+  if (!upserted) {
+    console.error('[signup] db error: referral_code collision retries exhausted');
     return back('server');
   }
 
