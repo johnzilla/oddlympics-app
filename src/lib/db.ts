@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { generateReferralCode } from './referral';
 
 const DEFAULT_PATH = './data/oddlympics.db';
 const path = resolve(process.env.DATABASE_PATH ?? DEFAULT_PATH);
@@ -58,6 +59,55 @@ db.exec(`
   // not NULL. The ADD COLUMN above creates the column nullable; this UPDATE
   // backfills it once. Idempotent — second boot finds zero rows with NULL.
   db.exec(`UPDATE vip_signups SET timezone = 'America/New_York' WHERE timezone IS NULL;`);
+}
+
+// Phase 13 — REF-01: additive referral_code + referred_by columns, unique index, backfill.
+// No SQLite version assert, no DROP COLUMN — purely additive (D-03).
+// Models the simpler teams probe at :159-166 (no Phase-5 version assertion ceremony).
+{
+  const cols = db
+    .prepare("SELECT name FROM pragma_table_info('vip_signups')")
+    .all() as { name: string }[];
+  const has = (n: string) => cols.some((c) => c.name === n);
+  if (!has('referral_code'))
+    db.exec(`ALTER TABLE vip_signups ADD COLUMN referral_code TEXT;`);
+  if (!has('referred_by'))
+    db.exec(`ALTER TABLE vip_signups ADD COLUMN referred_by TEXT;`);
+  // Uniqueness MUST be a separate CREATE UNIQUE INDEX — SQLite forbids UNIQUE
+  // on ALTER TABLE ADD COLUMN (verified landmine). IF NOT EXISTS makes this idempotent.
+  db.exec(
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_vip_signups_referral_code ON vip_signups(referral_code);`,
+  );
+  // Backfill: assign a stable code to every existing row that has none (D-04).
+  // Idempotent — a second boot finds zero NULL rows and skips the loop body entirely.
+  const nullRows = db
+    .prepare('SELECT id FROM vip_signups WHERE referral_code IS NULL')
+    .all() as { id: number }[];
+  const updateCode = db.prepare<[string, number]>(
+    'UPDATE vip_signups SET referral_code = ? WHERE id = ?',
+  );
+  for (const row of nullRows) {
+    let assigned = false;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const code = generateReferralCode();
+      try {
+        updateCode.run(code, row.id);
+        assigned = true;
+        break;
+      } catch (e: unknown) {
+        if (
+          e instanceof Error &&
+          'code' in e &&
+          (e as { code: string }).code === 'SQLITE_CONSTRAINT_UNIQUE'
+        ) {
+          // Genuine collision (astronomically rare at ~3.6e-13 per attempt); regenerate
+          continue;
+        }
+        throw e; // not a collision error — re-throw
+      }
+    }
+    if (!assigned) throw new Error('referral_code backfill: too many collisions');
+  }
 }
 
 export type VipSignup = {
