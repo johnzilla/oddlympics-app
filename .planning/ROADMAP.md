@@ -60,51 +60,70 @@ no rewards, no leaderboard. Hard target **2026-06-11**.
 ## Phase Details
 
 ### Phase 13: Referral Code & Attribution
+
 **Goal**: Every signup has a unique, stable, public referral code, and the signup path records which code (if any) drove a new signup — making share-driven signups measurable.
 **Depends on**: Phase 12 (v2.0 signup flow + `vip_signups` schema)
 **Requirements**: REF-01, REF-02, REF-03
 **Success Criteria** (what must be TRUE):
+
   1. Every existing and new `vip_signups` row has a unique, stable referral code (additive `pragma_table_info` probe + `ALTER TABLE ADD COLUMN` migration; backfill for existing rows; re-running the migration is a no-op).
   2. Visiting `/?ref=CODE` carries the code through the signup form so it is submitted with the POST (hidden field, read client-side on the prerendered landing page — same pattern as the `?error=`/`?email=` inline-script trick).
   3. After a signup that arrived via `/?ref=CODE`, the new `vip_signups` row has its `referred_by` column set to that code; a direct (no-ref) signup leaves `referred_by` NULL.
   4. An unknown, malformed, or self-referencing `?ref=` value never blocks or errors the signup — it is silently ignored (`referred_by` stays NULL), preserving the v2.0 "signup never rejects" contract.
+
 **Plans**: 4 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 13-01-PLAN.md — Schema: referral_code + referred_by columns, unique index, backfill, code generator, 8-param COALESCE-protected upsert, lookupByReferralCode (Wave 1)
-- [ ] 13-02-PLAN.md — `/api/signup` ref resolution: generate code, resolve submitted ref to referred_by, never reject on bad ref (Wave 2)
 - [ ] 13-03-PLAN.md — `index.astro` carry-through: hidden ref field + defensive inline-script reading ?ref= and localStorage (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 13-02-PLAN.md — `/api/signup` ref resolution: generate code, resolve submitted ref to referred_by, never reject on bad ref (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 13-04-PLAN.md — Verification + measurement: smoke-signup.mjs referral cases + DEPLOY.md Day-2 referral-counting SQL recipe (Wave 3)
 
 ### Phase 14: Share Experience
+
 **Goal**: A user who has signed up is prompted, in every natural place, to share their personalized referral link with team-named copy and a native share sheet — closing the referral loop the codes from Phase 13 enable.
 **Depends on**: Phase 13 (referral code must exist before it can be shared)
 **Requirements**: SHARE-01, SHARE-02, SHARE-03, SHARE-04
 **Success Criteria** (what must be TRUE):
+
   1. `/pending`, `/confirmed`, and `/manage` each show a share prompt containing the user's referral link (`/?ref=CODE`).
   2. The confirmation email body includes a personalized share line plus the user's referral link.
   3. The share action opens the native share sheet on supporting devices (Web Share API) and falls back to a visible copy-link control where the API is unavailable.
   4. The shared message names the user's team — e.g. "I'm following USA — get your team's World Cup kickoff alerts" — sourced from the same `references/teams.json` label data used elsewhere.
+
 **Plans**: TBD
 **UI hint**: yes
 
 Plans:
+
 - [ ] 14-01: TBD
 - [ ] 14-02: TBD
 
 ### Phase 15: Personalized Open Graph
+
 **Goal**: When a referral link is shared on a social platform, the link preview unfurls with an image of the sharer's team — making the share visually personal. Resolve the server-rendered-referral-route mechanism so a prerendered landing page can still serve per-referrer OG meta.
 **Depends on**: Phase 14 (share links must exist and be in circulation)
 **Requirements**: OG-02, OG-03
 **Success Criteria** (what must be TRUE):
+
   1. A per-team Open Graph image exists for each of the 48 World Cup teams (pre-rendered at build time via the resvg toolchain + fonts vendored in v2.0 Phase 8; each ≤300KB, 1200×630).
   2. A shared referral link resolves to a route that sets OG/Twitter meta tags pointing at the sharer's team image — implemented via a server-rendered share/referral route (e.g. `/r/CODE` that looks up code → team → team image) since the landing page `/` is `prerender = true` and cannot vary its meta per referrer.
   3. Pasting a referral link into a social unfurl preview (or an OG validator) shows the sharer's team image and personalized title, not the generic `/og-image.png`.
   4. If the per-team image set cannot be completed within the runway, the route still unfurls with personalized text over the existing generic `/og-image.png` — the share loop never breaks on a missing image. (Scope-trim fallback: this is the milestone's long pole and first trim candidate.)
+
 **Plans**: TBD
 **UI hint**: yes
 
 Plans:
+
 - [ ] 15-01: TBD
 - [ ] 15-02: TBD
 
