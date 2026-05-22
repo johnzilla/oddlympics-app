@@ -4,13 +4,13 @@ milestone: v2.1
 milestone_name: Referral & Social Sharing
 status: executing
 stopped_at: Phase 13 context gathered
-last_updated: "2026-05-22T21:11:34.643Z"
-last_activity: 2026-05-22 -- Phase 13 planning complete
+last_updated: "2026-05-22T21:19:35.716Z"
+last_activity: 2026-05-22
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-22, started milestone v2.1)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** v2.1 Referral & Social Sharing — add a referral/share loop on top of the v2.0 consumer landing. Hard target 2026-06-11, runway shared with four pre-launch operator actions.
+**Current focus:** Phase 13 — referral-code-attribution
 
 ## Current Position
 
-Phase: 13 — Referral Code & Attribution
-Plan: — (not yet planned)
+Phase: 13 (referral-code-attribution) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-05-22 -- Phase 13 planning complete
+Last activity: 2026-05-22
 
 Next: `/gsd:plan-phase 13`
 
@@ -72,6 +72,7 @@ Next: `/gsd:plan-phase 13`
 | Phase 12-restore-multi-team-selection P04 | 15min | 3 tasks | 1 files |
 | Phase 12-restore-multi-team-selection P05 | 18min | 3 tasks | 4 files |
 | Phase 12 P06 | 4min | 2 tasks | 1 files |
+| Phase 13-referral-code-attribution P01 | 289 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -121,10 +122,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-22T20:24:47.082Z
+Last session: 2026-05-22T21:19:35.710Z
 Stopped at: Phase 13 context gathered
 Resume file:
-.planning/phases/13-referral-code-attribution/13-CONTEXT.md
+None
 
 ## Operator Next Steps
 

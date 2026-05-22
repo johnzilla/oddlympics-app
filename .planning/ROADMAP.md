@@ -76,7 +76,7 @@ no rewards, no leaderboard. Hard target **2026-06-11**.
 Plans:
 **Wave 1**
 
-- [ ] 13-01-PLAN.md — Schema: referral_code + referred_by columns, unique index, backfill, code generator, 8-param COALESCE-protected upsert, lookupByReferralCode (Wave 1)
+- [x] 13-01-PLAN.md — Schema: referral_code + referred_by columns, unique index, backfill, code generator, 8-param COALESCE-protected upsert, lookupByReferralCode (Wave 1)
 - [ ] 13-03-PLAN.md — `index.astro` carry-through: hidden ref field + defensive inline-script reading ?ref= and localStorage (Wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -156,6 +156,6 @@ Phases execute in numeric order: 13 → 14 → 15
 | 10. Confirmation email update | v2.0 | 3/3 | Complete | 2026-05-16 |
 | 11. End-to-end + launch gate | v2.0 | 4/6 | Complete | 2026-05-16 |
 | 12. Restore multi-team selection | v2.0 | 6/6 | Complete | 2026-05-16 |
-| 13. Referral Code & Attribution | v2.1 | 0/4 | Not started | - |
+| 13. Referral Code & Attribution | v2.1 | 1/4 | In Progress|  |
 | 14. Share Experience | v2.1 | 0/TBD | Not started | - |
 | 15. Personalized Open Graph | v2.1 | 0/TBD | Not started | - |
