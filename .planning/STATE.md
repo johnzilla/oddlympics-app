@@ -3,8 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Referral & Social Sharing
 status: planning
-last_updated: "2026-05-22T15:30:00.000Z"
-last_activity: 2026-05-22
+stopped_at: Phase 13 context gathered
+last_updated: "2026-05-22T20:24:47.093Z"
+last_activity: 2026-05-22 — v2.1 roadmap written (Phases 13–15, coarse granularity, 9/9 requirements mapped)
 progress:
   total_phases: 3
   completed_phases: 0
@@ -120,10 +121,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-22T15:30:00.000Z
-Stopped at: v2.1 roadmap created — Phases 13–15 written, 9/9 requirements mapped. Ready to plan Phase 13.
+Last session: 2026-05-22T20:24:47.082Z
+Stopped at: Phase 13 context gathered
 Resume file:
-None
+.planning/phases/13-referral-code-attribution/13-CONTEXT.md
 
 ## Operator Next Steps
 
