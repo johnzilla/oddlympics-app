@@ -108,6 +108,7 @@ If everything works, https://oddlympics.app shows the teaser.
 | Export the confirmed email list | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, team, timezone, requested_sport, datetime(confirmed_at, "unixepoch") FROM vip_signups WHERE confirmed_at IS NOT NULL'` |
 | Export demand-capture requests (demand triage) | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, request_text, datetime(created_at, "unixepoch") FROM feature_requests ORDER BY created_at DESC'` |
 | See team distribution (post-Phase-5) | `sqlite3 -column -header /var/lib/oddlympics/oddlympics.db 'SELECT COALESCE(team, "(unset)") AS team, COUNT(*) AS n FROM vip_signups WHERE confirmed_at IS NOT NULL AND unsubscribed_at IS NULL GROUP BY team ORDER BY n DESC'` |
+| Referral attribution (Phase 13 — signups by referrer, direct vs referred, % referred) | see [Referral-counting SQL recipe](#referral-counting-sql-recipe-phase-13) below |
 | Roll Caddy config | edit `/etc/caddy/Caddyfile`, then `systemctl reload caddy` |
 | Back up the DB | `sqlite3 /var/lib/oddlympics/oddlympics.db ".backup /tmp/oddlympics-$(date +%F).db"` |
 | Pre-Phase-5-deploy backup (one-shot) | see [Pre-deploy SQLite backup (Phase 5 / v2.0)](#pre-deploy-sqlite-backup-phase-5--v20) below |
@@ -122,6 +123,25 @@ ssh root@oddlympics.app 'sqlite3 /var/lib/oddlympics/oddlympics.db <<SQL
 SELECT "TOTALS" AS section, COUNT(*) AS total, SUM(confirmed_at IS NOT NULL) AS confirmed FROM vip_signups;
 SELECT requested_sport, COUNT(*) AS n FROM vip_signups GROUP BY requested_sport;
 SELECT date(created_at, "unixepoch") AS day, COUNT(*) AS signups, SUM(confirmed_at IS NOT NULL) AS confirmed FROM vip_signups WHERE created_at > strftime("%s","now","-14 days") GROUP BY day ORDER BY day;
+SQL'
+```
+
+### Referral-counting SQL recipe (Phase 13)
+
+Phase 13 referral-attribution measurement path (REQUIREMENTS.md REF-01/REF-03). Reports confirmed
+signups grouped by `referred_by` (top referral codes), total referred vs. direct, and % of each.
+
+```bash
+ssh root@oddlympics.app 'sqlite3 /var/lib/oddlympics/oddlympics.db <<SQL
+.mode column
+.headers on
+SELECT COALESCE(referred_by, "(direct)") AS referrer,
+       COUNT(*) AS signups,
+       ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM vip_signups WHERE confirmed_at IS NOT NULL), 1) AS pct
+FROM vip_signups
+WHERE confirmed_at IS NOT NULL AND unsubscribed_at IS NULL
+GROUP BY referred_by
+ORDER BY signups DESC;
 SQL'
 ```
 
