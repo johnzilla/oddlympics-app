@@ -223,6 +223,41 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
         });
       }
     } catch {}
+
+    // ?ref= / localStorage reader — populates hidden #ref field (REF-02, D-10..D-13)
+    // localStorage throws in Safari private mode / when disabled; the entire block is
+    // wrapped so any failure falls through silently — the form still submits with no ref.
+    try {
+      const LS_KEY = 'oddlympics_ref';
+      const TTL = 30 * 24 * 60 * 60 * 1000; // 30 days in ms (D-12)
+
+      // Read ?ref= from URL — consistent with how block 2 reads ?error= (D-10)
+      const urlRef = (new URL(location.href).searchParams.get('ref') || '').trim();
+
+      let activeRef = '';
+
+      if (urlRef) {
+        // URL ref is authoritative (D-10). Write it to localStorage first-seen only (D-11).
+        activeRef = urlRef;
+        try {
+          if (!localStorage.getItem(LS_KEY)) {
+            localStorage.setItem(LS_KEY, JSON.stringify({ ref: urlRef, ts: Date.now() }));
+          }
+        } catch {}
+      } else {
+        // No URL ref — fall back to localStorage (D-11/D-12)
+        try {
+          const stored = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+          if (stored && stored.ref && (Date.now() - stored.ts) < TTL) {
+            activeRef = stored.ref;
+          }
+        } catch {}
+      }
+
+      // Transport the active ref to the hidden field — client performs NO validation (D-13)
+      const refInput = document.getElementById('ref');
+      if (refInput && activeRef) refInput.value = activeRef;
+    } catch {}
   </script>
 </Layout>
 
