@@ -53,21 +53,21 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REF-01 | TBD | Pending |
-| REF-02 | TBD | Pending |
-| REF-03 | TBD | Pending |
-| SHARE-01 | TBD | Pending |
-| SHARE-02 | TBD | Pending |
-| SHARE-03 | TBD | Pending |
-| SHARE-04 | TBD | Pending |
-| OG-02 | TBD | Pending |
-| OG-03 | TBD | Pending |
+| REF-01 | Phase 13 | Pending |
+| REF-02 | Phase 13 | Pending |
+| REF-03 | Phase 13 | Pending |
+| SHARE-01 | Phase 14 | Pending |
+| SHARE-02 | Phase 14 | Pending |
+| SHARE-03 | Phase 14 | Pending |
+| SHARE-04 | Phase 14 | Pending |
+| OG-02 | Phase 15 | Pending |
+| OG-03 | Phase 15 | Pending |
 
 **Coverage:**
 - v2.1 requirements: 9 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 9 ⚠️
+- Mapped to phases: 9 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-22*
-*Last updated: 2026-05-22 after initial definition*
+*Last updated: 2026-05-22 — roadmap created, all 9 requirements mapped to Phases 13–15*
