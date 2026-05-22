@@ -37,6 +37,11 @@ import { resolve } from 'node:path';
 const BASE = process.env.SMOKE_BASE_URL ?? 'http://localhost:4321';
 const DB_PATH = resolve(process.env.DATABASE_PATH ?? './data/oddlympics.db');
 const SMOKE_IP = '192.0.2.42'; // RFC 5737 TEST-NET-1; never a real client IP
+const REF_IP = '192.0.2.43'; // RFC 5737 TEST-NET-1 (distinct address); used for referral
+// POST cases so they do NOT consume SMOKE_IP rate-limit slots that case-7 depends on.
+// REF_IP accommodates 5 valid POSTs (A, B, direct, unknown, malformed) before its own
+// rate-limit is reached. The self-ref case uses SELF_REF_IP to avoid consuming that 6th slot.
+const SELF_REF_IP = '192.0.2.44'; // RFC 5737 TEST-NET-1; used only for REF-self-ref re-signup
 
 console.log(`[smoke] target: ${BASE}`);
 console.log(`[smoke] db:     ${DB_PATH}`);
@@ -93,7 +98,7 @@ function dbHasEmail(email) {
 function dbRowFor(email) {
   return db
     .prepare(
-      'SELECT email, team, timezone, requested_sport FROM vip_signups WHERE email = ?',
+      'SELECT email, team, timezone, requested_sport, referral_code, referred_by FROM vip_signups WHERE email = ?',
     )
     .get(email);
 }
@@ -277,11 +282,168 @@ await runCase('AC12-honeypot (website=evil-bot)', async () => {
   return true;
 });
 
+// Phase 13 referral cases — all valid POSTs use REF_IP (192.0.2.43), NOT SMOKE_IP,
+// so the SMOKE_IP slot count case-7 depends on is unchanged at ~3 of 5 slots used.
+
+// REF-valid-ref: signup A gets a code; signup B with ref=A's code -> B.referred_by === A's code
+await runCase('REF-valid-ref', async () => {
+  const emailA = `smoke-ref-a-${Date.now()}@example.com`;
+  const { status: sA, location: lA } = await post(
+    { email: emailA, team: 'england', timezone: 'Europe/London' },
+    { 'X-Forwarded-For': REF_IP },
+  );
+  if (sA !== 303 || !lA?.startsWith('/pending?email=')) {
+    console.error(`  [A] expected 303 /pending?email=..., got ${sA} ${lA}`);
+    return false;
+  }
+  const rowA = dbRowFor(emailA);
+  if (!rowA?.referral_code) {
+    console.error(`  [A] expected referral_code on row, got ${JSON.stringify(rowA)}`);
+    return false;
+  }
+  const codeA = rowA.referral_code;
+  if (!/^[a-z0-9]{8}$/.test(codeA)) {
+    console.error(`  [A] referral_code "${codeA}" does not match /^[a-z0-9]{8}$/`);
+    return false;
+  }
+  // Signup B with ref=codeA
+  const emailB = `smoke-ref-b-${Date.now()}@example.com`;
+  const { status: sB, location: lB } = await post(
+    { email: emailB, team: 'france', timezone: 'Europe/Paris', ref: codeA },
+    { 'X-Forwarded-For': REF_IP },
+  );
+  if (sB !== 303 || !lB?.startsWith('/pending?email=')) {
+    console.error(`  [B] expected 303 /pending?email=..., got ${sB} ${lB}`);
+    return false;
+  }
+  const rowB = dbRowFor(emailB);
+  if (rowB?.referred_by !== codeA) {
+    console.error(`  [B] expected referred_by=${codeA}, got ${JSON.stringify(rowB?.referred_by)}`);
+    return false;
+  }
+  return true;
+});
+
+// REF-direct-no-ref: signup with no ref param -> referred_by IS NULL
+await runCase('REF-direct-no-ref', async () => {
+  const email = `smoke-ref-direct-${Date.now()}@example.com`;
+  const { status, location } = await post(
+    { email, team: 'germany', timezone: 'Europe/Berlin' },
+    { 'X-Forwarded-For': REF_IP },
+  );
+  if (status !== 303 || !location?.startsWith('/pending?email=')) {
+    console.error(`  expected 303 /pending?email=..., got ${status} ${location}`);
+    return false;
+  }
+  const row = dbRowFor(email);
+  if (row?.referred_by !== null) {
+    console.error(`  expected referred_by=null, got ${JSON.stringify(row?.referred_by)}`);
+    return false;
+  }
+  return true;
+});
+
+// REF-unknown-ref: well-formed 8-char code not in DB -> 303 /pending?email=, referred_by NULL
+await runCase('REF-unknown-ref', async () => {
+  const email = `smoke-ref-unk-${Date.now()}@example.com`;
+  const { status, location } = await post(
+    { email, team: 'brazil', timezone: 'America/Sao_Paulo', ref: 'zzzzzzzz' },
+    { 'X-Forwarded-For': REF_IP },
+  );
+  if (status !== 303) {
+    console.error(`  expected status 303, got ${status}`);
+    return false;
+  }
+  if (!location?.startsWith('/pending?email=')) {
+    console.error(`  expected /pending?email=..., got ${location}`);
+    return false;
+  }
+  const row = dbRowFor(email);
+  if (row?.referred_by !== null) {
+    console.error(`  expected referred_by=null, got ${JSON.stringify(row?.referred_by)}`);
+    return false;
+  }
+  return true;
+});
+
+// REF-malformed-ref: wrong charset -> 303 /pending?email=, referred_by NULL (SC4: never blocks)
+await runCase('REF-malformed-ref', async () => {
+  const email = `smoke-ref-mal-${Date.now()}@example.com`;
+  const { status, location } = await post(
+    { email, team: 'argentina', timezone: 'America/Buenos_Aires', ref: '!!bad!!' },
+    { 'X-Forwarded-For': REF_IP },
+  );
+  if (status !== 303) {
+    console.error(`  expected status 303, got ${status}`);
+    return false;
+  }
+  if (!location?.startsWith('/pending?email=')) {
+    console.error(`  expected /pending?email=..., got ${location}`);
+    return false;
+  }
+  const row = dbRowFor(email);
+  if (row?.referred_by !== null) {
+    console.error(`  expected referred_by=null, got ${JSON.stringify(row?.referred_by)}`);
+    return false;
+  }
+  return true;
+});
+
+// REF-self-ref: re-signup email A with A's own referral_code as ref -> referred_by stays NULL
+// Uses SELF_REF_IP (192.0.2.44) — REF_IP is exhausted after 5 valid POSTs (A, B, direct,
+// unknown, malformed); a 6th would be rate-limited. SELF_REF_IP keeps slot accounting clean.
+await runCase('REF-self-ref', async () => {
+  // Fetch emailA's code from the DB directly (it was created in REF-valid-ref above)
+  const allRows = db
+    .prepare("SELECT email, referral_code FROM vip_signups WHERE email LIKE 'smoke-ref-a-%@example.com'")
+    .all();
+  if (!allRows.length) {
+    console.error('  could not find smoke-ref-a-* row from REF-valid-ref; ensure cases run in order');
+    return false;
+  }
+  const refRow = allRows[0];
+  const selfEmail = refRow.email;
+  const selfCode = refRow.referral_code;
+  const { status, location } = await post(
+    { email: selfEmail, team: 'england', timezone: 'Europe/London', ref: selfCode },
+    { 'X-Forwarded-For': SELF_REF_IP },
+  );
+  if (status !== 303 || !location?.startsWith('/pending?email=')) {
+    console.error(`  expected 303 /pending?email=..., got ${status} ${location}`);
+    return false;
+  }
+  const row = dbRowFor(selfEmail);
+  if (row?.referred_by !== null) {
+    console.error(`  expected referred_by=null (self-ref ignored), got ${JSON.stringify(row?.referred_by)}`);
+    return false;
+  }
+  return true;
+});
+
+// REF-code-uniqueness: every row in vip_signups has a non-null, distinct referral_code (SC1)
+await runCase('REF-code-uniqueness', () => {
+  const rows = db.prepare('SELECT referral_code FROM vip_signups').all();
+  const codes = rows.map((r) => r.referral_code);
+  const nullCount = codes.filter((c) => c === null || c === undefined).length;
+  if (nullCount > 0) {
+    console.error(`  ${nullCount} rows have a null referral_code (SC1 violated)`);
+    return false;
+  }
+  const unique = new Set(codes);
+  if (unique.size !== codes.length) {
+    console.error(`  duplicate referral_code found: ${codes.length} rows, ${unique.size} distinct`);
+    return false;
+  }
+  return true;
+});
+
 // Case 7 — rate limit
 // rate-limit.ts: MAX_PER_WINDOW = 5 per WINDOW_MS = 1h, keyed by 'ip:<ip>' AND 'email:<email>'.
 // Pre-condition: prior cases (1, 4, 5) all came from SMOKE_IP and succeeded — that's 3 IP slots used.
 // Plus case 6 (honeypot) short-circuits before reaching the rate limiter, so it doesn't count.
 // Cases 2 and 3 hit bad-form which is BEFORE the rate limiter, also not counted.
+// Phase 13 referral cases use REF_IP (192.0.2.43) or SELF_REF_IP (192.0.2.44) for valid POSTs —
+// they do NOT consume SMOKE_IP slots.
 // So at this point, SMOKE_IP has used ~3 of its 5 hourly slots. Firing 4 more valid POSTs
 // from the same IP brings the total to 7 ≥ MAX_PER_WINDOW — the LAST should rate-limit.
 // Note: the limiter state is in-memory per server process; restart of the dev server resets it.
