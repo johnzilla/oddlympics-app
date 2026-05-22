@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Referral & Social Sharing
-status: verifying
-stopped_at: Completed 13-04-PLAN.md — Phase 13 all 4 plans done
-last_updated: "2026-05-22T21:29:35.584Z"
+status: ready_to_plan
+stopped_at: Phase 13 complete (4/4) — ready to discuss Phase 14
+last_updated: 2026-05-22T22:18:19.980Z
 last_activity: 2026-05-22
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 4
-  completed_plans: 4
+  completed_plans: 41
   percent: 33
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-22, started milestone v2.1)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** Phase 13 — referral-code-attribution
+**Current focus:** Phase 14 — share experience
 
 ## Current Position
 
-Phase: 13 (referral-code-attribution) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
+Phase: 14
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-05-22
 
 Next: `/gsd:plan-phase 13`
@@ -36,7 +36,7 @@ Next: `/gsd:plan-phase 13`
 
 **Velocity:**
 
-- Total plans completed: 20
+- Total plans completed: 24
 - Average duration: —
 - Total execution time: 0 hours
 
@@ -49,6 +49,7 @@ Next: `/gsd:plan-phase 13`
 | 07 | 2 | - | - |
 | 10 | 3 | - | - |
 | 12 | 6 | - | - |
+| 13 | 4 | - | - |
 
 **Recent Trend:**
 

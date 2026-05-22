@@ -156,6 +156,6 @@ Phases execute in numeric order: 13 → 14 → 15
 | 10. Confirmation email update | v2.0 | 3/3 | Complete | 2026-05-16 |
 | 11. End-to-end + launch gate | v2.0 | 4/6 | Complete | 2026-05-16 |
 | 12. Restore multi-team selection | v2.0 | 6/6 | Complete | 2026-05-16 |
-| 13. Referral Code & Attribution | v2.1 | 4/4 | Complete   | 2026-05-22 |
+| 13. Referral Code & Attribution | v2.1 | 4/4 | Complete    | 2026-05-22 |
 | 14. Share Experience | v2.1 | 0/TBD | Not started | - |
 | 15. Personalized Open Graph | v2.1 | 0/TBD | Not started | - |
