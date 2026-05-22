@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
-import { upsertVipSignup } from '../../lib/db';
+import { upsertVipSignup, lookupByReferralCode } from '../../lib/db';
 import { mintToken } from '../../lib/token';
 import { sendMagicLink } from '../../lib/email';
 import { checkRateLimit } from '../../lib/rate-limit';
 import { VALID_TEAMS } from '../../lib/teams';
 import { VALID_TZ, FALLBACK_TZ } from '../../lib/timezones';
+import { generateReferralCode } from '../../lib/referral';
 
 export const prerender = false;
 
@@ -89,6 +90,31 @@ export const POST: APIRoute = async ({ request, site }) => {
     console.log(`[signup] tz-fallback email=${rawEmail} input=${JSON.stringify(rawTz)}`);
   }
 
+  // Phase 13 — REF-03: ref resolution (D-09 insertion point — post-validation, pre-upsert).
+  // Mirrors the tz-fallback "never rejects, silent fallback" model (D-08/SC4):
+  // an unknown, malformed, or self-referencing ref stays NULL — signup always 303s normally.
+  // MUST NOT call back() or throw on a bad ref.
+  const rawRef = ((form.get('ref') as string | null) ?? '').trim().toLowerCase();
+  let referredBy: string | null = null;
+  if (rawRef) {
+    const refRow = lookupByReferralCode.get(rawRef) as { email: string; referral_code: string } | undefined;
+    if (refRow && refRow.email !== rawEmail) {
+      // Valid ref, different owner — set attribution
+      referredBy = refRow.referral_code;
+    } else if (refRow && refRow.email === rawEmail) {
+      // Self-referral: silently ignore (T-13-04)
+      console.log(`[signup] ref-self-referral email=${rawEmail} ref=${JSON.stringify(rawRef)}`);
+    } else {
+      // Unknown/malformed ref: silently ignore (D-08)
+      console.log(`[signup] ref-unknown email=${rawEmail} ref=${JSON.stringify(rawRef)}`);
+    }
+  }
+
+  // Generate a fresh referral_code for this new row (D-04).
+  // COALESCE in upsertVipSignup preserves the existing code on re-signup — breaks are avoided.
+  // Collision risk ~3.6e-13 at current row counts; no retry loop needed here.
+  const referralCode = generateReferralCode();
+
   try {
     upsertVipSignup.get(
       rawEmail,
@@ -97,6 +123,8 @@ export const POST: APIRoute = async ({ request, site }) => {
       request.headers.get('user-agent'),
       rawTeam,
       tz,
+      referralCode,
+      referredBy,
     );
   } catch (err) {
     console.error('[signup] db error', err);
