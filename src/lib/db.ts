@@ -175,6 +175,13 @@ export const lookupByReferralCode = db.prepare<[string]>(`
   SELECT email, referral_code FROM vip_signups WHERE referral_code = ?
 `);
 
+// Phase 15 — OG-03 (D-04/D-10): resolves a referral code to team slug for
+// per-team OG image selection on /r/CODE. Narrowed to {referral_code, team}
+// only — no email/status leak to the unauthenticated /r/CODE route (D-03).
+export const lookupTeamByReferralCode = db.prepare<[string]>(`
+  SELECT referral_code, team FROM vip_signups WHERE referral_code = ?
+`);
+
 export const markUnsubscribed = db.prepare<[string]>(`
   UPDATE vip_signups
   SET unsubscribed_at = strftime('%s','now')
