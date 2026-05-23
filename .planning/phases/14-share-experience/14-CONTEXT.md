@@ -75,7 +75,7 @@ Out of scope (locked / deferred):
   Wrapped in `try/catch` like the existing `?error=` / `?email=` blocks. If
   `?rc=` is absent (direct-URL visit, malformed redirect), the share UI
   hides itself rather than showing a broken/empty link — graceful no-op.
-- **D-04:** No localStorage interaction for the user's *own* code.
+- **D-04 [informational]:** No localStorage interaction for the user's *own* code.
   `localStorage.oddlympics_ref` (from Phase 13 D-11) stores the *incoming*
   referrer's code only — different scope, do not conflate. A user who
   reloads `/pending` without `?rc=` does not see the share UI; this is
@@ -123,7 +123,7 @@ Out of scope (locked / deferred):
 - **D-09:** Team label is sourced via `teamLabel(slug)` from `src/lib/teams.ts`
   — the same function already used by `sendMagicLink` (`email.ts:26`) and
   the consumer landing. Single source of truth: `references/teams.json`.
-- **D-10:** No flag emoji. Skipped despite PROJECT.md's aspirational
+- **D-10 [informational]:** No flag emoji. Skipped despite PROJECT.md's aspirational
   example, because (a) `references/teams.json` has no `flag` field today,
   (b) text-only matches the editorial-minimalist house style, (c) Windows
   flag glyphs render inconsistently. The team name alone satisfies SC4.
@@ -183,7 +183,7 @@ Out of scope (locked / deferred):
 - **D-19:** A second smoke section for confirmation: mint a confirm token,
   GET `/api/confirm?token=...`, follow the 303, grep `/confirmed`'s body
   for the referral URL. Confirms D-02's email→code lookup.
-- **D-20:** No new Playwright/Puppeteer dependency. The `navigator.share`
+- **D-20 [informational]:** No new Playwright/Puppeteer dependency. The `navigator.share`
   / `navigator.clipboard` behavior is browser-specific and is verified
   manually in a checklist on `/pending` (the operator will exercise it
   during Phase 4 launch-week observation or pre-launch walk-through). Web

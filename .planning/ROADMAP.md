@@ -108,14 +108,14 @@ Plans:
 - [ ] 14-01-PLAN.md — Copy helper: add `shareText(teamLabel, url)` to `src/lib/copy.ts` (D-08, D-11; contract for Wave 2)
 - [ ] 14-02-PLAN.md — API redirect plumbing: `/api/signup` appends `&rc=&team=`, `/api/confirm` appends `&rc=` on status=ok/already (D-01, D-02, D-15)
 
-**Wave 2** *(parallel — each depends on Wave 1 prerequisites; no Wave-2 file overlap)*
+**Wave 2** *(14-03 and 14-04 both depend on Wave 1; 14-03 additionally depends on 14-02 because Task 2 modifies the sendMagicLink call site in src/pages/api/signup.ts that 14-02 also touches — within-wave ordering preserves the 14-03/14-04 parallelism otherwise)*
 
-- [ ] 14-03-PLAN.md — Email integration: `sendMagicLink` 5th `referralCode` param + share `<p>` in HTML body and plaintext (D-12, D-13, D-14; depends on 14-01)
+- [ ] 14-03-PLAN.md — Email integration: `sendMagicLink` 5th `referralCode` param + share `<p>` in HTML body and plaintext; updates the call site in `/api/signup.ts` to pass `row.referral_code` (D-12, D-13, D-14; depends on 14-01, 14-02)
 - [ ] 14-04-PLAN.md — Share UI on three surfaces: `/pending` + `/confirmed` (prerendered, `?rc=` reader) + `/manage` (server-rendered from `user.referral_code`) with Web Share API + clipboard fallback (D-03, D-05, D-06, D-15, D-16, D-17; depends on 14-01, 14-02)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 14-05-PLAN.md — Smoke extension: SHARE-pending-card + SHARE-confirmed-card response-body greps in `scripts/smoke-signup.mjs` (D-18, D-19; depends on 14-01..14-04)
+- [ ] 14-05-PLAN.md — Smoke extension: SHARE-pending-card + SHARE-confirmed-card response-body greps + SHARE-confirm-redirect-location (mint token, GET /api/confirm with redirect: 'manual', assert 303 Location carries &rc=<row.referral_code>) in `scripts/smoke-signup.mjs` (D-18, D-19; depends on 14-01..14-04)
 
 ### Phase 15: Personalized Open Graph
 
