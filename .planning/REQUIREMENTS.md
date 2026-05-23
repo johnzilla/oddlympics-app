@@ -23,8 +23,8 @@ Requirements for the Referral & Social Sharing milestone. Each maps to exactly o
 
 ### Personalized Open Graph
 
-- [ ] **OG-02**: A per-team Open Graph image exists for each of the 48 World Cup teams
-- [ ] **OG-03**: A shared referral link unfurls on social platforms with the sharer's team image
+- [x] **OG-02**: A per-team Open Graph image exists for each of the 48 World Cup teams
+- [x] **OG-03**: A shared referral link unfurls on social platforms with the sharer's team image
 
 ## Future Requirements
 
@@ -60,8 +60,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | SHARE-02 | Phase 14 | Complete |
 | SHARE-03 | Phase 14 | Complete |
 | SHARE-04 | Phase 14 | Complete |
-| OG-02 | Phase 15 | Pending |
-| OG-03 | Phase 15 | Pending |
+| OG-02 | Phase 15 | Complete |
+| OG-03 | Phase 15 | Complete |
 
 **Coverage:**
 - v2.1 requirements: 9 total
