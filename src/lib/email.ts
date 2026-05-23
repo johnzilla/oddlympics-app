@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { mintToken } from './token';
 import { teamLabel } from './teams';
 import { tzLabel } from './timezones';
-import { NO_ACCOUNT_TITLE, NO_ACCOUNT_BODY, REENTRY_CTA } from './copy';
+import { NO_ACCOUNT_TITLE, NO_ACCOUNT_BODY, REENTRY_CTA, shareText } from './copy';
 
 const API_KEY = process.env.RESEND_API_KEY ?? '';
 const FROM = process.env.EMAIL_FROM ?? 'oddlympics <onboarding@resend.dev>';
@@ -20,11 +20,14 @@ export async function sendMagicLink(
   token: string,
   team: string,
   timezone: string,
+  referralCode: string,
 ): Promise<void> {
   const url = `${SITE_URL}/api/confirm?token=${encodeURIComponent(token)}`;
   const manageUrl = `${SITE_URL}/manage`;
   const teamHuman = teamLabel(team);
   const tzHuman = tzLabel(timezone);
+  const shareUrl = SITE_URL + '/?ref=' + referralCode;
+  const shareLine = shareText(teamHuman, shareUrl);
   const subject = 'Confirm your World Cup alerts — oddlympics';
   const text = [
     'Confirm your World Cup alerts for oddlympics.',
@@ -36,6 +39,8 @@ export async function sendMagicLink(
     '',
     'Add teams, change your time zone, or follow new sports anytime — no',
     `account, no password: ${manageUrl}`,
+    '',
+    shareLine,
     '',
     'No spam. No ads. Unsubscribe anytime.',
     '',
@@ -61,6 +66,7 @@ export async function sendMagicLink(
     </td></tr>
   </table>
   <p style="margin:0 0 24px"><a href="${url}" style="display:inline-block;background:hsl(18 70% 56%);color:#0b0b0e;text-decoration:none;padding:12px 18px;border-radius:6px;font-weight:700">Confirm email</a></p>
+  <p style="margin:0 0 20px;line-height:1.55;color:#5a5d68;font-size:13px">Know someone else following <strong>${teamHuman}</strong>? Share your link: <a href="${shareUrl}" style="color:#5a5d68;text-decoration:underline;word-break:break-all">${shareUrl}</a></p>
   <p style="margin:0 0 8px;color:#666;font-size:12px">Or paste this URL:</p>
   <p style="margin:0 0 24px;word-break:break-all;color:#666;font-size:12px">${url}</p>
   <p style="margin:0;color:#999;font-size:11px">No spam. No ads. Unsubscribe anytime. If you didn't request this, ignore this email.</p>
@@ -73,6 +79,7 @@ export async function sendMagicLink(
     console.log('\n[email-dev-fallback] Magic link for', email);
     console.log('  ', url, '\n');
     console.log('   body:', `every ${teamHuman} match in ${tzHuman}`, '\n');
+    console.log('   share:', shareUrl, '\n');
     return;
   }
 
