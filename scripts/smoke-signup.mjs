@@ -567,6 +567,67 @@ await runCase('SHARE-confirm-redirect-location (D-19 redirect side, real rc)', a
   return true;
 });
 
+// Phase 15 SHARE-r-known (D-12b): GET /r/<real-code> proves the route emits
+// personalized og:image (per-team if PNG exists, generic fallback per D-10)
+// and og:title carrying "Following <Team>" (D-14). Status-agnostic per D-03 —
+// any referral_code with a team works, confirmed or not.
+await runCase('SHARE-r-known (D-12b: personalized og:image + og:title)', async () => {
+  const row = db.prepare(
+    'SELECT referral_code, team FROM vip_signups WHERE referral_code IS NOT NULL AND team IS NOT NULL LIMIT 1',
+  ).get();
+  if (!row) {
+    console.error('  no vip_signups row with referral_code + team in DB; run a valid signup first');
+    return false;
+  }
+  const res = await fetch(`${BASE}/r/${row.referral_code}`, { redirect: 'manual' });
+  if (res.status !== 200) {
+    console.error(`  expected 200, got ${res.status}`);
+    return false;
+  }
+  const body = await res.text();
+  // og:image must be per-team PNG or generic fallback (D-10 trim path)
+  const hasOgImage =
+    body.includes('og:image" content="') &&
+    (body.includes(`/og/${row.team}.png`) || body.includes('/og-image.png'));
+  if (!hasOgImage) {
+    console.error('  body missing og:image (per-team or fallback)');
+    return false;
+  }
+  // og:title must carry "Following <Team> · oddlympics" (D-14)
+  if (!body.match(/og:title" content="Following [^"]+ · oddlympics"/)) {
+    console.error('  body missing personalized og:title');
+    return false;
+  }
+  return true;
+});
+
+// Phase 15 SHARE-r-unknown (D-12b + D-02): GET /r/notarealcode proves the
+// unresolved branch returns 200 (never 404), serves the generic og:image,
+// and does NOT carry a "Following <Team>" title. Stale-link UX preserved.
+await runCase('SHARE-r-unknown (D-12b + D-02: 200 + generic og:image + no team title)', async () => {
+  const res = await fetch(`${BASE}/r/notarealcode`, { redirect: 'manual' });
+  if (res.status !== 200) {
+    console.error(`  expected 200, got ${res.status}`);
+    return false;
+  }
+  const body = await res.text();
+  // Generic og:image (absolute URL — accept both prod and localhost forms)
+  const hasGenericOg =
+    body.includes('og:image" content="https://oddlympics.app/og-image.png"') ||
+    body.includes('og:image" content="http://localhost:4321/og-image.png"');
+  if (!hasGenericOg) {
+    console.error('  body missing generic og:image');
+    return false;
+  }
+  // Must NOT have personalized "Following …" title — would mean the shape
+  // gate or the unresolved-branch logic regressed.
+  if (body.includes('og:title" content="Following ')) {
+    console.error('  body has team-personalized og:title for unknown code (wrong)');
+    return false;
+  }
+  return true;
+});
+
 // Case 7 — rate limit
 // rate-limit.ts: MAX_PER_WINDOW = 5 per WINDOW_MS = 1h, keyed by 'ip:<ip>' AND 'email:<email>'.
 // Pre-condition: prior cases (1, 4, 5) all came from SMOKE_IP and succeeded — that's 3 IP slots used.
