@@ -375,6 +375,20 @@ const title = valid && !isUnsubscribed
     </div>
   </main>
 
+  {/* Tactic 1 (260523-r1x-01): scrub ?token= from browser address bar + history.
+      Runs unconditionally when a URL token was present — including on the bad-token
+      branch — so even an invalid/expired token doesn't persist in history.
+      Wrapped in try/catch mirroring the existing inline scripts above.  */}
+  {hadUrlToken && (
+    <script is:inline>
+      try {
+        var u = new URL(location.href);
+        u.searchParams.delete('token');
+        history.replaceState({}, '', u.pathname + u.search + u.hash);
+      } catch {}
+    </script>
+  )}
+
   {valid && !isUnsubscribed && (
     <>
       <script is:inline>
