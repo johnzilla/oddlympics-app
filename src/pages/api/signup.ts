@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { upsertVipSignup, lookupByReferralCode } from '../../lib/db';
+import { upsertVipSignup, lookupByReferralCode, type VipSignup } from '../../lib/db';
 import { mintToken } from '../../lib/token';
 import { sendMagicLink } from '../../lib/email';
 import { checkRateLimit } from '../../lib/rate-limit';
@@ -117,9 +117,10 @@ export const POST: APIRoute = async ({ request, site }) => {
   // signup (mirrors the backfill retry loop in db.ts — both paths must stay consistent).
   let referralCode = generateReferralCode();
   let upserted = false;
+  let row: VipSignup | undefined;
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
-      upsertVipSignup.get(
+      row = upsertVipSignup.get(
         rawEmail,
         requestedSport,
         ip === 'unknown' ? null : ip,
@@ -128,7 +129,7 @@ export const POST: APIRoute = async ({ request, site }) => {
         tz,
         referralCode,
         referredBy,
-      );
+      ) as VipSignup | undefined;
       upserted = true;
       break;
     } catch (err: unknown) {
@@ -150,6 +151,13 @@ export const POST: APIRoute = async ({ request, site }) => {
     console.error('[signup] db error: referral_code collision retries exhausted');
     return back('server');
   }
+  // Defensive: RETURNING * should always populate row.referral_code post-Phase-13,
+  // but the VipSignup type declares it `string | null` (db.ts:125) — narrow here so
+  // the Location header below can assume non-null without a `!`.
+  if (!row || !row.referral_code) {
+    console.error('[signup] db error: upsert returned no row');
+    return back('server');
+  }
 
   const token = mintToken(rawEmail);
 
@@ -162,6 +170,8 @@ export const POST: APIRoute = async ({ request, site }) => {
 
   return new Response(null, {
     status: 303,
-    headers: { Location: `/pending?email=${encodeURIComponent(rawEmail)}` },
+    headers: {
+      Location: `/pending?email=${encodeURIComponent(rawEmail)}&rc=${encodeURIComponent(row.referral_code)}&team=${encodeURIComponent(rawTeam)}`,
+    },
   });
 };
