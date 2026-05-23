@@ -130,6 +130,7 @@ None yet.
 | 260511-ccx | Phase 2.5 SC4: demand-capture textarea on /schedule + feature_requests table | 2026-05-11 | 6129910 | [260511-ccx-implement-phase-2-5-success-criterion-4-](./quick/260511-ccx-implement-phase-2-5-success-criterion-4-/) |
 | 260516-q33 | manage discoverability content and entry pass (sketches 001-B/002-B/003-B) | 2026-05-16 | eb67661 | [260516-q33-manage-discoverability-content-and-entry](./quick/260516-q33-manage-discoverability-content-and-entry/) |
 | 260517-px5 | Harden football-data.org team-name→slug mapping; shared resolver + offline smoke + launch-gate NULL-slug AC | 2026-05-17 | 4684248 | [260517-px5-harden-football-data-org-team-name-to-sl](./quick/260517-px5-harden-football-data-org-team-name-to-sl/) |
+| 260523-qqa | CSRF + RFC 8058 + kickoff-alert hardening: Origin check on /api/save-selection, POST handler on /api/unsubscribe (RFC 8058 one-click), List-Unsubscribe headers on kickoff alerts | 2026-05-23 | 6a597cf | [260523-qqa-csrf-rfc8058-email-hardening](./quick/260523-qqa-csrf-rfc8058-email-hardening/) |
 
 ## Deferred Items
 
