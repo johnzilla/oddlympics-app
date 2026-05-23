@@ -18,7 +18,22 @@ findings:
   warning: 7
   info: 4
   total: 12
-status: issues_found
+  resolved: 3
+  deferred: 9
+status: partial
+resolution:
+  CR-01: resolved (commit fixing FS-probe → VALID_TEAMS allow-list)
+  WR-01: resolved (smoke now requires per-team og:image specifically)
+  IN-01: resolved (misleading comment removed with FS probe)
+  WR-02: deferred (render coverage check — post-launch hardening)
+  WR-03: deferred (Cache-Control on /r/[code] — perf, not correctness)
+  WR-04: deferred (tmp-file leak on SIGTERM — minor cleanliness)
+  WR-05: deferred (?? '' dead defense in signup.ts — readability)
+  WR-06: deferred (share-card duplication across 3 pages — Layout-style extraction)
+  WR-07: deferred (TEAM_LABEL_JSON size on /pending — acceptable for v1)
+  IN-02: deferred (copyFallback dup — resolves with WR-06)
+  IN-03: deferred (SELECT can narrow to just `team` — readability)
+  IN-04: deferred (og:url provenance on unresolved branch — minor analytics)
 ---
 
 # Phase 15: Code Review Report
