@@ -11,6 +11,8 @@
 //     npm run build && node ./dist/server/entry.mjs
 //   Then in this terminal:
 //     node scripts/smoke-signup.mjs
+//   (Requires Node 22.6+ for the in-script TS import of mintToken; on 22.0-22.5
+//   add the --experimental-strip-types flag: node --experimental-strip-types ...)
 //
 //   Env (optional):
 //     SMOKE_BASE_URL   default http://localhost:4321
@@ -28,11 +30,16 @@
 //
 // Cleanup (operator, post-run, optional):
 //   sqlite3 data/oddlympics.db \
-//     "DELETE FROM vip_signups WHERE email LIKE 'smoke-%@example.com'"
+//     "DELETE FROM vip_signups WHERE email LIKE 'smoke-%@example.com' \
+//        OR email LIKE 'share-confirm-redirect-%@example.com'"
 
 import Database from 'better-sqlite3';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+// NB: requires Node 22.6+ (or --experimental-strip-types flag) for the TS import below.
+// Phase 14 SHARE-confirm-redirect-location case needs to mint a real confirm token; we
+// import the project's own mintToken so the smoke + server agree on token format.
+import { mintToken } from '../src/lib/token.ts';
 
 const BASE = process.env.SMOKE_BASE_URL ?? 'http://localhost:4321';
 const DB_PATH = resolve(process.env.DATABASE_PATH ?? './data/oddlympics.db');
@@ -42,6 +49,7 @@ const REF_IP = '192.0.2.43'; // RFC 5737 TEST-NET-1 (distinct address); used for
 // REF_IP accommodates 5 valid POSTs (A, B, direct, unknown, malformed) before its own
 // rate-limit is reached. The self-ref case uses SELF_REF_IP to avoid consuming that 6th slot.
 const SELF_REF_IP = '192.0.2.44'; // RFC 5737 TEST-NET-1; used only for REF-self-ref re-signup
+const SHARE_IP = '192.0.2.45'; // RFC 5737 TEST-NET-1; reserved for Phase 14 share-card smoke cases
 
 console.log(`[smoke] target: ${BASE}`);
 console.log(`[smoke] db:     ${DB_PATH}`);
@@ -437,6 +445,128 @@ await runCase('REF-code-uniqueness', () => {
   return true;
 });
 
+// Phase 14 SHARE-* cases. Cases 1-2 prove prerendered-page MARKUP shipped (D-18/D-19
+// page-render side): GET /pending and /confirmed with the rc + (for /pending) team
+// query params, then grep the response body for share-card markers and the team label.
+// Case 3 proves /api/confirm's 303 Location carries &rc=<real-code> (D-19 redirect
+// side — closes the gap a synthetic-rc check leaves open). All three cases use
+// SHARE_IP (192.0.2.45) so they do NOT consume SMOKE_IP rate-limit slots that case-7
+// depends on. Browser-API behavior (navigator.share / navigator.clipboard) is
+// operator-UAT'd per D-20 — not covered here.
+
+// SHARE-pending-card (D-18): /pending response body contains share-card markup +
+// the team label injected via TEAM_LABEL_JSON.
+await runCase('SHARE-pending-card (D-18 /pending markup + team label)', async () => {
+  const url = BASE + '/pending?email=share-smoke%40example.com&rc=abc12345&team=brazil';
+  const res = await fetch(url);
+  if (res.status !== 200) {
+    console.error(`  expected 200, got ${res.status}`);
+    return false;
+  }
+  const body = await res.text();
+  const needed = ['share-card', 'share-url', 'Brazil'];
+  for (const s of needed) {
+    if (!body.includes(s)) {
+      console.error(`  body missing: ${s}`);
+      return false;
+    }
+  }
+  return true;
+});
+
+// SHARE-confirmed-card (D-19 page-render side): /confirmed response body contains
+// share-card markup. NO team label assertion (D-16: /confirmed deliberately omits
+// TEAM_LABEL_JSON because the confirm 303 carries no &team=).
+await runCase('SHARE-confirmed-card (D-19 page-render side)', async () => {
+  const url = BASE + '/confirmed?status=ok&rc=abc12345';
+  const res = await fetch(url);
+  if (res.status !== 200) {
+    console.error(`  expected 200, got ${res.status}`);
+    return false;
+  }
+  const body = await res.text();
+  const needed = ['share-card', 'share-url'];
+  for (const s of needed) {
+    if (!body.includes(s)) {
+      console.error(`  body missing: ${s}`);
+      return false;
+    }
+  }
+  return true;
+});
+
+// SHARE-confirm-redirect-location (D-19 redirect side): POST a fresh signup, read the
+// real referral_code from the DB, mint a confirm-purpose token, GET /api/confirm with
+// manual-redirect, assert the 303 Location matches /confirmed?status=ok&rc=<real-code>.
+// Second GET with same token asserts &status=already&rc=... (re-click path — D-02).
+// This is the only case that catches a regression dropping &rc= from /api/confirm's
+// 303 — the synthetic-rc case 2 above does not.
+await runCase('SHARE-confirm-redirect-location (D-19 redirect side, real rc)', async () => {
+  // Per-run unique email — case 3 confirms the row, so a fixed email would hit the
+  // status=already path on a 2nd run against the same DB. Matches the established
+  // smoke-${name}-${Date.now()}@example.com pattern used by cases 1, 4, 5, etc.
+  const email = `share-confirm-redirect-${Date.now()}@example.com`;
+  // 1. POST a fresh signup with SHARE_IP so we don't consume SMOKE_IP slots.
+  //    Team slug must match references/teams.json (e.g. 'united_states', not 'usa').
+  const form = {
+    email,
+    team: 'united_states',
+    timezone: 'America/New_York',
+  };
+  const signupRes = await post(form, { 'X-Forwarded-For': SHARE_IP });
+  if (signupRes.status !== 303) {
+    console.error(`  signup expected 303, got ${signupRes.status}`);
+    return false;
+  }
+  if (!signupRes.location?.startsWith('/pending?email=')) {
+    console.error(`  signup expected /pending?email=..., got ${signupRes.location}`);
+    return false;
+  }
+  // 2. Read the real referral_code from the DB
+  const row = dbRowFor(email);
+  if (!row || !row.referral_code) {
+    console.error(`  no row / no referral_code for ${email}`);
+    return false;
+  }
+  // 3. Mint a confirm-purpose token (signature: mintToken(email, { purpose }))
+  const token = mintToken(email, { purpose: 'confirm' });
+  // 4. First click: GET /api/confirm, assert 303 Location = /confirmed?status=ok&rc=<code>
+  const confirmRes = await fetch(
+    BASE + '/api/confirm?token=' + encodeURIComponent(token),
+    { redirect: 'manual' },
+  );
+  if (confirmRes.status !== 303) {
+    console.error(`  confirm expected 303, got ${confirmRes.status}`);
+    return false;
+  }
+  const loc = confirmRes.headers.get('location');
+  const expected = '/confirmed?status=ok&rc=' + encodeURIComponent(row.referral_code);
+  if (loc !== expected) {
+    console.error(
+      `  confirm Location mismatch:\n    expected: ${expected}\n    actual:   ${loc}`,
+    );
+    return false;
+  }
+  // 5. Re-click: GET same token again, assert 303 Location = /confirmed?status=already&rc=<code>
+  const confirmRes2 = await fetch(
+    BASE + '/api/confirm?token=' + encodeURIComponent(token),
+    { redirect: 'manual' },
+  );
+  if (confirmRes2.status !== 303) {
+    console.error(`  re-click expected 303, got ${confirmRes2.status}`);
+    return false;
+  }
+  const loc2 = confirmRes2.headers.get('location');
+  const expected2 = '/confirmed?status=already&rc=' + encodeURIComponent(row.referral_code);
+  if (loc2 !== expected2) {
+    console.error(
+      `  re-click Location mismatch:\n    expected: ${expected2}\n    actual:   ${loc2}`,
+    );
+    return false;
+  }
+  return true;
+});
+
 // Case 7 — rate limit
 // rate-limit.ts: MAX_PER_WINDOW = 5 per WINDOW_MS = 1h, keyed by 'ip:<ip>' AND 'email:<email>'.
 // Pre-condition: prior cases (1, 4, 5) all came from SMOKE_IP and succeeded — that's 3 IP slots used.
@@ -475,7 +605,7 @@ db.close();
 
 if (fail > 0) {
   console.log(
-    "[smoke] cleanup: sqlite3 data/oddlympics.db \"DELETE FROM vip_signups WHERE email LIKE 'smoke-%@example.com'\"",
+    "[smoke] cleanup: sqlite3 data/oddlympics.db \"DELETE FROM vip_signups WHERE email LIKE 'smoke-%@example.com' OR email LIKE 'share-confirm-redirect-%@example.com'\"",
   );
 }
 
