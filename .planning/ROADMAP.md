@@ -54,7 +54,7 @@ back. Lightweight attribution (a code + `?ref=` param + `referred_by` column);
 no rewards, no leaderboard. Hard target **2026-06-11**.
 
 - [x] **Phase 13: Referral Code & Attribution** - Every signup gets a stable referral code; `?ref=CODE` threads through signup into a `referred_by` column (completed 2026-05-22)
-- [ ] **Phase 14: Share Experience** - Personalized, team-named share prompts with native share sheet on `/pending`, `/confirmed`, `/manage`, and the confirmation email
+- [x] **Phase 14: Share Experience** - Personalized, team-named share prompts with native share sheet on `/pending`, `/confirmed`, `/manage`, and the confirmation email (completed 2026-05-23)
 - [ ] **Phase 15: Personalized Open Graph** - Per-team OG images and a server-rendered referral route so a shared link unfurls with the sharer's team
 
 ## Phase Details
@@ -115,7 +115,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 14-05-PLAN.md — Smoke extension: SHARE-pending-card + SHARE-confirmed-card response-body greps + SHARE-confirm-redirect-location (mint token, GET /api/confirm with redirect: 'manual', assert 303 Location carries &rc=<row.referral_code>) in `scripts/smoke-signup.mjs` (D-18, D-19; depends on 14-01..14-04)
+- [x] 14-05-PLAN.md — Smoke extension: SHARE-pending-card + SHARE-confirmed-card response-body greps + SHARE-confirm-redirect-location (mint token, GET /api/confirm with redirect: 'manual', assert 303 Location carries &rc=<row.referral_code>) in `scripts/smoke-signup.mjs` (D-18, D-19; depends on 14-01..14-04)
 
 ### Phase 15: Personalized Open Graph
 
@@ -167,5 +167,5 @@ Phases execute in numeric order: 13 → 14 → 15
 | 11. End-to-end + launch gate | v2.0 | 4/6 | Complete | 2026-05-16 |
 | 12. Restore multi-team selection | v2.0 | 6/6 | Complete | 2026-05-16 |
 | 13. Referral Code & Attribution | v2.1 | 4/4 | Complete    | 2026-05-22 |
-| 14. Share Experience | v2.1 | 4/5 | In Progress|  |
+| 14. Share Experience | v2.1 | 5/5 | Complete   | 2026-05-23 |
 | 15. Personalized Open Graph | v2.1 | 0/TBD | Not started | - |
