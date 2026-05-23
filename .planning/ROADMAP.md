@@ -135,8 +135,8 @@ Plans:
 Plans:
 **Wave 1** *(parallel — no file overlap)*
 
-- [ ] 15-01-PLAN.md — Route + DB: add lookupTeamByReferralCode to src/lib/db.ts and create src/pages/r/[code].astro server-rendered referral route with resolved/unresolved branches, trim-fallback, meta-refresh + JS bounce (D-01..D-04, D-10, D-14, D-15)
-- [ ] 15-02-PLAN.md — Render toolchain: references/og-image-team.svg template (D-05..D-08), scripts/render-team-og-images.mjs reusing Phase 8 Resvg config (D-11), package.json og:render-teams entry (D-09)
+- [x] 15-01-PLAN.md — Route + DB: add lookupTeamByReferralCode to src/lib/db.ts and create src/pages/r/[code].astro server-rendered referral route with resolved/unresolved branches, trim-fallback, meta-refresh + JS bounce (D-01..D-04, D-10, D-14, D-15)
+- [x] 15-02-PLAN.md — Render toolchain: references/og-image-team.svg template (D-05..D-08), scripts/render-team-og-images.mjs reusing Phase 8 Resvg config (D-11), package.json og:render-teams entry (D-09)
 
 **Wave 2** *(parallel — depends on Wave 1; 15-03 needs 15-02 toolchain, 15-04 needs 15-01 route)*
 
@@ -178,4 +178,4 @@ Phases execute in numeric order: 13 → 14 → 15
 | 12. Restore multi-team selection | v2.0 | 6/6 | Complete | 2026-05-16 |
 | 13. Referral Code & Attribution | v2.1 | 4/4 | Complete    | 2026-05-22 |
 | 14. Share Experience | v2.1 | 5/5 | Complete    | 2026-05-23 |
-| 15. Personalized Open Graph | v2.1 | 0/5 | Not started | - |
+| 15. Personalized Open Graph | v2.1 | 2/5 | In Progress|  |
