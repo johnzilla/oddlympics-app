@@ -123,11 +123,13 @@ their personalized World Cup signup and track which signups it drives back.
 - ✓ Per-user referral link with attribution — unique 8-char `[a-z0-9]` code per signup (additive `pragma_table_info` migration + idempotent backfill + UNIQUE index + collision-retry on insert); landing page reads `?ref=CODE` (with 30-day first-touch localStorage fallback) and `/api/signup` records `referred_by` without ever rejecting; smoke 14/14, DEPLOY.md attribution recipe — Validated in Phase 13: Referral Code & Attribution (REF-01, REF-02, REF-03)
 - ✓ Share prompts on `/pending`, `/confirmed`, and signed-in `/manage` + share line in confirmation email (HTML + plaintext) — single `shareText(teamLabel, url)` helper in `src/lib/copy.ts`; transport via `&rc=` (+ `&team=` on /pending) appended to `/api/signup` and `/api/confirm` 303 redirects; Web Share API feature-detect with `navigator.clipboard.writeText` fallback + "Copied!" 1.5s flash; AbortError suppression on user cancel; regex-gated `?rc=` (8-char `[a-z0-9]`) before DOM-property assignment; smoke 17/17 end-to-end including 3 new SHARE-* cases — Validated in Phase 14: Share Experience (SHARE-01, SHARE-02, SHARE-03, SHARE-04). Note: 5 D-20 walk-through items (native share sheet on mobile, clipboard fallback on desktop, hidden-when-empty branches, cross-client email rendering, /manage share card per-branch visibility) tracked in `14-HUMAN-UAT.md` pending operator confirmation pre-launch.
 
+- ✓ Per-team OG image rendered server-side at `/r/CODE` — new `/r/[code]` server-rendered route (`prerender = false`) emits per-team `og:image` + "Following <Team> · oddlympics" title for resolved 8-char `[a-z0-9]` codes; meta-refresh + try/catch'd `location.replace('/?ref=CODE')` so Phase 13 attribution plumbing fires unchanged; unresolved/malformed codes return 200 with generic OG (never 404); narrowed `lookupTeamByReferralCode` prepared statement (`{referral_code, team}` only — no email/status leak); parameterized `og-image-team.svg` template + `npm run og:render-teams` builds 48 PNGs (1200×630, 6-check per-team gate with tmpfile-LAND-02 grep); four Phase 14 share-URL emitters migrated `/?ref=CODE` → `/r/CODE` (`pending.astro`, `confirmed.astro`, `manage.astro`, `email.ts`); smoke 19/19 PASS including new SHARE-r-known + SHARE-r-unknown cases (D-12b runtime contract). Mid-phase code-review caught CR-01 (FS-probe resolving to `dist/public/` not `dist/client/` in prod — silently dead); fixed by dropping the `existsSync` probe in favor of a `VALID_TEAMS` allow-list check — Validated in Phase 15: Personalized Open Graph (OG-02, OG-03). 1 human-UAT item (real social-card unfurl on production via Twitter/LinkedIn/Facebook/Slack validators) tracked in `15-HUMAN-UAT.md` pending post-deploy.
+
 ### Active
 
 <!-- v2.1 Referral & Social Sharing — started 2026-05-22. Detailed REQ-IDs in REQUIREMENTS.md. -->
 
-- [ ] Per-team OG image rendered server-side at `/r/CODE` — Phase 15
+(milestone complete pending operator-side launch tasks)
 
 ### Out of Scope
 
@@ -224,4 +226,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-23 — Phase 14 (Share Experience) complete; SHARE-01/02/03/04 validated, 5 human-UAT items pending operator walk-through. Next: Phase 15 (Personalized Open Graph). Milestone v2.1, hard target 2026-06-11.*
+*Last updated: 2026-05-23 — Phase 15 (Personalized Open Graph) complete; OG-02/OG-03 validated, 1 human-UAT item (real social-card unfurl post-deploy) tracked in `15-HUMAN-UAT.md`. Phase 14 still has 5 D-20 walk-through items pending operator pre-launch. Milestone v2.1 complete pending operator-side launch tasks. Hard target 2026-06-11.*
