@@ -20,6 +20,27 @@ function isValidIanaTz(tz: string): boolean {
   }
 }
 
+// Mirror of signup.ts:21-37. The endpoint authenticates via either a form token
+// (purpose=manage, single-use, self-protecting) or a 30-day session cookie. The
+// session-cookie path is browser-ambient — without this check, a cross-site
+// <form action="/api/save-selection" method="POST"> can ride the signed-in
+// user's session and silently overwrite their team selection or timezone.
+function originOk(request: Request, siteUrl: string | undefined): boolean {
+  const origin = request.headers.get('origin');
+  if (!origin) return false;
+  try {
+    const o = new URL(origin);
+    if (o.hostname === 'localhost' || o.hostname === '127.0.0.1') return true;
+    if (siteUrl) {
+      const s = new URL(siteUrl);
+      return o.host === s.host;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 function redirectTo(token: string, status: string, setCookie?: string): Response {
   const params = new URLSearchParams({ status });
   if (token) params.set('token', token);
@@ -28,7 +49,12 @@ function redirectTo(token: string, status: string, setCookie?: string): Response
   return new Response(null, { status: 303, headers });
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, site }) => {
+  if (!originOk(request, site?.toString())) {
+    console.error(`[save-selection] bad-origin: ${request.headers.get('origin') ?? '(missing)'}`);
+    return redirectTo('', 'bad-origin');
+  }
+
   let form: FormData;
   try {
     form = await request.formData();
