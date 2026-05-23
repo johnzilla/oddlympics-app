@@ -121,13 +121,13 @@ their personalized World Cup signup and track which signups it drives back.
 - ✓ Confirmation email names team + human-readable timezone; custom Resend domain `hello@oddlympics.app` live, Mail-Tester 10/10 — v2.0 Phase 10 (SIGNUP-04)
 - ✓ Production launch gate AC1–AC12 green; `v1.0-consumer-landing` tagged + pushed — v2.0 Phase 11
 - ✓ Per-user referral link with attribution — unique 8-char `[a-z0-9]` code per signup (additive `pragma_table_info` migration + idempotent backfill + UNIQUE index + collision-retry on insert); landing page reads `?ref=CODE` (with 30-day first-touch localStorage fallback) and `/api/signup` records `referred_by` without ever rejecting; smoke 14/14, DEPLOY.md attribution recipe — Validated in Phase 13: Referral Code & Attribution (REF-01, REF-02, REF-03)
+- ✓ Share prompts on `/pending`, `/confirmed`, and signed-in `/manage` + share line in confirmation email (HTML + plaintext) — single `shareText(teamLabel, url)` helper in `src/lib/copy.ts`; transport via `&rc=` (+ `&team=` on /pending) appended to `/api/signup` and `/api/confirm` 303 redirects; Web Share API feature-detect with `navigator.clipboard.writeText` fallback + "Copied!" 1.5s flash; AbortError suppression on user cancel; regex-gated `?rc=` (8-char `[a-z0-9]`) before DOM-property assignment; smoke 17/17 end-to-end including 3 new SHARE-* cases — Validated in Phase 14: Share Experience (SHARE-01, SHARE-02, SHARE-03, SHARE-04). Note: 5 D-20 walk-through items (native share sheet on mobile, clipboard fallback on desktop, hidden-when-empty branches, cross-client email rendering, /manage share card per-branch visibility) tracked in `14-HUMAN-UAT.md` pending operator confirmation pre-launch.
 
 ### Active
 
 <!-- v2.1 Referral & Social Sharing — started 2026-05-22. Detailed REQ-IDs in REQUIREMENTS.md. -->
 
-- [ ] Personalized share content — team-named share text + per-team OG image
-- [ ] Share prompts on `/pending`, `/confirmed`, the confirmation email, and `/manage`
+- [ ] Per-team OG image rendered server-side at `/r/CODE` — Phase 15
 
 ### Out of Scope
 
@@ -224,4 +224,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-22 — Phase 13 (Referral Code & Attribution) complete; REF-01/02/03 validated, 4 human-UAT items pending. Next: Phase 14 (Share Experience). Milestone v2.1, hard target 2026-06-11.*
+*Last updated: 2026-05-23 — Phase 14 (Share Experience) complete; SHARE-01/02/03/04 validated, 5 human-UAT items pending operator walk-through. Next: Phase 15 (Personalized Open Graph). Milestone v2.1, hard target 2026-06-11.*
