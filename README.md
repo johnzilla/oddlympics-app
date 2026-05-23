@@ -37,23 +37,43 @@ to `main` (~40 seconds end-to-end).
   confederation-grouped checkbox editor backed by a `user_teams` join table;
   signup stays single-team (one slug); the kickoff cron fans out per followed
   team. Verified 11/11.
+- ✅ **v2.1 — Referral & Social Sharing** — Phases 13/14/15:
+  - **Phase 13** — per-user 8-char `[a-z0-9]` referral code with attribution
+    (`referred_by`), additive `pragma_table_info` migration + idempotent
+    backfill + UNIQUE index + collision-retry on insert; landing reads
+    `?ref=CODE` (30-day first-touch localStorage fallback) and `/api/signup`
+    records attribution without ever rejecting.
+  - **Phase 14** — share prompts on `/pending`, `/confirmed`, and signed-in
+    `/manage`, plus a share line in the confirmation email; one
+    `shareText(teamLabel, url)` helper in `src/lib/copy.ts`; Web Share API
+    with `navigator.clipboard.writeText` fallback + "Copied!" 1.5s flash;
+    AbortError suppression on user cancel; regex-gated `?rc=` before any
+    DOM-property assignment.
+  - **Phase 15** — new server-rendered `/r/[code]` route emits per-team
+    `og:image` + `Following <Team> · oddlympics` title for resolved codes
+    (D-01); meta-refresh + try/catch'd `location.replace('/?ref=CODE')` so
+    Phase 13 attribution plumbing fires unchanged; unresolved/malformed codes
+    return 200 with generic OG (never 404). 48 per-team PNGs (1200×630,
+    ~4.1 MB total) under `public/og/` built by `npm run og:render-teams`
+    (parameterized `og-image-team.svg` + 6-check per-team gate). All four
+    Phase 14 share emitters migrated `/?ref=CODE` → `/r/CODE`. Smoke 19/19
+    PASS including new `SHARE-r-known` + `SHARE-r-unknown` cases.
 
-**Recent fixes (post-v2.0 hardening):**
-- 🐛 **Kickoff notification path restored.** Phase 12 had repointed the cron at
-  an INNER JOIN on `user_teams`, which is only written by the `/manage`
-  editor — so users who signed up and confirmed but never opened `/manage`
-  (the primary funnel) silently received **no notifications**. Fixed: the
-  cron now `LEFT JOIN`s `user_teams` and `COALESCE(ut.team_slug, v.team)` so
-  every confirmed subscriber is reached (and a deselected `/manage` team is
-  not resurrected). `/manage` got the same first-visit fallback.
-- 🎨 **Unified light UI + `Layout.astro` extraction.** All seven pages now
-  share `src/components/Layout.astro` (one light "editorial minimalist"
-  theme; the old per-page dark/light drift is gone).
-
-**Operator actions remaining:** flip the kickoff cron live
-(`KICKOFF_NOTIFICATIONS_ENABLED=true` in `/etc/oddlympics.env`) and
-smoke-test one real kickoff notification before group stage opens; fire the
-launch blast. See `DEPLOY.md`.
+**Operator actions remaining (pre-launch, before 2026-06-11):**
+1. **Flip kickoff cron live** — set `KICKOFF_NOTIFICATIONS_ENABLED=true` in
+   `/etc/oddlympics.env`, then `systemctl restart oddlympics-notify.timer`.
+2. **End-to-end smoke** one real kickoff notification after the flip.
+3. **Verify football-data.org name → slug mapping** (read-only `comm` check;
+   silent-loss risk in the kickoff cron — resolver was hardened 2026-05-17 but
+   needs one final pre-launch confirmation).
+4. **Fire the launch blast** — `scripts/launch-blast.mjs --send` (currently
+   dry-run by default).
+5. **Walk through the human-UAT items** logged in
+   `.planning/phases/13-referral-code-attribution/13-HUMAN-UAT.md` (4 items),
+   `.planning/phases/14-share-experience/14-HUMAN-UAT.md` (5 items), and
+   `.planning/phases/15-personalized-open-graph/15-HUMAN-UAT.md` (1
+   post-deploy item — real social-card unfurl via Twitter/LinkedIn/Facebook/
+   Slack validators). See `DEPLOY.md`.
 
 **Deferred (no scheduled milestone):** Telegram bot, Lightning tip jar,
 niche-sport long tail (strongman, cubing, etc.).
@@ -72,6 +92,7 @@ operator runbook.
 | `/manage` | GET | Dual-mode: signed-out magic-link form, or (session/`?token=` valid) the 1–5 team confederation-checkbox editor + tz override + schedule preview. Uses the session cookie if valid; otherwise sends a `purpose=manage` link. |
 | `/schedule` | GET | **301 → `/manage`**, preserving `?token=` (the editor + schedule live on `/manage` since Phase 9). |
 | `/unsubscribed` | GET | Confirmation page after one-click unsubscribe |
+| `/r/[code]` | GET | **Phase 15** server-rendered referral route. Emits per-team `og:image` + `Following <Team> · oddlympics` title for resolved 8-char `[a-z0-9]` codes, then meta-refreshes + `location.replace('/?ref=CODE')` so social-card bots scrape the meta and real users land on `/` with Phase 13 attribution intact. Unresolved or malformed codes return 200 with generic OG (never 404). Shape-gated before any DB lookup or HTML echo. |
 | `/api/signup` | POST | Validates email + **team** (48-slug allow-list) + **timezone** (IANA-validated, falls back to `America/New_York`), rate-limits, writes SQLite row, mints magic-link, sends via Resend. Bad team rejects with `?error=bad-form`; bad/empty tz falls back silently. |
 | `/api/confirm` | GET | Verifies token (purpose=confirm), marks row confirmed (re-subscribe restores an unsubscribed row), redirects to `/confirmed?status=` |
 | `/api/manage` | POST | Sends a magic-link with purpose=manage; the link lands on `/manage`, which mints a 30-day session cookie |
@@ -116,6 +137,8 @@ src/
     manage.astro           # dual-mode sign-in + 1–5 team editor (server-rendered, token/session)
     schedule.astro         # 301 → /manage, preserves ?token= (thin redirect)
     unsubscribed.astro     # post-unsubscribe (prerendered, reads ?status= client-side)
+    r/
+      [code].astro         # Phase 15: server-rendered referral route. Resolves code via lookupTeamByReferralCode → per-team og:image (VALID_TEAMS allow-list) + "Following <Team>" title; meta-refresh + try/catch'd location.replace('/?ref=CODE'). Unresolved/malformed → 200 with generic OG. Shape gate /^[a-z0-9]{8}$/ before DB or echo. Status-agnostic (no join on confirmed_at/unsubscribed_at — D-03).
     api/
       signup.ts            # POST → validate team + tz, mint purpose=confirm magic-link
       confirm.ts           # GET ?token → markConfirmed (restores re-subscribers) → 303 /confirmed?status=
@@ -133,6 +156,9 @@ src/
     rate-limit.ts          # in-memory IP + email throttle
 references/
   teams.json               # canonical 48-team World Cup 2026 list (snake_case slugs, confederation-grouped UEFA→CONMEBOL→CONCACAF→CAF→AFC→OFC)
+  og-image.svg             # Phase 8: source for the generic /og-image.png
+  og-image-team.svg        # Phase 15: parameterized {{TEAM_LABEL}} + {{HEADLINE_FONT_SIZE}} template; one render per team
+  fonts/                   # vendored JetBrainsMono-Bold + Inter for deterministic OG rendering (loadSystemFonts: false)
 scripts/
   ingest-schedule.mjs      # pull WC 2026 teams + matches from football-data.org (idempotent upsert); maps teams.json labels to teams.slug
   backfill-team-slugs.mjs  # one-shot teams.slug backfill from references/teams.json (dry-run by default)
@@ -140,12 +166,15 @@ scripts/
   launch-blast.mjs         # one-time "pick your teams" email to existing teaser list (manual --send)
   backup-pre-05.mjs        # pre-Phase-5-migration SQLite snapshot (operator runs on droplet before the deploy that drops selected_teams)
   render-og-image.mjs      # Phase 8: render references/og-image.svg → public/og-image.png at 1200×630 (@resvg/resvg-js) + byte/LAND-02 checks
-  smoke-signup.mjs         # Phase 5 end-to-end verification: 8 cases + AC2 static assertion against /api/signup (exit 0 = all PASS)
+  render-team-og-images.mjs # Phase 15: render references/og-image-team.svg × 48 → public/og/<slug>.png with D-08 font-size buckets (64/52/44pt) + per-team 6-check gate (file/sig/dims/size/LAND-02-on-substituted-svg); exits 1 on any FAIL
+  smoke-signup.mjs         # End-to-end verification: 19 cases including Phase 5 signup, Phase 13 REF-*, Phase 14 SHARE-*, Phase 15 SHARE-r-known + SHARE-r-unknown (exit 0 = all PASS)
   smoke-landing.mjs        # Phase 6 landing-page verification (consumer copy, 48-option <select>, tz-label, no LAND-02 terms)
   smoke-manage.mjs         # Phase 9 /manage verification: 9 end-to-end cases (MANAGE-01/02, COMPAT-01, re-subscribe)
   smoke-confirm-email.mjs  # Phase 10 offline confirmation-email verification: 10 zero-network/zero-DB body-composition cases
 public/
   favicon.svg
+  og-image.png             # Phase 8 generic 1200×630 OG image
+  og/                      # Phase 15: 48 per-team OG PNGs (1200×630, ~85KB each), one per references/teams.json slug
 deploy/
   Caddyfile                # reverse proxy + auto Let's Encrypt + CSP enforce
   oddlympics.service       # systemd unit for the Node web server (hardened)
