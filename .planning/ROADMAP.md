@@ -99,13 +99,23 @@ Plans:
   3. The share action opens the native share sheet on supporting devices (Web Share API) and falls back to a visible copy-link control where the API is unavailable.
   4. The shared message names the user's team — e.g. "I'm following USA — get your team's World Cup kickoff alerts" — sourced from the same `references/teams.json` label data used elsewhere.
 
-**Plans**: TBD
+**Plans**: 5 plans
 **UI hint**: yes
 
 Plans:
+**Wave 1** *(parallel — no file overlap)*
 
-- [ ] 14-01: TBD
-- [ ] 14-02: TBD
+- [ ] 14-01-PLAN.md — Copy helper: add `shareText(teamLabel, url)` to `src/lib/copy.ts` (D-08, D-11; contract for Wave 2)
+- [ ] 14-02-PLAN.md — API redirect plumbing: `/api/signup` appends `&rc=&team=`, `/api/confirm` appends `&rc=` on status=ok/already (D-01, D-02, D-15)
+
+**Wave 2** *(parallel — each depends on Wave 1 prerequisites; no Wave-2 file overlap)*
+
+- [ ] 14-03-PLAN.md — Email integration: `sendMagicLink` 5th `referralCode` param + share `<p>` in HTML body and plaintext (D-12, D-13, D-14; depends on 14-01)
+- [ ] 14-04-PLAN.md — Share UI on three surfaces: `/pending` + `/confirmed` (prerendered, `?rc=` reader) + `/manage` (server-rendered from `user.referral_code`) with Web Share API + clipboard fallback (D-03, D-05, D-06, D-15, D-16, D-17; depends on 14-01, 14-02)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 14-05-PLAN.md — Smoke extension: SHARE-pending-card + SHARE-confirmed-card response-body greps in `scripts/smoke-signup.mjs` (D-18, D-19; depends on 14-01..14-04)
 
 ### Phase 15: Personalized Open Graph
 
@@ -157,5 +167,5 @@ Phases execute in numeric order: 13 → 14 → 15
 | 11. End-to-end + launch gate | v2.0 | 4/6 | Complete | 2026-05-16 |
 | 12. Restore multi-team selection | v2.0 | 6/6 | Complete | 2026-05-16 |
 | 13. Referral Code & Attribution | v2.1 | 4/4 | Complete    | 2026-05-22 |
-| 14. Share Experience | v2.1 | 0/TBD | Not started | - |
+| 14. Share Experience | v2.1 | 0/5 | Planned | - |
 | 15. Personalized Open Graph | v2.1 | 0/TBD | Not started | - |
