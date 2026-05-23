@@ -36,6 +36,12 @@ const url = Astro.url;
 const urlToken = url.searchParams.get('token') ?? '';
 const status = url.searchParams.get('status') ?? '';
 
+// Tactic 2 (260523-r1x-02): no-referrer on every /manage render — covers all
+// four UI branches (A signed-out, B bad-token, C unsubscribed, D editor).
+// Overrides Caddy's global strict-origin-when-cross-origin for this route,
+// so no part of the URL (including ?token=) leaks via Referer to outbound links.
+Astro.response.headers.set('Referrer-Policy', 'no-referrer');
+
 // Auth: prefer URL token (manage flow on first arrival); fall back to session cookie.
 // On URL-token success, mint a 30-day session cookie so subsequent visits skip the email step.
 let result = urlToken ? verifyToken(urlToken, 'manage') : null;
