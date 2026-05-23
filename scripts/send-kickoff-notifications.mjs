@@ -59,6 +59,29 @@ function mintManageToken(email) {
   return `${body}.${sign(body)}`;
 }
 
+// Mirror of src/lib/email.ts:buildUnsubscribeHeaders. Inlined here because the
+// script is self-contained (it duplicates src/lib/token.ts to avoid a TS build
+// step on the droplet). Same purpose claim (`unsubscribe`) — the resulting
+// token verifies against the same MAGIC_LINK_SECRET the web app uses.
+function mintUnsubscribeToken(email) {
+  const payload = {
+    email,
+    exp: Math.floor(Date.now() / 1000) + TTL_SECONDS,
+    purpose: 'unsubscribe',
+  };
+  const body = b64u(Buffer.from(JSON.stringify(payload)));
+  return `${body}.${sign(body)}`;
+}
+
+function buildUnsubscribeHeaders(email) {
+  const token = mintUnsubscribeToken(email);
+  const url = `${SITE_URL}/api/unsubscribe?token=${encodeURIComponent(token)}`;
+  return {
+    'List-Unsubscribe': `<${url}>`,
+    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+  };
+}
+
 const db = new Database(DB_PATH);
 
 // Defensive: ensure match_notifications and user_teams exist. Mirrors src/lib/db.ts.
@@ -239,6 +262,7 @@ for (const match of matches) {
         subject,
         text,
         html,
+        headers: buildUnsubscribeHeaders(user.email),
       });
       if (error) {
         console.error(`    ERROR ${user.email}: ${error.message ?? error}`);
