@@ -1,0 +1,74 @@
+---
+import Layout from '../../components/Layout.astro';
+import { lookupTeamByReferralCode } from '../../lib/db';
+import { teamLabel } from '../../lib/teams';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+export const prerender = false;
+
+const rawCode = Astro.params.code ?? '';
+
+// T-15-01 mitigation: validate code shape BEFORE any DB lookup or HTML echo.
+// Rejects path-segment injection, XSS payloads, or traversal attempts.
+// Only 8-char [a-z0-9] passes; anything else is treated as unresolved (D-02).
+const CODE_SHAPE = /^[a-z0-9]{8}$/;
+const code = CODE_SHAPE.test(rawCode) ? rawCode : '';
+
+const SITE_URL = process.env.PUBLIC_SITE_URL ?? 'http://localhost:4321';
+const GENERIC_TITLE = 'oddlympics — your team\'s World Cup matches';
+const GENERIC_DESC = 'Every World Cup match in your time zone. One ping before kickoff.';
+
+// Resolve repo root for existsSync path. fileURLToPath(import.meta.url) is
+// src/pages/r/[code].astro → 4 levels up = repo root. Do NOT use process.cwd()
+// — under systemd the cwd is /var/lib/oddlympics, not the repo root (D-10).
+const repoRoot = resolve(fileURLToPath(import.meta.url), '../../../../');
+
+// Only query DB if code passed the shape gate
+const row = code
+  ? (lookupTeamByReferralCode.get(code) as { referral_code: string; team: string | null } | undefined)
+  : undefined;
+
+let pageTitle: string;
+let ogProps: { title: string; description: string; image: string; url: string };
+let bounceUrl: string;
+
+if (row?.team) {
+  const label = teamLabel(row.team);
+  // Trim-fallback (D-10): if per-team PNG is absent, og:image uses generic
+  // BUT title/description still personalize. Lets us ship with partial PNG coverage.
+  const pngExists = existsSync(resolve(repoRoot, 'public/og', row.team + '.png'));
+  pageTitle = `Following ${label} · oddlympics`;
+  ogProps = {
+    title: pageTitle,
+    description: GENERIC_DESC,
+    image: pngExists ? `${SITE_URL}/og/${row.team}.png` : `${SITE_URL}/og-image.png`,
+    url: `${SITE_URL}/r/${code}`,
+  };
+  bounceUrl = `/?ref=${code}`;
+} else {
+  // Unknown / unresolvable code — generic fallback (D-02).
+  // Shape-invalid codes fall here too (code = '' after gate, no DB lookup).
+  pageTitle = GENERIC_TITLE;
+  ogProps = {
+    title: GENERIC_TITLE,
+    description: GENERIC_DESC,
+    image: `${SITE_URL}/og-image.png`,
+    url: `${SITE_URL}/`,
+  };
+  bounceUrl = '/';
+}
+---
+
+<Layout title={pageTitle} og={ogProps} noindex>
+  <Fragment slot="head">
+    <meta http-equiv="refresh" content={`0; url=${bounceUrl}`} />
+  </Fragment>
+  <div class="wrap" style="padding: 4rem 0;">
+    <p>Redirecting… if you're not redirected, <a href={bounceUrl} class="link">tap here</a>.</p>
+  </div>
+  <script is:inline define:vars={{ bounceUrl }}>
+    try { location.replace(bounceUrl); } catch {}
+  </script>
+</Layout>
