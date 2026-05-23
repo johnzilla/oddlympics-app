@@ -4,13 +4,13 @@ milestone: v2.1
 milestone_name: Referral & Social Sharing
 status: executing
 stopped_at: Completed 14-03-PLAN.md
-last_updated: "2026-05-23T01:43:26.653Z"
+last_updated: "2026-05-23T01:52:36.380Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 33
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-22, started milestone v2.1)
 ## Current Position
 
 Phase: 14 (share-experience) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-05-23
 
@@ -80,6 +80,7 @@ Next: `/gsd:plan-phase 13`
 | Phase 14 P01 | 78 | 1 tasks | 1 files |
 | Phase 14 P02 | 9min | 2 tasks | 2 files |
 | Phase 14 P03 | 134s | 2 tasks | 2 files |
+| Phase 14 P04 | 280s | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Plan 14-01: shareText(teamLabel, url) helper added to src/lib/copy.ts — single source of truth for D-08 locked wording, consumed by Wave-2 plans 14-03 (email) and 14-04 (pages)
 - [Phase 14]: Plan 14-02: VipSignup imported as a type into /api/signup.ts and /api/confirm.ts to narrow db.prepare<...>.get() RETURNING * results; defensive null-guard on referral_code (typed string|null) rather than non-null assertion
 - [Phase 14]: Plan 14-03: sendMagicLink widened to 5 params (referralCode); shareText helper from copy.ts inserted into both HTML body (muted color:#5a5d68 <p> after Confirm-email button) and plaintext part of confirmation email; /api/signup.ts call site passes row.referral_code ?? ''. D-12/D-13/D-14 honored — share URL is /?ref=CODE (generic landing with Phase 13 first-touch localStorage attribution), NOT Phase-15's /r/CODE server-rendered route.
+- [Phase ?]: Plan 14-04: share UI on /pending, /confirmed, /manage signed-in — inline duplication over component extraction; D-15/D-16/D-17 per-page rules honored; two-layer rc security gate (regex + DOM-property assignment); navigator.share AbortError no-fall-through (T-14-17)
 
 ### Pending Todos
 
@@ -133,7 +135,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-23T01:43:18.708Z
+Last session: 2026-05-23T01:52:10.272Z
 Stopped at: Completed 14-03-PLAN.md
 Resume file:
 None

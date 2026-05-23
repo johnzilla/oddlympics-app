@@ -111,7 +111,7 @@ Plans:
 **Wave 2** *(14-03 and 14-04 both depend on Wave 1; 14-03 additionally depends on 14-02 because Task 2 modifies the sendMagicLink call site in src/pages/api/signup.ts that 14-02 also touches — within-wave ordering preserves the 14-03/14-04 parallelism otherwise)*
 
 - [x] 14-03-PLAN.md — Email integration: `sendMagicLink` 5th `referralCode` param + share `<p>` in HTML body and plaintext; updates the call site in `/api/signup.ts` to pass `row.referral_code` (D-12, D-13, D-14; depends on 14-01, 14-02)
-- [ ] 14-04-PLAN.md — Share UI on three surfaces: `/pending` + `/confirmed` (prerendered, `?rc=` reader) + `/manage` (server-rendered from `user.referral_code`) with Web Share API + clipboard fallback (D-03, D-05, D-06, D-15, D-16, D-17; depends on 14-01, 14-02)
+- [x] 14-04-PLAN.md — Share UI on three surfaces: `/pending` + `/confirmed` (prerendered, `?rc=` reader) + `/manage` (server-rendered from `user.referral_code`) with Web Share API + clipboard fallback (D-03, D-05, D-06, D-15, D-16, D-17; depends on 14-01, 14-02)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -167,5 +167,5 @@ Phases execute in numeric order: 13 → 14 → 15
 | 11. End-to-end + launch gate | v2.0 | 4/6 | Complete | 2026-05-16 |
 | 12. Restore multi-team selection | v2.0 | 6/6 | Complete | 2026-05-16 |
 | 13. Referral Code & Attribution | v2.1 | 4/4 | Complete    | 2026-05-22 |
-| 14. Share Experience | v2.1 | 3/5 | In Progress|  |
+| 14. Share Experience | v2.1 | 4/5 | In Progress|  |
 | 15. Personalized Open Graph | v2.1 | 0/TBD | Not started | - |
