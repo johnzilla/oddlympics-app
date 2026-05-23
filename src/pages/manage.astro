@@ -67,7 +67,7 @@ if (valid && result) {
   // prevents a broken card on the unlikely null case.
   if (user?.referral_code) {
     const base = process.env.PUBLIC_SITE_URL ?? 'http://localhost:4321';
-    shareUrl = base + '/?ref=' + user.referral_code;
+    shareUrl = base + '/r/' + user.referral_code;
     const labelForShare = user.team ? teamLabel(user.team) : 'my team';
     shareTextStr = shareText(labelForShare, shareUrl);
   }

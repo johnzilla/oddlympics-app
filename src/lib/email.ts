@@ -26,7 +26,7 @@ export async function sendMagicLink(
   const manageUrl = `${SITE_URL}/manage`;
   const teamHuman = teamLabel(team);
   const tzHuman = tzLabel(timezone);
-  const shareUrl = SITE_URL + '/?ref=' + referralCode;
+  const shareUrl = SITE_URL + '/r/' + referralCode;
   const shareLine = shareText(teamHuman, shareUrl);
   const subject = 'Confirm your World Cup alerts — oddlympics';
   const text = [

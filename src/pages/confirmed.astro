@@ -87,7 +87,7 @@ export const prerender = true;
         if (!rc || !/^[a-z0-9]{8}$/.test(rc)) {
           // share card stays hidden
         } else {
-          const shareUrl = location.origin + '/?ref=' + rc;
+          const shareUrl = location.origin + '/r/' + rc;
           // D-16: generic copy on /confirmed — no team personalization.
           // The confirm 303 does not carry &team=, so teamLabel is hardcoded ''.
           const teamLabel = '';
