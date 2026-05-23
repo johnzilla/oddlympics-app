@@ -3,8 +3,8 @@ import Layout from '../components/Layout.astro';
 import { verifyToken } from '../lib/token';
 import { buildSessionCookie, readSessionFromCookie } from '../lib/session';
 import { db, getByEmail, getUserTeams, type VipSignup, type Match } from '../lib/db';
-import { TEAMS } from '../lib/teams';
-import { NO_ACCOUNT_TITLE, NO_ACCOUNT_BODY } from '../lib/copy';
+import { TEAMS, teamLabel } from '../lib/teams';
+import { NO_ACCOUNT_TITLE, NO_ACCOUNT_BODY, shareText } from '../lib/copy';
 
 export const prerender = false;
 
@@ -54,8 +54,23 @@ let matches: (Match & { home_tla?: string | null; away_tla?: string | null })[] 
 let selectedIds: number[] = [];
 let userTeamSlugs: Set<string> = new Set();
 
+let shareUrl = '';
+let shareTextStr = '';
+
 if (valid && result) {
   user = getByEmail.get(result.email) as VipSignup | undefined;
+
+  // Phase 14 — SHARE-01: compose the per-user share link + text server-side
+  // (no URL-param dance — user.referral_code is in scope from the verified
+  // session). Defensive: referral_code is typed string | null in db.ts; the
+  // Phase 13 backfill makes it non-null in practice, but the falsy-guard
+  // prevents a broken card on the unlikely null case.
+  if (user?.referral_code) {
+    const base = process.env.PUBLIC_SITE_URL ?? 'http://localhost:4321';
+    shareUrl = base + '/?ref=' + user.referral_code;
+    const labelForShare = user.team ? teamLabel(user.team) : 'my team';
+    shareTextStr = shareText(labelForShare, shareUrl);
+  }
 
   // Load the user's followed teams from user_teams join table (multi-team, Phase 12).
   const userTeamRows = user
@@ -292,6 +307,34 @@ const title = valid && !isUnsubscribed
             <button type="submit">Save selection</button>
           </form>
 
+          {shareUrl && (
+            <section class="share-card">
+              <h2 class="share-heading">Share with a friend</h2>
+              <p class="share-blurb">
+                {user?.team
+                  ? "You're following " + teamLabel(user.team) + '. Pass it on:'
+                  : 'Pass it on:'}
+              </p>
+              <div class="share-row">
+                <input
+                  id="share-url"
+                  class="share-url"
+                  type="text"
+                  readonly
+                  value={shareUrl}
+                  aria-label="Your referral link"
+                />
+                <button
+                  id="share-btn"
+                  class="share-btn"
+                  type="button"
+                  data-share-text={shareTextStr}
+                  data-share-url={shareUrl}
+                >Share</button>
+              </div>
+            </section>
+          )}
+
           {selectedIds.length > 0 && (
             <section class="schedule">
               <h2 class="section-h">Your teams' matches ({matches.length})</h2>
@@ -433,6 +476,47 @@ const title = valid && !isUnsubscribed
           } catch {}
         })();
       </script>
+
+      <script is:inline>
+        // Phase 14 — SHARE-01 + SHARE-03: share button on /manage signed-in
+        // branch. Reads the server-composed share text + URL from data-*
+        // attributes on the button (no URL-param dance — manage is server-
+        // rendered, so user.referral_code and user.team were already resolved
+        // in the frontmatter and shareText() called there).
+        try {
+          const btn = document.getElementById('share-btn');
+          if (btn) {
+            const shareTextStr = btn.dataset.shareText || '';
+            const shareUrl = btn.dataset.shareUrl || '';
+
+            function copyFallback() {
+              try {
+                navigator.clipboard.writeText(shareTextStr + '\n' + shareUrl).then(function () {
+                  const prev = btn.textContent;
+                  btn.textContent = 'Copied!';
+                  setTimeout(function () { btn.textContent = prev; }, 1500);
+                }).catch(function () {});
+              } catch (e) {}
+            }
+
+            btn.addEventListener('click', function () {
+              try {
+                if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+                  navigator.share({ text: shareTextStr, url: shareUrl }).catch(function (e) {
+                    // AbortError = user dismissed the share sheet (T-14-17).
+                    if (e && e.name === 'AbortError') return;
+                    copyFallback();
+                  });
+                } else {
+                  copyFallback();
+                }
+              } catch (e) {
+                copyFallback();
+              }
+            });
+          }
+        } catch {}
+      </script>
     </>
   )}
 </Layout>
@@ -493,10 +577,20 @@ const title = valid && !isUnsubscribed
   .sport-acc.future .sport-acc-head { cursor: default; }
   .sport-soon { margin-left: auto; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-dim); }
   .sport-name { flex: 1; }
+  .share-card { margin-top: 40px; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; max-width: 460px; }
+  .share-heading { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: var(--fg); }
+  .share-blurb { margin: 0 0 14px; font-size: 14px; color: var(--fg-dim); line-height: 1.5; }
+  .share-row { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
+  .share-url { flex: 1; min-width: 0; padding: 10px 12px; font-family: var(--font-mono); font-size: 13px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }
+  .share-url:focus { outline: none; border-color: var(--accent); }
+  .share-btn { padding: 10px 18px; font-family: var(--font-sans); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .share-btn:hover { filter: brightness(1.08); }
   @media (max-width: 640px) {
     :root { --pad: 24px; }
     .match { grid-template-columns: 1fr; gap: 4px; }
     .cta-form { flex-direction: column; }
     .cta-form button { width: 100%; }
+    .share-row { flex-direction: column; }
+    .share-btn { width: 100%; }
   }
 </style>
