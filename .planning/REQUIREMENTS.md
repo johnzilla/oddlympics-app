@@ -16,7 +16,7 @@ Requirements for the Referral & Social Sharing milestone. Each maps to exactly o
 
 ### Share Experience
 
-- [ ] **SHARE-01**: A share prompt with the user's referral link appears on `/pending`, `/confirmed`, and `/manage`
+- [x] **SHARE-01**: A share prompt with the user's referral link appears on `/pending`, `/confirmed`, and `/manage`
 - [ ] **SHARE-02**: The confirmation email includes a personalized share line + referral link
 - [ ] **SHARE-03**: The share action offers the native share sheet (Web Share API) with a copy-link fallback
 - [x] **SHARE-04**: Shared content names the user's team (personalized message)
@@ -56,7 +56,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | REF-01 | Phase 13 | Complete |
 | REF-02 | Phase 13 | Complete |
 | REF-03 | Phase 13 | Complete |
-| SHARE-01 | Phase 14 | Pending |
+| SHARE-01 | Phase 14 | Complete |
 | SHARE-02 | Phase 14 | Pending |
 | SHARE-03 | Phase 14 | Pending |
 | SHARE-04 | Phase 14 | Complete |
