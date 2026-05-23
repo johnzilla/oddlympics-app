@@ -140,8 +140,8 @@ Plans:
 
 **Wave 2** *(parallel — depends on Wave 1; 15-03 needs 15-02 toolchain, 15-04 needs 15-01 route)*
 
-- [ ] 15-03-PLAN.md — Run npm run og:render-teams, verify 48/48 PASS, commit per-team PNGs to public/og/ (D-09, D-12a; depends on 15-02)
-- [ ] 15-04-PLAN.md — Migrate four Phase 14 share-URL emit sites (pending.astro:77, confirmed.astro:90, manage.astro:70, email.ts:29) from /?ref=CODE to /r/CODE (D-13; depends on 15-01)
+- [x] 15-03-PLAN.md — Run npm run og:render-teams, verify 48/48 PASS, commit per-team PNGs to public/og/ (D-09, D-12a; depends on 15-02)
+- [x] 15-04-PLAN.md — Migrate four Phase 14 share-URL emit sites (pending.astro:77, confirmed.astro:90, manage.astro:70, email.ts:29) from /?ref=CODE to /r/CODE (D-13; depends on 15-01)
 
 **Wave 3** *(blocked on Waves 1+2)*
 
@@ -178,4 +178,4 @@ Phases execute in numeric order: 13 → 14 → 15
 | 12. Restore multi-team selection | v2.0 | 6/6 | Complete | 2026-05-16 |
 | 13. Referral Code & Attribution | v2.1 | 4/4 | Complete    | 2026-05-22 |
 | 14. Share Experience | v2.1 | 5/5 | Complete    | 2026-05-23 |
-| 15. Personalized Open Graph | v2.1 | 2/5 | In Progress|  |
+| 15. Personalized Open Graph | v2.1 | 4/5 | In Progress|  |
