@@ -1,10 +1,7 @@
 ---
 import Layout from '../../components/Layout.astro';
 import { lookupTeamByReferralCode } from '../../lib/db';
-import { teamLabel } from '../../lib/teams';
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { teamLabel, VALID_TEAMS } from '../../lib/teams';
 
 export const prerender = false;
 
@@ -20,11 +17,6 @@ const SITE_URL = process.env.PUBLIC_SITE_URL ?? 'http://localhost:4321';
 const GENERIC_TITLE = 'oddlympics — your team\'s World Cup matches';
 const GENERIC_DESC = 'Every World Cup match in your time zone. One ping before kickoff.';
 
-// Resolve repo root for existsSync path. fileURLToPath(import.meta.url) is
-// src/pages/r/[code].astro → 4 levels up = repo root. Do NOT use process.cwd()
-// — under systemd the cwd is /var/lib/oddlympics, not the repo root (D-10).
-const repoRoot = resolve(fileURLToPath(import.meta.url), '../../../../');
-
 // Only query DB if code passed the shape gate
 const row = code
   ? (lookupTeamByReferralCode.get(code) as { referral_code: string; team: string | null } | undefined)
@@ -36,9 +28,14 @@ let bounceUrl: string;
 
 if (row?.team) {
   const label = teamLabel(row.team);
-  // Trim-fallback (D-10): if per-team PNG is absent, og:image uses generic
-  // BUT title/description still personalize. Lets us ship with partial PNG coverage.
-  const pngExists = existsSync(resolve(repoRoot, 'public/og', row.team + '.png'));
+  // Trim-fallback (D-10): if the team's PNG was not rendered, og:image uses
+  // generic BUT title/description still personalize. Coverage is enforced by
+  // `npm run og:render-teams` (loops `references/teams.json`) — every slug
+  // in VALID_TEAMS has a committed PNG. Earlier versions of this file did an
+  // `existsSync` probe relative to `import.meta.url`, which silently misfired
+  // in production because the bundled route lives at dist/server/... and
+  // Astro copies `public/` → `dist/client/` (NOT `dist/public/`).
+  const pngExists = VALID_TEAMS.has(row.team);
   pageTitle = `Following ${label} · oddlympics`;
   ogProps = {
     title: pageTitle,

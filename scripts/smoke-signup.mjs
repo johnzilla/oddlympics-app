@@ -585,12 +585,12 @@ await runCase('SHARE-r-known (D-12b: personalized og:image + og:title)', async (
     return false;
   }
   const body = await res.text();
-  // og:image must be per-team PNG or generic fallback (D-10 trim path)
-  const hasOgImage =
-    body.includes('og:image" content="') &&
-    (body.includes(`/og/${row.team}.png`) || body.includes('/og-image.png'));
-  if (!hasOgImage) {
-    console.error('  body missing og:image (per-team or fallback)');
+  // og:image MUST be the per-team PNG. Accepting the generic fallback would
+  // mask CR-class regressions where the per-team probe silently misfires
+  // (#CR-01 hardened: every VALID_TEAMS slug has a committed PNG, so a known
+  // code with a valid team MUST resolve to its per-team image).
+  if (!body.includes(`og:image" content="`) || !body.includes(`/og/${row.team}.png`)) {
+    console.error(`  expected per-team og:image /og/${row.team}.png; got fallback or missing`);
     return false;
   }
   // og:title must carry "Following <Team> · oddlympics" (D-14)
