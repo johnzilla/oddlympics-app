@@ -4,8 +4,8 @@ milestone: v2.1
 milestone_name: Referral & Social Sharing
 status: milestone_complete
 stopped_at: Milestone complete (Phase 15 was final phase)
-last_updated: 2026-05-23T22:15:25.073Z
-last_activity: 2026-05-23 -- Phase 15 execution started
+last_updated: 2026-05-23T23:48:15.450Z
+last_activity: 2026-05-23 -- Completed quick task 260523-r1x: /manage token surface hardening
 progress:
   total_phases: 3
   completed_phases: 2
@@ -131,6 +131,7 @@ None yet.
 | 260516-q33 | manage discoverability content and entry pass (sketches 001-B/002-B/003-B) | 2026-05-16 | eb67661 | [260516-q33-manage-discoverability-content-and-entry](./quick/260516-q33-manage-discoverability-content-and-entry/) |
 | 260517-px5 | Harden football-data.org team-name→slug mapping; shared resolver + offline smoke + launch-gate NULL-slug AC | 2026-05-17 | 4684248 | [260517-px5-harden-football-data-org-team-name-to-sl](./quick/260517-px5-harden-football-data-org-team-name-to-sl/) |
 | 260523-qqa | CSRF + RFC 8058 + kickoff-alert hardening: Origin check on /api/save-selection, POST handler on /api/unsubscribe (RFC 8058 one-click), List-Unsubscribe headers on kickoff alerts | 2026-05-23 | 6a597cf | [260523-qqa-csrf-rfc8058-email-hardening](./quick/260523-qqa-csrf-rfc8058-email-hardening/) |
+| 260523-r1x | /manage magic-link token surface hardening: history.replaceState scrub, Referrer-Policy: no-referrer, consumed_tokens single-use enforcement (M1–M17 PASS) | 2026-05-23 | ff152dc | [260523-r1x-redirect-url-data-leakage](./quick/260523-r1x-redirect-url-data-leakage/) |
 
 ## Deferred Items
 
