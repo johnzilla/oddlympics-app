@@ -4,11 +4,12 @@
 // pre-check, too-many, empty-bad-team, cron-visibility through user_teams).
 // Extended in Phase 12 — Plan 12-06 with M15–M16 (unsubscribed-POST rejected,
 // unsubscribe clears user_teams → reconfirm → cron sees zero teams).
+// Extended in quick-260523-r1x with M17 (single-use manage token enforcement).
 // WR-04 closed: negative-path behavioral proof for CR-01 and CR-02 fixes.
 // End-to-end smoke for /manage editor + /schedule redirect + unsubscribe
 // token TTL + single-use semantics + re-subscribe DB path + multi-team save +
-// consent/unsubscribe contract enforcement.
-// Covers M1–M16. Provides goal-backward proof for
+// consent/unsubscribe contract enforcement + manage-token single-use.
+// Covers M1–M17. Provides goal-backward proof for
 // ROADMAP SC1–SC4, MANAGE-01, MANAGE-02, COMPAT-01, D-01 (DB), D-04/D-05
 // (checkbox editor), D-06 (cron join visibility), NOTIFY-04, IDENT-02/03/04,
 // SIGNUP-04, LAND-02 (consent/unsubscribe contract: CR-01 + CR-02 closed).
@@ -49,6 +50,7 @@
 //   M14-cron-visibility         — DB: usersQuery-equivalent JOIN confirms user appears for match team
 //   M15-unsub-save-rejected     — CR-01 proof: unsubscribed user POST → status=unknown, zero user_teams writes, tz preserved
 //   M16-unsub-reconfirm-no-stale — CR-02 proof: real /api/unsubscribe clears user_teams; post-reconfirm cron JOIN yields zero rows
+//   M17-manage-single-use       — 260523-r1x-03: first manage-token click → editor + Set-Cookie; second click → bad-token UI
 //
 // Cleanup (operator, post-run, optional):
 //   sqlite3 data/oddlympics.db \
@@ -1006,6 +1008,53 @@ await runCase('M16-unsub-reconfirm-no-stale', async () => {
     return false;
   }
 
+  return true;
+});
+
+// ---------------------------------------------------------------------------
+// M17 — single-use manage token: first click → editor; second click → bad-token
+// (260523-r1x-03: consumed_tokens PRIMARY KEY enforcement)
+// ---------------------------------------------------------------------------
+await runCase('M17-manage-single-use', async () => {
+  const ts = Date.now();
+  const email = `smoke-m17-${ts}@example.com`;
+  dbInsertSmokeRow(email, { team: 'england' });
+
+  const token = mintToken(email, { purpose: 'manage' });
+  const url = `/manage?token=${encodeURIComponent(token)}`;
+
+  // First click — should land on editor (status 200, set-cookie present).
+  const first = await get(url);
+  if (first.status !== 200) {
+    console.error(`  first click: expected 200, got ${first.status}`);
+    return false;
+  }
+  if (!first.setCookie || !first.setCookie.startsWith(`${COOKIE_NAME}=`)) {
+    console.error(`  first click: expected Set-Cookie ${COOKIE_NAME}=, got ${first.setCookie}`);
+    return false;
+  }
+  if (!first.body.includes('action="/api/save-selection"')) {
+    console.error('  first click: expected editor body (action="/api/save-selection")');
+    return false;
+  }
+
+  // Second click — same token, now consumed → bad-token branch.
+  const second = await get(url);
+  if (second.status !== 200) {
+    console.error(`  second click: expected 200, got ${second.status}`);
+    return false;
+  }
+  // Bad-token branch renders the "Link expired" UI; assert the headline copy.
+  if (!second.body.includes("That link didn't work") &&
+      !second.body.includes('That link didn&#39;t work')) {
+    console.error('  second click: expected bad-token UI ("That link didn\'t work")');
+    return false;
+  }
+  // Must NOT render the editor.
+  if (second.body.includes('action="/api/save-selection"')) {
+    console.error('  second click: unexpected editor in body (should be bad-token branch)');
+    return false;
+  }
   return true;
 });
 

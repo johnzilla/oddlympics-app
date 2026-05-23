@@ -2,6 +2,7 @@ import Database from 'better-sqlite3';
 import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { generateReferralCode } from './referral';
+import { verifyToken, extractTokenSig } from './token';
 
 const DEFAULT_PATH = './data/oddlympics.db';
 const path = resolve(process.env.DATABASE_PATH ?? DEFAULT_PATH);
@@ -249,6 +250,57 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_feature_requests_email ON feature_requests(email);
 `);
+
+// Phase r1x (260523-r1x-03): single-use enforcement for manage-purpose tokens.
+// Keyed by HMAC signature — no email or exp leak; purpose column allows future
+// extension to other token types without a schema change.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS consumed_tokens (
+    sig TEXT PRIMARY KEY,
+    purpose TEXT NOT NULL,
+    consumed_at INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_consumed_tokens_consumed_at ON consumed_tokens(consumed_at);
+`);
+
+// Boot-time prune: remove consumed_tokens rows older than 24h (the longest
+// manage-purpose TTL). Opportunistic — runs once per process boot. Worst-case
+// accumulation is bounded at ~80 bytes × <rate> × 24h; pruning keeps the index tiny.
+db.prepare(
+  "DELETE FROM consumed_tokens WHERE consumed_at < strftime('%s','now') - 86400",
+).run();
+
+const insertConsumedToken = db.prepare<[string, string, number]>(
+  'INSERT INTO consumed_tokens (sig, purpose, consumed_at) VALUES (?, ?, ?)',
+);
+
+// Verify a manage-purpose URL token AND atomically mark it consumed.
+// Returns the verified email on success; null if the token is bad,
+// expired, wrong purpose, or already consumed.
+// The INSERT on a PRIMARY KEY constraint is the atomic act — a concurrent click
+// reaches the same INSERT and one of them fails the PK constraint, preventing
+// the TOCTOU race where two concurrent clicks both pass verify before either inserts.
+export function consumeManageToken(token: string): { email: string } | null {
+  const sig = extractTokenSig(token);
+  if (!sig) return null;
+  const verified = verifyToken(token, 'manage');
+  if (!verified) return null;
+  const now = Math.floor(Date.now() / 1000);
+  try {
+    insertConsumedToken.run(sig, 'manage', now);
+    return verified;
+  } catch (err: unknown) {
+    // SQLITE_CONSTRAINT_PRIMARYKEY → already consumed.
+    if (
+      err instanceof Error &&
+      'code' in err &&
+      (err as { code: string }).code === 'SQLITE_CONSTRAINT_PRIMARYKEY'
+    ) {
+      return null;
+    }
+    throw err;
+  }
+}
 
 export type Team = {
   id: number;

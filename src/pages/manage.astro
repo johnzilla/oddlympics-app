@@ -1,8 +1,7 @@
 ---
 import Layout from '../components/Layout.astro';
-import { verifyToken } from '../lib/token';
 import { buildSessionCookie, readSessionFromCookie } from '../lib/session';
-import { db, getByEmail, getUserTeams, type VipSignup, type Match } from '../lib/db';
+import { db, getByEmail, getUserTeams, consumeManageToken, type VipSignup, type Match } from '../lib/db';
 import { TEAMS, teamLabel } from '../lib/teams';
 import { NO_ACCOUNT_TITLE, NO_ACCOUNT_BODY, shareText } from '../lib/copy';
 
@@ -44,7 +43,7 @@ Astro.response.headers.set('Referrer-Policy', 'no-referrer');
 
 // Auth: prefer URL token (manage flow on first arrival); fall back to session cookie.
 // On URL-token success, mint a 30-day session cookie so subsequent visits skip the email step.
-let result = urlToken ? verifyToken(urlToken, 'manage') : null;
+let result = urlToken ? consumeManageToken(urlToken) : null;
 if (result) {
   Astro.response.headers.set('Set-Cookie', buildSessionCookie(result.email));
 }

@@ -54,6 +54,18 @@ export function mintToken(
   return `${body}.${sign(body)}`;
 }
 
+// Extract the raw HMAC signature from a token wire-format string (<body>.<sig>).
+// Used by consumeManageToken in db.ts to key consumed_tokens without re-parsing.
+// Does NOT verify the HMAC — verifyToken's responsibility. Returns null if malformed.
+export function extractTokenSig(token: string): string | null {
+  if (typeof token !== 'string' || !token.includes('.')) return null;
+  const dot = token.indexOf('.');
+  const body = token.slice(0, dot);
+  const sig = token.slice(dot + 1);
+  if (!body || !sig) return null;
+  return sig;
+}
+
 export function verifyToken(
   token: string,
   expectedPurpose?: 'confirm' | 'unsubscribe' | 'manage' | 'session',
