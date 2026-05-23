@@ -55,7 +55,7 @@ no rewards, no leaderboard. Hard target **2026-06-11**.
 
 - [x] **Phase 13: Referral Code & Attribution** - Every signup gets a stable referral code; `?ref=CODE` threads through signup into a `referred_by` column (completed 2026-05-22)
 - [x] **Phase 14: Share Experience** - Personalized, team-named share prompts with native share sheet on `/pending`, `/confirmed`, `/manage`, and the confirmation email (completed 2026-05-23)
-- [ ] **Phase 15: Personalized Open Graph** - Per-team OG images and a server-rendered referral route so a shared link unfurls with the sharer's team
+- [x] **Phase 15: Personalized Open Graph** - Per-team OG images and a server-rendered referral route so a shared link unfurls with the sharer's team (completed 2026-05-23)
 
 ## Phase Details
 
@@ -145,7 +145,7 @@ Plans:
 
 **Wave 3** *(blocked on Waves 1+2)*
 
-- [ ] 15-05-PLAN.md — Smoke extension: SHARE-r-known + SHARE-r-unknown response-body greps in scripts/smoke-signup.mjs; run against live dev server for SC2/SC3 gate (D-12b; depends on 15-01, 15-03, 15-04)
+- [x] 15-05-PLAN.md — Smoke extension: SHARE-r-known + SHARE-r-unknown response-body greps in scripts/smoke-signup.mjs; run against live dev server for SC2/SC3 gate (D-12b; depends on 15-01, 15-03, 15-04)
 
 ## Pending operator actions (pre-launch, milestone-independent)
 
@@ -178,4 +178,4 @@ Phases execute in numeric order: 13 → 14 → 15
 | 12. Restore multi-team selection | v2.0 | 6/6 | Complete | 2026-05-16 |
 | 13. Referral Code & Attribution | v2.1 | 4/4 | Complete    | 2026-05-22 |
 | 14. Share Experience | v2.1 | 5/5 | Complete    | 2026-05-23 |
-| 15. Personalized Open Graph | v2.1 | 4/5 | In Progress|  |
+| 15. Personalized Open Graph | v2.1 | 5/5 | Complete   | 2026-05-23 |
