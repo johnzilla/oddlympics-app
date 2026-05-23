@@ -4,8 +4,8 @@ milestone: v2.1
 milestone_name: Referral & Social Sharing
 status: executing
 stopped_at: Phase 15 context gathered
-last_updated: "2026-05-23T15:34:59.602Z"
-last_activity: 2026-05-23 -- Phase 15 planning complete
+last_updated: "2026-05-23T16:04:56.395Z"
+last_activity: 2026-05-23 -- Phase 15 execution started
 progress:
   total_phases: 3
   completed_phases: 2
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-22, started milestone v2.1)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** Phase 15 — personalized open graph
+**Current focus:** Phase 15 — personalized-open-graph
 
 ## Current Position
 
-Phase: 15
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-23 -- Phase 15 planning complete
+Phase: 15 (personalized-open-graph) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 15
+Last activity: 2026-05-23 -- Phase 15 execution started
 
 Next: `/gsd:verify-phase 14` (then plan phase 15)
 
