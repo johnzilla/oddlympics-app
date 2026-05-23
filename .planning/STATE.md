@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Referral & Social Sharing
 status: executing
-stopped_at: Phase 14 context gathered
-last_updated: "2026-05-23T01:14:59.218Z"
-last_activity: 2026-05-23 -- Phase 14 planning complete
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-05-23T01:32:47.815Z"
+last_activity: 2026-05-23
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 9
-  completed_plans: 4
+  completed_plans: 5
   percent: 33
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-22, started milestone v2.1)
 
 **Core value:** A user picks their team and gets a kickoff notification in their local time, on time, before group stage 2026-06-11.
-**Current focus:** Phase 14 — share experience
+**Current focus:** Phase 14 — share-experience
 
 ## Current Position
 
-Phase: 14
-Plan: Not started
+Phase: 14 (share-experience) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-05-23 -- Phase 14 planning complete
+Last activity: 2026-05-23
 
 Next: `/gsd:plan-phase 13`
 
@@ -77,6 +77,7 @@ Next: `/gsd:plan-phase 13`
 | Phase 13-referral-code-attribution P03 | 5min | 2 tasks | 1 files |
 | Phase 13 P02 | 52 | 1 tasks | 1 files |
 | Phase 13-referral-code-attribution P04 | 161 | 2 tasks | 2 files |
+| Phase 14 P01 | 78 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,7 @@ Recent decisions affecting current work:
 - v2.1: attribution stays lightweight — a `referred_by` column + `?ref=` param, no rewards/leaderboard. A full referral program is explicitly out of scope.
 - v2.1 OG (Phase 15) reuses the resvg render toolchain + fonts vendored in v2.0 Phase 8; per-team images pre-render at build time. Phase 15 is the milestone's long pole and first scope-trim candidate.
 - [Phase ?]: SELF_REF_IP (192.0.2.44) added alongside REF_IP for smoke REF-self-ref case — REF_IP exhausts at 5 valid POSTs, self-ref needs a third RFC 5737 address to avoid rate-limit
+- [Phase ?]: Plan 14-01: shareText(teamLabel, url) helper added to src/lib/copy.ts — single source of truth for D-08 locked wording, consumed by Wave-2 plans 14-03 (email) and 14-04 (pages)
 
 ### Pending Todos
 
@@ -127,10 +129,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-22T23:44:37.291Z
-Stopped at: Phase 14 context gathered
+Last session: 2026-05-23T01:32:47.810Z
+Stopped at: Completed 14-01-PLAN.md
 Resume file:
-.planning/phases/14-share-experience/14-CONTEXT.md
+None
 
 ## Operator Next Steps
 
