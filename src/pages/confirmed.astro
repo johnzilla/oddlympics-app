@@ -14,6 +14,22 @@ export const prerender = true;
       <p class="subhead" style="margin-top:24px">
         <a href="/" class="link">← back to oddlympics</a>
       </p>
+
+      <section id="share-card" class="share-card" hidden>
+        <h2 class="share-heading">Share with a friend</h2>
+        <p class="share-blurb" id="share-blurb"></p>
+        <div class="share-row">
+          <input
+            id="share-url"
+            class="share-url"
+            type="text"
+            readonly
+            value=""
+            aria-label="Your referral link"
+          />
+          <button id="share-btn" class="share-btn" type="button">Share</button>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -56,10 +72,85 @@ export const prerender = true;
       document.title = c.headline + ' — oddlympics';
     } catch {}
   </script>
+
+  <script is:inline>
+    try {
+      const params = new URL(location.href).searchParams;
+      const status = params.get('status') || 'ok';
+      // D-16 / D-02: only show share card on success-equivalent statuses.
+      // Bad / unknown branches skip — no rc to share, no recruit pitch to a stranger.
+      if (status !== 'ok' && status !== 'already') {
+        // share card stays hidden
+      } else {
+        const rc = params.get('rc');
+        // Defensive 8-char [a-z0-9] gate against ?rc= injection (T-14-11).
+        if (!rc || !/^[a-z0-9]{8}$/.test(rc)) {
+          // share card stays hidden
+        } else {
+          const shareUrl = location.origin + '/?ref=' + rc;
+          // D-16: generic copy on /confirmed — no team personalization.
+          // The confirm 303 does not carry &team=, so teamLabel is hardcoded ''.
+          const teamLabel = '';
+          const shareTextStr = "I'm following " + (teamLabel || 'my team') +
+            " — get your team's World Cup kickoff alerts.\n" + shareUrl;
+
+          // DOM-property assignment only (T-14-13).
+          const urlInput = document.getElementById('share-url');
+          urlInput.value = shareUrl;
+
+          // textContent only (never HTML-string injection).
+          document.getElementById('share-blurb').textContent =
+            'Help someone else not miss kickoff.';
+
+          document.getElementById('share-card').hidden = false;
+
+          function copyFallback() {
+            try {
+              navigator.clipboard.writeText(shareTextStr + '\n' + shareUrl).then(function () {
+                const b = document.getElementById('share-btn');
+                const prev = b.textContent;
+                b.textContent = 'Copied!';
+                setTimeout(function () { b.textContent = prev; }, 1500);
+              }).catch(function () {});
+            } catch (e) {}
+          }
+
+          const btn = document.getElementById('share-btn');
+          btn.addEventListener('click', function () {
+            try {
+              if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+                navigator.share({ text: shareTextStr, url: shareUrl }).catch(function (e) {
+                  // AbortError = user dismissed the share sheet; do not fall through (T-14-17).
+                  if (e && e.name === 'AbortError') return;
+                  copyFallback();
+                });
+              } else {
+                copyFallback();
+              }
+            } catch (e) {
+              copyFallback();
+            }
+          });
+        }
+      }
+    } catch {}
+  </script>
 </Layout>
 
 <style>
   .hero { min-height: 100dvh; display: flex; align-items: center; padding: var(--pad); }
   .hero-content { max-width: 720px; }
-  @media (max-width: 520px) { :root { --pad: 28px; } }
+  .share-card { margin-top: 40px; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; max-width: 460px; }
+  .share-heading { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: var(--fg); }
+  .share-blurb { margin: 0 0 14px; font-size: 14px; color: var(--fg-dim); line-height: 1.5; }
+  .share-row { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
+  .share-url { flex: 1; min-width: 0; padding: 10px 12px; font-family: var(--font-mono); font-size: 13px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }
+  .share-url:focus { outline: none; border-color: var(--accent); }
+  .share-btn { padding: 10px 18px; font-family: var(--font-sans); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .share-btn:hover { filter: brightness(1.08); }
+  @media (max-width: 520px) {
+    :root { --pad: 28px; }
+    .share-row { flex-direction: column; }
+    .share-btn { width: 100%; }
+  }
 </style>
