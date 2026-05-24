@@ -4,8 +4,8 @@ milestone: v2.1
 milestone_name: Referral & Social Sharing
 status: milestone_complete
 stopped_at: Milestone complete (Phase 15 was final phase)
-last_updated: 2026-05-23T23:48:15.450Z
-last_activity: 2026-05-23 -- Completed quick task 260523-r1x: /manage token surface hardening
+last_updated: 2026-05-24T01:35:00.000Z
+last_activity: 2026-05-24 -- Completed quick task 260523-s40: rate-limiter SQLite persistence
 progress:
   total_phases: 3
   completed_phases: 2
@@ -132,6 +132,7 @@ None yet.
 | 260517-px5 | Harden football-data.org team-name→slug mapping; shared resolver + offline smoke + launch-gate NULL-slug AC | 2026-05-17 | 4684248 | [260517-px5-harden-football-data-org-team-name-to-sl](./quick/260517-px5-harden-football-data-org-team-name-to-sl/) |
 | 260523-qqa | CSRF + RFC 8058 + kickoff-alert hardening: Origin check on /api/save-selection, POST handler on /api/unsubscribe (RFC 8058 one-click), List-Unsubscribe headers on kickoff alerts | 2026-05-23 | 6a597cf | [260523-qqa-csrf-rfc8058-email-hardening](./quick/260523-qqa-csrf-rfc8058-email-hardening/) |
 | 260523-r1x | /manage magic-link token surface hardening: history.replaceState scrub, Referrer-Policy: no-referrer, consumed_tokens single-use enforcement (M1–M17 PASS) | 2026-05-23 | ff152dc | [260523-r1x-redirect-url-data-leakage](./quick/260523-r1x-redirect-url-data-leakage/) |
+| 260523-s40 | Rate-limiter SQLite persistence: rate_limit_hits table, HMAC-hashed IP keys, fail-open on DB error. Closes deploy-resets-counters vector on /api/signup + /api/manage (RL1–RL3 + smoke-signup + smoke-manage all PASS) | 2026-05-24 | 9257cf8 | [260523-s40-rate-limiter-persistence-persist-rate-li](./quick/260523-s40-rate-limiter-persistence-persist-rate-li/) |
 
 ## Deferred Items
 
