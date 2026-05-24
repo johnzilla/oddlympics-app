@@ -58,6 +58,23 @@ to `main` (~40 seconds end-to-end).
     (parameterized `og-image-team.svg` + 6-check per-team gate). All four
     Phase 14 share emitters migrated `/?ref=CODE` → `/r/CODE`. Smoke 19/19
     PASS including new `SHARE-r-known` + `SHARE-r-unknown` cases.
+- ✅ **Post-v2.1 pre-launch hardening (quick tasks, 2026-05-23 → 2026-05-24):**
+  - **`260523-qqa`** — CSRF Origin check on `/api/save-selection`; RFC 8058
+    one-click `POST /api/unsubscribe` handler; `List-Unsubscribe` +
+    `List-Unsubscribe-Post` headers on kickoff-alert emails.
+  - **`260523-r1x`** — `/manage` magic-link token surface hardening: inline
+    `history.replaceState()` scrubs `?token=` from browser address bar +
+    history; route-specific `Referrer-Policy: no-referrer` response header;
+    new `consumed_tokens` SQLite table enforces single-use on
+    `purpose=manage` tokens (closes the 24h replay window). New
+    `M17-manage-single-use` smoke case in `smoke-manage.mjs`.
+  - **`260523-s40`** — Rate-limiter SQLite persistence. New `rate_limit_hits`
+    table replaces the in-memory `Map<key, number[]>` so the 5-per-hour cap
+    survives process restarts and GitHub Actions deploys (the literal vector:
+    a deploy used to wipe counters and grant attackers a fresh budget). IPs
+    HMAC-hashed with `MAGIC_LINK_SECRET` before storage (raw IPs never
+    persisted); fail-open on DB error. New `scripts/smoke-rate-limit.mjs`
+    (RL1/RL2/RL3) proves the DB is the source of truth via direct pre-seed.
 
 **Operator actions remaining (pre-launch, before 2026-06-11):**
 1. **Flip kickoff cron live** — set `KICKOFF_NOTIFICATIONS_ENABLED=true` in
@@ -96,8 +113,8 @@ operator runbook.
 | `/api/signup` | POST | Validates email + **team** (48-slug allow-list) + **timezone** (IANA-validated, falls back to `America/New_York`), rate-limits, writes SQLite row, mints magic-link, sends via Resend. Bad team rejects with `?error=bad-form`; bad/empty tz falls back silently. |
 | `/api/confirm` | GET | Verifies token (purpose=confirm), marks row confirmed (re-subscribe restores an unsubscribed row), redirects to `/confirmed?status=` |
 | `/api/manage` | POST | Sends a magic-link with purpose=manage; the link lands on `/manage`, which mints a 30-day session cookie |
-| `/api/save-selection` | POST | Authenticated (form token or session). Persists **1–5 team slugs** into `user_teams` (delete-all-then-insert) + `timezone`, atomically in one transaction (a non-active/unsubscribed row is rejected, whole txn rolls back); also inserts the optional demand-capture field into `feature_requests` if non-empty (non-blocking — never gates the team-save) |
-| `/api/unsubscribe` | GET | Verifies token (purpose=unsubscribe), sets `unsubscribed_at`, redirects to `/unsubscribed` |
+| `/api/save-selection` | POST | Authenticated (form token or session) **+ Origin check** (quick-260523-qqa CSRF hardening — rejects same-method cross-origin POSTs). Persists **1–5 team slugs** into `user_teams` (delete-all-then-insert) + `timezone`, atomically in one transaction (a non-active/unsubscribed row is rejected, whole txn rolls back); also inserts the optional demand-capture field into `feature_requests` if non-empty (non-blocking — never gates the team-save) |
+| `/api/unsubscribe` | GET / POST | Verifies token (purpose=unsubscribe), sets `unsubscribed_at`, redirects to `/unsubscribed`. **POST handler added in quick-260523-qqa for RFC 8058 one-click unsubscribe** (Gmail/Outlook honour `List-Unsubscribe-Post: List-Unsubscribe=One-Click` headers); POST returns 200 (RFC-mandated, no redirect) instead of 303 |
 | `/api/logout` | POST | Clears the session cookie |
 
 ## Local dev
@@ -147,13 +164,13 @@ src/
       unsubscribe.ts       # GET ?token → set unsubscribed_at + clear user_teams (CR-02)
       logout.ts            # POST → clear session cookie
   lib/
-    db.ts                  # better-sqlite3 singleton + prepared statements + schema (vip_signups w/ team + timezone, teams w/ slug, matches, match_notifications, feature_requests, user_teams join table; idempotent ALTER + DROP guards)
+    db.ts                  # better-sqlite3 singleton + prepared statements + schema (vip_signups w/ team + timezone, teams w/ slug, matches, match_notifications, feature_requests, user_teams join table, consumed_tokens [quick-r1x: single-use manage tokens], rate_limit_hits [quick-s40: persistent rate-limit]; idempotent ALTER + DROP guards; boot-time prunes on the two TTL-bound tables)
     teams.ts               # VALID_TEAMS Set built from references/teams.json (48 slugs); TEAMS ordered array; isValidTeamSlug
     timezones.ts           # VALID_TZ Set built at module load from Intl.supportedValuesOf('timeZone'); FALLBACK_TZ=America/New_York; isValidTimezone
-    token.ts               # HMAC-SHA256 signed tokens, 24h TTL, 4 purposes (confirm/manage/unsubscribe/session)
+    token.ts               # HMAC-SHA256 signed tokens, 24h TTL, 4 purposes (confirm/manage/unsubscribe/session); `manage`-purpose tokens are now single-use via `consumeManageToken` (quick-r1x)
     session.ts             # cookie-based 30-day sliding-window sessions
     email.ts               # Resend wrapper with dev console fallback
-    rate-limit.ts          # in-memory IP + email throttle
+    rate-limit.ts          # SQLite-backed per-IP/email throttle (5/hour) — survives process restarts and the GitHub Actions deploy cycle (quick-s40). IPs HMAC-hashed with `MAGIC_LINK_SECRET` via exported `hashIp()` before storage; emails stored raw (already plaintext in `vip_signups`). Fail-open + `console.error` on DB error.
 references/
   teams.json               # canonical 48-team World Cup 2026 list (snake_case slugs, confederation-grouped UEFA→CONMEBOL→CONCACAF→CAF→AFC→OFC)
   og-image.svg             # Phase 8: source for the generic /og-image.png
@@ -169,8 +186,10 @@ scripts/
   render-team-og-images.mjs # Phase 15: render references/og-image-team.svg × 48 → public/og/<slug>.png with D-08 font-size buckets (64/52/44pt) + per-team 6-check gate (file/sig/dims/size/LAND-02-on-substituted-svg); exits 1 on any FAIL
   smoke-signup.mjs         # End-to-end verification: 19 cases including Phase 5 signup, Phase 13 REF-*, Phase 14 SHARE-*, Phase 15 SHARE-r-known + SHARE-r-unknown (exit 0 = all PASS)
   smoke-landing.mjs        # Phase 6 landing-page verification (consumer copy, 48-option <select>, tz-label, no LAND-02 terms)
-  smoke-manage.mjs         # Phase 9 /manage verification: 9 end-to-end cases (MANAGE-01/02, COMPAT-01, re-subscribe)
+  smoke-manage.mjs         # /manage end-to-end: M1–M17. Phase 9 base + Phase 12 multi-team + quick-r1x M17-manage-single-use (proves a consumed manage token's second click hits the bad-token branch)
   smoke-confirm-email.mjs  # Phase 10 offline confirmation-email verification: 10 zero-network/zero-DB body-composition cases
+  smoke-team-resolver.mjs  # Offline coverage for the football-data.org name → teams.json slug resolver (quick-260517-px5; closes the kickoff-cron silent-loss vector)
+  smoke-rate-limit.mjs     # quick-s40 regression: pre-seeds 5 rate_limit_hits rows for a synthetic RFC 5737 IP's hashed key, then POSTs from that IP and asserts 303 → /?error=rate-limited (proves the DB IS the source of truth — no in-process state). RL2 confirms raw IPs never appear; RL3 source-greps the fail-open path.
 public/
   favicon.svg
   og-image.png             # Phase 8 generic 1200×630 OG image
@@ -221,8 +240,14 @@ DEPLOY.md                  # step-by-step production deploy + Day 2 ops + per-cr
     until `KICKOFF_NOTIFICATIONS_ENABLED=true` in `/etc/oddlympics.env`.
   - `oddlympics-ingest.timer` — daily 03:00 UTC, refreshes WC 2026
     teams + matches from football-data.org. Idempotent (upsert on `id`).
-- **Honeypot + per-IP/email rate limiting** on `/api/signup`. Bots get a silent
-  303 to `/pending` and never touch the DB; humans get standard error redirects.
+- **Honeypot + per-IP/email rate limiting** on `/api/signup` and `/api/manage`.
+  5 hits/hour per key. Bots get a silent 303 to `/pending` and never touch the
+  DB; humans get standard error redirects. As of quick-260523-s40 the limiter
+  is **SQLite-backed** (`rate_limit_hits` table) so counters survive process
+  restarts and the GitHub Actions deploy cycle — closes the
+  "wait-for-deploy-then-burst" vector. IP keys are HMAC-hashed with
+  `MAGIC_LINK_SECRET` before storage; raw IPs are never persisted anywhere
+  (no Caddy access logs, no journald URL logging, no DB rows).
 - **`security: { checkOrigin: false }`** in `astro.config.mjs` because we do
   our own Origin check that allows `localhost`/`127.0.0.1` for local testing
   while blocking cross-origin form posts.

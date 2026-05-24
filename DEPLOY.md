@@ -109,6 +109,8 @@ If everything works, https://oddlympics.app shows the teaser.
 | Export demand-capture requests (demand triage) | `sqlite3 -csv /var/lib/oddlympics/oddlympics.db 'SELECT email, request_text, datetime(created_at, "unixepoch") FROM feature_requests ORDER BY created_at DESC'` |
 | See team distribution (post-Phase-5) | `sqlite3 -column -header /var/lib/oddlympics/oddlympics.db 'SELECT COALESCE(team, "(unset)") AS team, COUNT(*) AS n FROM vip_signups WHERE confirmed_at IS NOT NULL AND unsubscribed_at IS NULL GROUP BY team ORDER BY n DESC'` |
 | Referral attribution (Phase 13 — signups by referrer, direct vs referred, % referred) | see [Referral-counting SQL recipe](#referral-counting-sql-recipe-phase-13) below |
+| Rate-limit hits in the last hour (quick-s40) | `sqlite3 -column -header /var/lib/oddlympics/oddlympics.db "SELECT key, COUNT(*) AS hits FROM rate_limit_hits WHERE ts > strftime('%s','now') - 3600 GROUP BY key ORDER BY hits DESC LIMIT 20"` — IP keys appear as `ip:<16-char-base64url>` (HMAC-hashed; raw IPs are never persisted per quick-s40 D-02). Email keys show as `email:<address>` (already plaintext in `vip_signups`). |
+| Consumed manage-tokens in the last 24h (quick-r1x) | `sqlite3 -column -header /var/lib/oddlympics/oddlympics.db "SELECT COUNT(*) AS consumed_last_24h FROM consumed_tokens WHERE consumed_at > strftime('%s','now') - 86400"` — operator sanity check that the single-use enforcement is active. Boot-time prune trims rows older than 24h on every process restart. |
 | Roll Caddy config | edit `/etc/caddy/Caddyfile`, then `systemctl reload caddy` |
 | Back up the DB | `sqlite3 /var/lib/oddlympics/oddlympics.db ".backup /tmp/oddlympics-$(date +%F).db"` |
 | Pre-Phase-5-deploy backup (one-shot) | see [Pre-deploy SQLite backup (Phase 5 / v2.0)](#pre-deploy-sqlite-backup-phase-5--v20) below |
@@ -285,8 +287,13 @@ ssh root@oddlympics.app 'sudo -u oddlympics bash -c \
    node scripts/smoke-signup.mjs"'
 ```
 
-Expect 8/8 PASS and exit 0. The 7 HTTP cases use `smoke-*@example.com`
-emails — clean them up with:
+Expect exit 0. (The smoke has grown to 19 cases as of Phase 15 —
+Phase 5 signup/team/tz, Phase 13 `REF-*` referral attribution, Phase 14 +
+Phase 15 `SHARE-*` / `SHARE-r-*`. The cleanup below clears the synthetic
+`smoke-*@example.com` rows; quick-s40 `smoke-rate-limit.mjs` and quick-r1x
+`smoke-manage.mjs` add their own `smoke-s40-*` / `smoke-m*-*` keys which
+self-prune on the next process boot for the TTL-bound tables.) HTTP cases
+use `smoke-*@example.com` emails — clean them up with:
 
 ```bash
 sudo -u oddlympics sqlite3 /var/lib/oddlympics/oddlympics.db \

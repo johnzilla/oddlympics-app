@@ -8,11 +8,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 for international sports fans, launching at the 2026 FIFA World Cup
 (group-stage kickoff **2026-06-11**).
 
-**Status: v2.0 SHIPPED + ARCHIVED 2026-05-16.** Both milestones to date are
-complete and live on production (https://oddlympics.app, HTTP 200, launch gate
-green, tagged `v1.0-consumer-landing`). **No active milestone** — the project
-is in launch-readiness mode until World Cup group stage on **2026-06-11**
-(pre-launch operator actions below). `.planning/STATE.md` + `MILESTONES.md`
+**Status: v2.0 + v2.1 SHIPPED.** All three milestones to date (v1 MVP, v2.0
+Consumer Landing, v2.1 Referral & Social Sharing) are complete and live on
+production (https://oddlympics.app, HTTP 200, launch gate green, tagged
+`v1.0-consumer-landing`). **No active milestone** — the project is in
+launch-readiness mode until World Cup group stage on **2026-06-11**
+(pre-launch operator actions below). Three pre-launch hardening quick tasks
+landed 2026-05-23 → 2026-05-24 (`quick-260523-qqa`: CSRF Origin check on
+`/api/save-selection` + RFC 8058 one-click POST `/api/unsubscribe` +
+`List-Unsubscribe` headers on kickoff alerts; `quick-260523-r1x`: `/manage`
+magic-link token surface — `history.replaceState` scrub, `Referrer-Policy:
+no-referrer`, single-use `consumed_tokens` table; `quick-260523-s40`:
+SQLite-backed `rate_limit_hits` table replacing the in-memory `Map` so the
+5-per-hour cap survives deploys). `.planning/STATE.md` + `MILESTONES.md`
 are the source of truth for status; this section is a summary and can lag —
 trust `.planning/` over this paragraph.
 
@@ -77,14 +85,19 @@ Roadmap, requirements, locked decisions, and per-phase plans live under
 
 - **Astro 5** with `output: 'server'` and the **Node standalone adapter** (`@astrojs/node`)
 - **better-sqlite3** for storage. Schema (the `vip_signups` user/session table
-  with `team` + `timezone` columns, plus `teams` with a `slug` column,
-  `matches`, `match_notifications`, `feature_requests`) lives inline in
+  with `team` + `timezone` + `referral_code` + `referred_by` columns, plus
+  `teams` with a `slug` column, `matches`, `match_notifications`,
+  `feature_requests`, `user_teams` join table for Phase 12 multi-team,
+  `consumed_tokens` for quick-r1x single-use manage tokens, and
+  `rate_limit_hits` for quick-s40 persistent rate-limiting) lives inline in
   `src/lib/db.ts` and migrates on boot. New tables use `CREATE TABLE IF NOT
   EXISTS`; new columns use a `pragma_table_info` probe + conditional `ALTER
   TABLE ADD COLUMN` (SQLite has no `ADD COLUMN IF NOT EXISTS`). The Phase 5
   migration extends this with the inverse direction — `has('selected_teams')`
   guards a `DROP COLUMN`, gated by a SQLite ≥ 3.35 version assert so an old
-  runtime aborts cleanly. Re-running on a migrated DB is a no-op
+  runtime aborts cleanly. The two TTL-bound tables (`consumed_tokens`,
+  `rate_limit_hits`) carry boot-time `DELETE WHERE ts < now-TTL` prunes
+  alongside their `CREATE TABLE` blocks. Re-running on a migrated DB is a no-op
 - **Resend** for transactional email (with a dev console fallback when no API key)
 - **HMAC-SHA256 signed tokens** for both magic-links AND session cookies
   (Node built-in `crypto`, no JWT lib). Tokens carry a `purpose` claim
@@ -155,14 +168,26 @@ The user clicks → GET `/api/confirm?token=...` → token verified
 because it's prerendered.
 
 *Sign-in* (purpose=`manage`): POST `/api/manage` (from `/manage` page) mints
-a magic-link with purpose=manage and sends it. The user clicks → lands on
-`/schedule` → token verified → session cookie minted → user is signed in for
-30 days, sliding window.
+a magic-link with purpose=manage and sends it. The email links to
+`/manage?token=...` (the `/schedule` route 301-redirects to `/manage` since
+Phase 9). The user clicks → `manage.astro` calls `consumeManageToken(token)`
+in the frontmatter (quick-r1x: verify + INSERT INTO consumed_tokens in one
+transaction; a second click of the same token hits the PK constraint and is
+rejected as bad-token) → session cookie minted → an inline
+`<script is:inline>` calls `history.replaceState({}, '', '/manage')` so the
+24h auth credential never sits in the browser address bar or history. User
+is signed in for 30 days, sliding window. `Referrer-Policy: no-referrer` on
+the `/manage` response keeps the token from leaking to any outbound link
+target.
 
 *Unsubscribe* (purpose=`unsubscribe`): every outbound email contains an
 unsubscribe link. GET `/api/unsubscribe?token=...` → token verified →
-`unsubscribed_at` set → 303 → `/unsubscribed`. Also satisfies RFC 8058 via
-the helper that adds a `List-Unsubscribe-Post` header.
+`unsubscribed_at` set → 303 → `/unsubscribed`. quick-260523-qqa also added
+a POST handler at the same URL for RFC 8058 one-click unsubscribe (Gmail and
+Outlook honour `List-Unsubscribe-Post: List-Unsubscribe=One-Click` headers);
+the POST returns 200 (RFC-mandated, no redirect) instead of 303. The same
+`List-Unsubscribe` + `List-Unsubscribe-Post` headers are attached to kickoff-alert
+emails too (`scripts/send-kickoff-notifications.mjs`).
 
 *Session* (purpose=`session`): the session cookie itself is a signed token,
 managed by `src/lib/session.ts`. `readSessionFromCookie()` validates +
@@ -235,8 +260,10 @@ ops table (logs, restart, DB inspection, email-list export, backup).
   `footer` all props), the unified `:root` design tokens, the base reset, the
   shared chrome (`.wrap`/`.banner`/`.headline`/`.subhead`/`.link`), and the
   site footer. Every UI page (`index`, `pending`, `confirmed`, `unsubscribed`,
-  `manage`, `privacy`, `terms`) wraps its content in `<Layout>` and keeps only
-  its **page-specific** CSS in a scoped `<style>` (NOT `is:global`). A new
+  `manage`, `privacy`, `terms`, `r/[code]`) wraps its content in `<Layout>` and
+  keeps only its **page-specific** CSS in a scoped `<style>` (NOT `is:global`).
+  (`schedule.astro` is a thin 301 redirect with no rendered HTML, so it doesn't
+  import `Layout`.) A new
   page imports `Layout` — it does NOT paste a `<style is:global>` head. This
   extraction was originally deferred but pulled forward (the per-page style
   duplication is what let the dark/light theme drift happen). `--mono` is an intentional
