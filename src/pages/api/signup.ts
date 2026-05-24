@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { upsertVipSignup, lookupByReferralCode, type VipSignup } from '../../lib/db';
 import { mintToken } from '../../lib/token';
 import { sendMagicLink } from '../../lib/email';
-import { checkRateLimit } from '../../lib/rate-limit';
+import { checkRateLimit, hashIp } from '../../lib/rate-limit';
 import { VALID_TEAMS } from '../../lib/teams';
 import { VALID_TZ, FALLBACK_TZ } from '../../lib/timezones';
 import { generateReferralCode } from '../../lib/referral';
@@ -70,7 +70,7 @@ export const POST: APIRoute = async ({ request, site }) => {
   const requestedSport = VALID_SPORTS.has(sport) ? sport : 'other';
 
   const ip = clientIp(request);
-  if (!checkRateLimit(`ip:${ip}`)) return back('rate-limited');
+  if (!checkRateLimit(`ip:${hashIp(ip)}`)) return back('rate-limited');
   if (!checkRateLimit(`email:${rawEmail}`)) return back('rate-limited');
 
   // Phase 5 — SIGNUP-01 / COMPAT-02: team must be a known slug from references/teams.json.

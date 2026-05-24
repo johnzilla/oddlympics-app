@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { getByEmail } from '../../lib/db';
 import { mintToken } from '../../lib/token';
 import { sendManageLink } from '../../lib/email';
-import { checkRateLimit } from '../../lib/rate-limit';
+import { checkRateLimit, hashIp } from '../../lib/rate-limit';
 
 export const prerender = false;
 
@@ -57,7 +57,7 @@ export const POST: APIRoute = async ({ request, site }) => {
   if (!EMAIL_RE.test(rawEmail) || rawEmail.length > 254) return back('bad-email');
 
   const ip = clientIp(request);
-  if (!checkRateLimit(`ip:${ip}`)) return back('rate-limited');
+  if (!checkRateLimit(`ip:${hashIp(ip)}`)) return back('rate-limited');
   if (!checkRateLimit(`email:${rawEmail}`)) return back('rate-limited');
 
   // Look up the row, but always 303 to /pending regardless of result.
