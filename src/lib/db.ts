@@ -274,6 +274,35 @@ const insertConsumedToken = db.prepare<[string, string, number]>(
   'INSERT INTO consumed_tokens (sig, purpose, consumed_at) VALUES (?, ?, ?)',
 );
 
+// quick-260523-s40: persistent rate-limit storage — survives process restarts so the
+// GitHub Actions deploy cadence (~40s) can't reset the 5/hour budget. Row-per-hit per D-01.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS rate_limit_hits (
+    key TEXT NOT NULL,
+    ts  INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_rlh_key_ts ON rate_limit_hits(key, ts);
+`);
+
+// Boot-time prune: remove rate_limit_hits rows older than 1h (WINDOW_SEC=3600).
+// Opportunistic — runs once per process boot. Keeps index size bounded across long-running
+// installs; the per-key prune inside checkRateLimit handles intra-window GC.
+db.prepare(
+  "DELETE FROM rate_limit_hits WHERE ts < strftime('%s','now') - 3600",
+).run();
+
+export const countRecentHits = db.prepare<[string, number]>(
+  'SELECT COUNT(*) AS count FROM rate_limit_hits WHERE key = ? AND ts > ?',
+);
+
+export const insertRateLimitHit = db.prepare<[string, number]>(
+  'INSERT INTO rate_limit_hits (key, ts) VALUES (?, ?)',
+);
+
+export const pruneRateLimitKey = db.prepare<[string, number]>(
+  'DELETE FROM rate_limit_hits WHERE key = ? AND ts <= ?',
+);
+
 // Verify a manage-purpose URL token AND atomically mark it consumed.
 // Returns the verified email on success; null if the token is bad,
 // expired, wrong purpose, or already consumed.
