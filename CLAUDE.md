@@ -67,10 +67,19 @@ trust `.planning/` over this paragraph.
   (one-email-per-match preserved), smoke M1–M16 green.
 
 **Pending operator actions (pre-launch, milestone-independent — before
-2026-06-11):** fire `scripts/launch-blast.mjs --send`; flip
+2026-06-11):** fire `scripts/launch-blast.mjs --send` (blasts confirmed
+`vip_signups`; there is no separate teaser list); flip
 `KICKOFF_NOTIFICATIONS_ENABLED=true` + restart `oddlympics-notify.timer`; e2e
-smoke one real kickoff notification; verify football-data.org name→slug mapping
-(kickoff-cron silent-loss risk). See `.planning/ROADMAP.md`.
+smoke one real kickoff notification (testable from 2026-06-11). The
+football-data.org name→slug verification is **DONE (2026-06-08)** — the live
+audit (`scripts/audit-team-coverage.mjs`) caught two real launch blockers that
+every offline smoke missed: the deploy never rsynced `references/` to the
+droplet (the daily ingest had been crashing on `ENOENT teams.json` since
+install, so the prod DB had 0 teams/matches), and `references/teams.json` was
+built on pre-draw guesses with 8 of the real 48 qualifiers unmapped. Both
+fixed (deploy now ships `references/`; `teams.json` reconciled to the live
+field); ingest re-run clean (48/48 mapped, 0 NULL, 104 matches). See
+`.planning/ROADMAP.md`.
 
 **Deferred (no scheduled milestone):** Telegram bot, Lightning tip jar
 (vaultwarden integration), niche-sport long tail (strongman, cubing). Not on

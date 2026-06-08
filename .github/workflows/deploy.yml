@@ -50,6 +50,12 @@ jobs:
           rsync -az --delete \
             ./scripts/ \
             "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/scripts/"
+          # references/ holds teams.json — required by scripts/ingest-schedule.mjs.
+          # Without it the daily ingest crashes on boot (ENOENT) and the DB never
+          # gets teams/matches, so the kickoff notifier has nothing to send.
+          rsync -az --delete \
+            ./references/ \
+            "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/references/"
           rsync -az --delete \
             ./deploy/ \
             "$DROPLET_USER@$DROPLET_HOST:$APP_DIR/deploy/"

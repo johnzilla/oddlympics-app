@@ -80,9 +80,17 @@ to `main` (~40 seconds end-to-end).
 1. **Flip kickoff cron live** — set `KICKOFF_NOTIFICATIONS_ENABLED=true` in
    `/etc/oddlympics.env`, then `systemctl restart oddlympics-notify.timer`.
 2. **End-to-end smoke** one real kickoff notification after the flip.
-3. **Verify football-data.org name → slug mapping** (read-only `comm` check;
-   silent-loss risk in the kickoff cron — resolver was hardened 2026-05-17 but
-   needs one final pre-launch confirmation).
+3. ~~**Verify football-data.org name → slug mapping**~~ **DONE 2026-06-08.**
+   The live audit (`scripts/audit-team-coverage.mjs`) ran against the real WC
+   feed and caught two launch-blocking bugs the offline smoke could not: (a)
+   the deploy never shipped `references/` to the droplet, so the daily ingest
+   had been crashing on `ENOENT teams.json` since install — the DB had zero
+   teams/matches; (b) `references/teams.json` was built on pre-draw guesses and
+   8 of the actual 48 qualifiers were unmapped. Both fixed: deploy now rsyncs
+   `references/`, and `teams.json` was reconciled to the real field (dropped
+   Bolivia/Costa Rica/Denmark/Italy/Nigeria/Poland/Serbia; added Algeria/Jordan/
+   Norway/Scotland/Sweden/Tunisia/Turkey; renamed Cape Verde → Cape Verde
+   Islands). Re-ran ingest: **48/48 teams mapped, 0 NULL, 104 matches.**
 4. **Fire the launch blast** — `scripts/launch-blast.mjs --send` (currently
    dry-run by default).
 5. **Walk through the human-UAT items** logged in

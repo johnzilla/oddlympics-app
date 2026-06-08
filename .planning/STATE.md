@@ -151,7 +151,13 @@ Resume file:
 
 Pre-launch operator actions before 2026-06-11 (launch blockers, not a milestone — share the v2.1 runway):
 
-- Fire `scripts/launch-blast.mjs --send` (currently dry-run)
+- Fire `scripts/launch-blast.mjs --send` (currently dry-run) — NOTE: blasts the
+  confirmed `vip_signups` rows; there is no separately-collected "teaser list".
 - Flip `KICKOFF_NOTIFICATIONS_ENABLED=true` + restart `oddlympics-notify.timer`
-- End-to-end smoke one real kickoff notification
-- Verify football-data.org name→slug mapping (kickoff-cron silent-loss risk)
+- End-to-end smoke one real kickoff notification (testable from 2026-06-11 when
+  matches enter the 1h send window)
+- ~~Verify football-data.org name→slug mapping~~ **DONE 2026-06-08.** Live audit
+  caught two real launch blockers: deploy never shipped `references/` (daily
+  ingest had been crashing on `ENOENT teams.json` → DB had 0 teams/matches), and
+  `teams.json` held 8 wrong pre-draw guesses. Both fixed; ingest re-run clean
+  (48/48 mapped, 0 NULL, 104 matches). See README "Operator actions" item 3.

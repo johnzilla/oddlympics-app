@@ -154,7 +154,7 @@ Must complete before group-stage kickoff **2026-06-11**:
 1. Fire the launch blast — `scripts/launch-blast.mjs --send` (currently dry-run)
 2. Flip kickoff notifications live — `KICKOFF_NOTIFICATIONS_ENABLED=true` in `/etc/oddlympics.env`, restart `oddlympics-notify.timer`
 3. End-to-end smoke of one real kickoff notification before 2026-06-11
-4. Verify football-data.org name→slug mapping (kickoff-cron silent-loss risk — memory: `notify-slug-mapping-launch-risk`)
+4. ~~Verify football-data.org name→slug mapping~~ **DONE 2026-06-08** via `scripts/audit-team-coverage.mjs`. Found+fixed two real launch blockers: deploy never shipped `references/` (ingest crashed daily → 0 teams/matches) and `teams.json` had 8 wrong pre-draw guesses. Re-ran ingest clean: 48/48 mapped, 104 matches.
 
 ## Progress
 
