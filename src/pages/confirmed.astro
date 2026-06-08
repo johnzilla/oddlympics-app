@@ -30,6 +30,25 @@ export const prerender = true;
           <button id="share-btn" class="share-btn" type="button">Share</button>
         </div>
       </section>
+
+      <section id="vote-card" class="vote-card" hidden>
+        <h2 class="vote-heading">One more thing — what should we cover next?</h2>
+        <p class="vote-blurb">After the World Cup, oddlympics is going to do this for the sports nobody else covers properly. Which one do you want?</p>
+        <div class="vote-grid" id="vote-grid">
+          <button class="vote-opt" type="button" data-sport="curling">Curling</button>
+          <button class="vote-opt" type="button" data-sport="esports">Esports</button>
+          <button class="vote-opt" type="button" data-sport="battlebots">BattleBots</button>
+          <button class="vote-opt" type="button" data-sport="speedcubing">Speedcubing</button>
+          <button class="vote-opt" type="button" data-sport="excel">Excel World Championship</button>
+          <button class="vote-opt" type="button" data-sport="drone-racing">Drone racing</button>
+          <button class="vote-opt" type="button" data-sport="other" id="vote-other-btn">Something else…</button>
+        </div>
+        <div class="vote-other-row" id="vote-other-row" hidden>
+          <input id="vote-other-text" class="vote-other-input" type="text" maxlength="200" placeholder="Which sport?" aria-label="Which sport should we cover?" />
+          <button id="vote-other-send" class="vote-send" type="button">Send</button>
+        </div>
+        <p class="vote-done" id="vote-done" hidden>Noted — thanks. We'll let you know what wins.</p>
+      </section>
     </div>
   </main>
 
@@ -135,6 +154,82 @@ export const prerender = true;
       }
     } catch {}
   </script>
+
+  <script is:inline>
+    // "What's next" vote capture — the lead-gen bridge. Posts to /api/vote, which
+    // records into feature_requests (attributed via the ?rc= already in this URL).
+    // Entirely try-wrapped: any failure leaves the confirm page fully intact.
+    try {
+      var vparams = new URL(location.href).searchParams;
+      var vstatus = vparams.get('status') || 'ok';
+      if (vstatus === 'ok' || vstatus === 'already') {
+        var rcRaw = vparams.get('rc') || '';
+        var rc = /^[a-z0-9]{8}$/.test(rcRaw) ? rcRaw : '';
+
+        var card = document.getElementById('vote-card');
+        var grid = document.getElementById('vote-grid');
+        var done = document.getElementById('vote-done');
+        var otherRow = document.getElementById('vote-other-row');
+        var otherText = document.getElementById('vote-other-text');
+        var otherSend = document.getElementById('vote-other-send');
+        var submitted = false;
+
+        function finish() {
+          submitted = true;
+          if (grid) grid.hidden = true;
+          if (otherRow) otherRow.hidden = true;
+          if (done) done.hidden = false;
+        }
+
+        function send(sport, text) {
+          if (submitted) return;
+          var body = new URLSearchParams();
+          body.set('sport', sport);
+          if (rc) body.set('rc', rc);
+          if (text) body.set('text', text);
+          try {
+            fetch('/api/vote', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: body.toString()
+            }).catch(function () {});
+          } catch (e) {}
+          // Optimistic: a vote is low-stakes — show thanks immediately, don't
+          // make the user wait on the round-trip or punish a flaky network.
+          finish();
+        }
+
+        if (card) card.hidden = false;
+
+        var opts = document.querySelectorAll('.vote-opt');
+        for (var i = 0; i < opts.length; i++) {
+          opts[i].addEventListener('click', function (ev) {
+            var sport = ev.currentTarget.getAttribute('data-sport');
+            if (sport === 'other') {
+              if (grid) grid.hidden = true;
+              if (otherRow) otherRow.hidden = false;
+              if (otherText) otherText.focus();
+            } else {
+              send(sport, '');
+            }
+          });
+        }
+
+        if (otherSend) {
+          otherSend.addEventListener('click', function () {
+            var t = ((otherText && otherText.value) || '').trim();
+            if (!t) { if (otherText) otherText.focus(); return; }
+            send('other', t);
+          });
+        }
+        if (otherText) {
+          otherText.addEventListener('keydown', function (ev) {
+            if (ev.key === 'Enter') { ev.preventDefault(); if (otherSend) otherSend.click(); }
+          });
+        }
+      }
+    } catch (e) {}
+  </script>
 </Layout>
 
 <style>
@@ -148,9 +243,26 @@ export const prerender = true;
   .share-url:focus { outline: none; border-color: var(--accent); }
   .share-btn { padding: 10px 18px; font-family: var(--font-sans); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; white-space: nowrap; }
   .share-btn:hover { filter: brightness(1.08); }
+
+  .vote-card { margin-top: 28px; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; max-width: 460px; }
+  .vote-heading { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: var(--fg); }
+  .vote-blurb { margin: 0 0 14px; font-size: 14px; color: var(--fg-dim); line-height: 1.5; }
+  .vote-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .vote-opt { padding: 8px 14px; font-family: var(--font-sans); font-size: 14px; font-weight: 600; color: var(--fg); background: var(--bg); border: 1px solid var(--line-strong); border-radius: 999px; cursor: pointer; }
+  .vote-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .vote-opt:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(184, 53, 13, 0.15); }
+  .vote-other-row { display: flex; gap: 8px; margin-top: 12px; }
+  .vote-other-input { flex: 1; min-width: 0; padding: 10px 12px; font-family: var(--font-sans); font-size: 14px; color: var(--fg); background: var(--bg); border: 1px solid var(--line-strong); border-radius: 6px; }
+  .vote-other-input:focus { outline: none; border-color: var(--accent); }
+  .vote-send { padding: 10px 18px; font-family: var(--font-sans); font-size: 14px; font-weight: 700; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .vote-send:hover { filter: brightness(1.08); }
+  .vote-done { margin: 4px 0 0; font-size: 14px; font-weight: 600; color: var(--accent); }
+
   @media (max-width: 520px) {
     :root { --pad: 28px; }
     .share-row { flex-direction: column; }
     .share-btn { width: 100%; }
+    .vote-other-row { flex-direction: column; }
+    .vote-send { width: 100%; }
   }
 </style>

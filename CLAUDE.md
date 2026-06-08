@@ -147,10 +147,20 @@ defaults to `http://localhost:4321` and `./data/oddlympics.db`; override via
 
 **Hybrid static + server.** The four prerendered pages (`/`, `/pending`,
 `/confirmed`, `/unsubscribed`) are static and cacheable; the two
-session-gated pages (`/manage`, `/schedule`) and all six API routes
+session-gated pages (`/manage`, `/schedule`) and all seven API routes
 (`/api/signup`, `/api/confirm`, `/api/manage`, `/api/save-selection`,
-`/api/unsubscribe`, `/api/logout`) are server-rendered. To add a new dynamic
-page, set `export const prerender = false;` at the top.
+`/api/unsubscribe`, `/api/logout`, `/api/vote`) are server-rendered. To add a
+new dynamic page, set `export const prerender = false;` at the top.
+
+**The "what's next" vote (`/api/vote`).** The lead-gen bridge: `/confirmed`
+shows a "which sport should we cover next?" card (6 options + free-text) and
+POSTs to `/api/vote`, which records into `feature_requests` with a
+`next-sport: <slug>` prefix (so these triage apart from the legacy `/manage`
+free-text requests). Attribution rides the public `?rc=` referral code already
+in the confirm-redirect URL (never email in a URL); unknown/absent rc records
+as `anonymous` so the aggregate vote still counts. Same Origin check + IP
+rate-limit as `/api/signup`; fully client-try-wrapped so it can never break the
+prerendered confirm page.
 
 **Why `security: { checkOrigin: false }`.** Astro's adapter has a built-in CSRF
 check that compares the request's `Origin` to the configured `site` URL. That
