@@ -139,7 +139,7 @@ const matchesQuery = db.prepare(`
 // match_notifications UNIQUE(user_email, match_id, channel) + claim-before-send.
 // Call site argv shape (home_id, away_id, match.id) is unchanged.
 const usersQuery = db.prepare(`
-  SELECT DISTINCT v.email AS email, v.timezone AS timezone
+  SELECT DISTINCT v.email AS email, v.timezone AS timezone, v.referral_code AS referral_code
   FROM vip_signups v
   LEFT JOIN user_teams ut ON ut.email = v.email
   JOIN teams t ON t.slug = COALESCE(ut.team_slug, v.team)
@@ -185,6 +185,14 @@ function buildEmail(match, user, url) {
   const stage =
     match.group_name ?? match.stage.replace(/_/g, ' ').toLowerCase();
   const kickoff = formatKickoff(match.utc_date, user.timezone);
+  // Viral loop: the kickoff email is peak excitement — give the fan their
+  // personalized referral link (/r/CODE unfurls with their team image and
+  // attributes the signup). referral_code is non-null in practice (Phase 13
+  // backfill + per-insert); guard anyway so a null never renders a broken link.
+  const shareUrl = user.referral_code ? `${SITE_URL}/r/${user.referral_code}` : null;
+  const shareBlock = shareUrl
+    ? `<p style="margin:0 0 24px;font-size:13px;color:#555">Know a fan who'd want their team's alerts? <a href="${shareUrl}" style="color:hsl(18 70% 56%);font-weight:700">Send them your link →</a></p>`
+    : '';
   const subject = `${match.home_name} vs ${match.away_name} — kicks off in an hour`;
   const text = [
     `${match.home_name} vs ${match.away_name}`,
@@ -193,6 +201,9 @@ function buildEmail(match, user, url) {
     'Your full schedule:',
     url,
     '',
+    ...(shareUrl
+      ? ["Know a fan who'd want their team's alerts? Send them your link:", shareUrl, '']
+      : []),
     'Manage your teams or unsubscribe at oddlympics.app/manage',
     '',
     '— oddlympics',
@@ -204,6 +215,7 @@ function buildEmail(match, user, url) {
   <h1 style="font-size:22px;margin:0 0 6px;line-height:1.2">${match.home_name} <span style="color:#999;font-weight:400">vs</span> ${match.away_name}</h1>
   <p style="margin:0 0 24px;font-size:14px;color:#555">Kickoff at <strong>${kickoff}</strong></p>
   <p style="margin:0 0 24px"><a href="${url}" style="display:inline-block;background:hsl(18 70% 56%);color:#0b0b0e;text-decoration:none;padding:12px 18px;border-radius:6px;font-weight:700">Open my schedule</a></p>
+  ${shareBlock}
   <p style="margin:0;color:#999;font-size:11px">Manage your teams or unsubscribe at <a href="${SITE_URL}/manage" style="color:hsl(18 70% 56%)">oddlympics.app/manage</a>.</p>
 </div>
 </body></html>`;
