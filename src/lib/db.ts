@@ -111,6 +111,21 @@ db.exec(`
   }
 }
 
+// UTM attribution: first-touch ad/referral source columns (additive, nullable).
+// Mirrors the Phase 13 referral probe — pragma_table_info + conditional ALTER.
+// First-touch is enforced in upsertVipSignup (COALESCE existing-first), so the
+// ad that originally acquired a user is never overwritten by a later visit.
+{
+  const cols = db
+    .prepare("SELECT name FROM pragma_table_info('vip_signups')")
+    .all() as { name: string }[];
+  const has = (n: string) => cols.some((c) => c.name === n);
+  if (!has('utm_source')) db.exec(`ALTER TABLE vip_signups ADD COLUMN utm_source TEXT;`);
+  if (!has('utm_medium')) db.exec(`ALTER TABLE vip_signups ADD COLUMN utm_medium TEXT;`);
+  if (!has('utm_campaign')) db.exec(`ALTER TABLE vip_signups ADD COLUMN utm_campaign TEXT;`);
+  if (!has('utm_content')) db.exec(`ALTER TABLE vip_signups ADD COLUMN utm_content TEXT;`);
+}
+
 export type VipSignup = {
   id: number;
   email: string;
@@ -125,6 +140,10 @@ export type VipSignup = {
   manage_blast_sent_at: number | null; // Phase 2.5: launch-blast tracking
   referral_code: string | null; // Phase 13: stable public short code, unique per user
   referred_by: string | null; // Phase 13: first-touch attribution — code of the referrer
+  utm_source: string | null; // ad/referral source, e.g. "kickbacks", "referral"
+  utm_medium: string | null; // placement, e.g. "spinner", "share"
+  utm_campaign: string | null; // campaign label, e.g. "wc2026"
+  utm_content: string | null; // creative/variant, e.g. "utility", "weird-next"
 };
 
 // Phase 5 — SIGNUP-01/02/03: writes team + timezone alongside the existing
@@ -136,10 +155,13 @@ export type VipSignup = {
 // referred_by is COALESCE-protected (D-06: first-touch attribution — once set, the
 // original referrer is never overwritten by a later re-signup without a ref).
 export const upsertVipSignup = db.prepare<
-  [string, string, string | null, string | null, string | null, string, string, string | null]
+  [
+    string, string, string | null, string | null, string | null, string, string, string | null,
+    string | null, string | null, string | null, string | null,
+  ]
 >(`
-  INSERT INTO vip_signups (email, requested_sport, ip, user_agent, team, timezone, referral_code, referred_by)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO vip_signups (email, requested_sport, ip, user_agent, team, timezone, referral_code, referred_by, utm_source, utm_medium, utm_campaign, utm_content)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(email) DO UPDATE SET
     requested_sport = excluded.requested_sport,
     ip = COALESCE(excluded.ip, vip_signups.ip),
@@ -147,7 +169,11 @@ export const upsertVipSignup = db.prepare<
     team = COALESCE(excluded.team, vip_signups.team),
     timezone = excluded.timezone,
     referral_code = COALESCE(excluded.referral_code, vip_signups.referral_code),
-    referred_by = COALESCE(excluded.referred_by, vip_signups.referred_by)
+    referred_by = COALESCE(excluded.referred_by, vip_signups.referred_by),
+    utm_source = COALESCE(vip_signups.utm_source, excluded.utm_source),
+    utm_medium = COALESCE(vip_signups.utm_medium, excluded.utm_medium),
+    utm_campaign = COALESCE(vip_signups.utm_campaign, excluded.utm_campaign),
+    utm_content = COALESCE(vip_signups.utm_content, excluded.utm_content)
   RETURNING *
 `);
 

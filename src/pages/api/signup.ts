@@ -36,6 +36,16 @@ function originOk(request: Request, siteUrl: string | undefined): boolean {
   }
 }
 
+// UTM values are attacker-controllable (they ride the URL). Stored via prepared
+// statement (no injection), but normalize for clean grouping: lowercase to avoid
+// "Kickbacks" vs "kickbacks" fragmentation, strip to a safe charset, cap length.
+// Best-effort — never rejects a signup; junk just becomes null.
+function cleanUtm(v: unknown): string | null {
+  if (typeof v !== 'string') return null;
+  const s = v.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 64);
+  return s.length > 0 ? s : null;
+}
+
 function back(message: string): Response {
   return new Response(null, {
     status: 303,
@@ -110,6 +120,13 @@ export const POST: APIRoute = async ({ request, site }) => {
     }
   }
 
+  // Ad/referral attribution (best-effort, never rejects). Hidden fields populated
+  // from the URL utm_* params client-side; first-touch is preserved in the upsert.
+  const utmSource = cleanUtm(form.get('utm_source'));
+  const utmMedium = cleanUtm(form.get('utm_medium'));
+  const utmCampaign = cleanUtm(form.get('utm_campaign'));
+  const utmContent = cleanUtm(form.get('utm_content'));
+
   // Generate a fresh referral_code for this new row (D-04).
   // COALESCE in upsertVipSignup preserves the existing code on re-signup — breaks are avoided.
   // The referral_code UNIQUE index can raise SQLITE_CONSTRAINT_UNIQUE on the INSERT
@@ -129,6 +146,10 @@ export const POST: APIRoute = async ({ request, site }) => {
         tz,
         referralCode,
         referredBy,
+        utmSource,
+        utmMedium,
+        utmCampaign,
+        utmContent,
       ) as VipSignup | undefined;
       upserted = true;
       break;

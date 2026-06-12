@@ -43,7 +43,10 @@ if (row?.team) {
     image: pngExists ? `${SITE_URL}/og/${row.team}.png` : `${SITE_URL}/og-image.png`,
     url: `${SITE_URL}/r/${code}`,
   };
-  bounceUrl = `/?ref=${code}`;
+  // Tag the bounce so referral traffic is attributable in both systems: Plausible
+  // buckets it under utm_source=referral, and /api/signup stores the same on the
+  // referred signup — distinguishing share-driven from ad-driven signups.
+  bounceUrl = `/?ref=${code}&utm_source=referral&utm_medium=share`;
 } else {
   // Unknown / unresolvable code — generic fallback (D-02).
   // Shape-invalid codes fall here too (code = '' after gate, no DB lookup).

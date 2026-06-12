@@ -59,3 +59,27 @@ https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2
 > After the buy, fill the **result** column with: spend, impressions/clicks (from
 > kickbacks), and Signup Submit conversions (from Plausible, filtered to this
 > content tag). That closes the loop on which line actually pulled.
+
+## Querying ad → signups → referrals (DB)
+
+As of the utm-capture change, `vip_signups` stores `utm_source/medium/campaign/content`
+per signup (first-touch; sanitized lowercase). Referred friends arrive via `/r/CODE`,
+which now tags them `utm_source=referral`. So the full funnel — ad → signup → referral —
+is answerable in SQL, no Plausible join needed:
+
+```sql
+-- Which ad creatives drove not just signups, but referrals (and how contagious):
+SELECT  ad.utm_content                                   AS ad,
+        COUNT(DISTINCT ad.email)                         AS signups,
+        COUNT(ref.email)                                 AS referrals_generated,
+        ROUND(1.0*COUNT(ref.email)/COUNT(DISTINCT ad.email), 2) AS viral_coef
+FROM        vip_signups ad
+LEFT JOIN   vip_signups ref ON ref.referred_by = ad.referral_code
+WHERE       ad.utm_source = 'kickbacks'
+GROUP BY    ad.utm_content
+ORDER BY    referrals_generated DESC;
+```
+
+`viral_coef` = referrals per signup — the prize metric (which ad brings users who *share*,
+not just users). Ad-driven signups have `utm_source` set; share-driven have `utm_source='referral'`
++ `referred_by` set. Plausible stays the top-of-funnel mirror (visits, Signup Submit by campaign).
