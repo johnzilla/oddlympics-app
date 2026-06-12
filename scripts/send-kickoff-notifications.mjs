@@ -182,8 +182,13 @@ function formatKickoff(utcSeconds, timezone) {
 }
 
 function buildEmail(match, user, url) {
-  const stage =
-    match.group_name ?? match.stage.replace(/_/g, ' ').toLowerCase();
+  // Humanize the feed's raw labels for both branches: GROUP_A -> Group A,
+  // LAST_16 -> Last 16. (The HTML eyebrow is CSS-uppercased, but the plaintext
+  // body and the underscore removal both need this.)
+  const stage = (match.group_name ?? match.stage)
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
   const kickoff = formatKickoff(match.utc_date, user.timezone);
   // Viral loop: the kickoff email is peak excitement — give the fan their
   // personalized referral link (/r/CODE unfurls with their team image and
