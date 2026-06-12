@@ -8,6 +8,7 @@ export const prerender = true;
       <span id="banner" class="banner"></span>
       <h1 id="headline" class="headline"></h1>
       <p id="sub" class="subhead"></p>
+      <p id="welcome-tag" class="welcome-tag" hidden>All weirdos welcome.</p>
       <p id="cta-row" class="subhead" style="margin-top:24px" hidden>
         <a href="/" class="link">Re-send confirmation →</a>
       </p>
@@ -89,6 +90,11 @@ export const prerender = true;
         document.getElementById('cta-row').hidden = false;
       }
       document.title = c.headline + ' — oddlympics';
+      // Brand stamp — only on the success states (they're in the tent now).
+      if (status === 'ok' || status === 'already') {
+        const wt = document.getElementById('welcome-tag');
+        if (wt) wt.hidden = false;
+      }
     } catch {}
   </script>
 
@@ -235,6 +241,7 @@ export const prerender = true;
 <style>
   .hero { min-height: 100dvh; display: flex; align-items: center; padding: var(--pad); }
   .hero-content { max-width: 720px; }
+  .welcome-tag { margin: 12px 0 0; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.04em; color: var(--accent); }
   .share-card { margin-top: 40px; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; max-width: 460px; }
   .share-heading { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: var(--fg); }
   .share-blurb { margin: 0 0 14px; font-size: 14px; color: var(--fg-dim); line-height: 1.5; }
