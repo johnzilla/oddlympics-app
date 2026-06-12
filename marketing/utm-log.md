@@ -39,6 +39,8 @@ add a hidden `utm_source` field later if you want airtight per-signup attributio
 |------------|-----------|---------|----------|-------------|-------------------------------------------------------------------------|-----------------|--------|
 | 2026-06-11 | kickbacks | spinner | wc2026   | weird-next  | `World Cup alerts now, weird sports next - oddlympics` (52ch)         | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=weird-next` | _pending_ |
 | 2026-06-11 | kickbacks | spinner | wc2026   | utility     | `World Cup alerts in your time zone, one ping - oddlympics` (57ch) | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=utility` | _pending_ |
+| 2026-06-12 | kickbacks | spinner | wc2026   | name-first  | `oddlympics: your team's World Cup, in your time zone` (52ch) | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=name-first` | _pending_ |
+| 2026-06-12 | kickbacks | spinner | wc2026   | tz-pain     | `team plays at 3am your time? we'll ping you - oddlympics` (56ch) | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=tz-pain` | _pending_ |
 
 > **kickbacks format gotcha:** visible ad text is capped at **60 characters** (the
 > destination URL is a separate, uncapped field). Keep `oddlympics` in the copy;
@@ -54,6 +56,12 @@ https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2
 
 # Ad #2 — "utility" creative
 https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=utility
+
+# Ad #3 — "name-first" creative (2026-06-12) — copy: oddlympics: your team's World Cup, in your time zone
+https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=name-first
+
+# Ad #4 — "tz-pain" creative (2026-06-12) — copy: team plays at 3am your time? we'll ping you - oddlympics
+https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=tz-pain
 ```
 
 > After the buy, fill the **result** column with: spend, impressions/clicks (from
