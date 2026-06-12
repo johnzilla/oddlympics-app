@@ -41,6 +41,7 @@ add a hidden `utm_source` field later if you want airtight per-signup attributio
 | 2026-06-11 | kickbacks | spinner | wc2026   | utility     | `World Cup alerts in your time zone, one ping - oddlympics` (57ch) | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=utility` | _pending_ |
 | 2026-06-12 | kickbacks | spinner | wc2026   | name-first  | `oddlympics: your team's World Cup, in your time zone` (52ch) | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=name-first` | _pending_ |
 | 2026-06-12 | kickbacks | spinner | wc2026   | tz-pain     | `team plays at 3am your time? we'll ping you - oddlympics` (56ch) | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=tz-pain` | _pending_ |
+| 2026-06-12 | x (organic) | social | wc2026 | — | build-in-public launch thread (3 tweets) — see "X launch thread" below | `https://oddlympics.app/?utm_source=x&utm_medium=social&utm_campaign=wc2026` | _pending_ |
 
 > **kickbacks format gotcha:** visible ad text is capped at **60 characters** (the
 > destination URL is a separate, uncapped field). Keep `oddlympics` in the copy;
@@ -67,6 +68,16 @@ https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2
 > After the buy, fill the **result** column with: spend, impressions/clicks (from
 > kickbacks), and Signup Submit conversions (from Plausible, filtered to this
 > content tag). That closes the loop on which line actually pulled.
+
+## X launch thread (organic, 2026-06-12)
+
+Link lives only in tweet 3 (tweet 1 stays link-free for reach). Post as a reply-chain; pin tweet 1.
+
+**1/** The 2026 World Cup is spread across 4 time zones. If your team isn't from the US, Canada, or Mexico, half its matches land at brutal local hours. Every big sports app will bury that under 17 betting-odds pings a day. I just wanted one alert for the games I care about.
+
+**2/** So I built oddlympics. Pick your team, get one email an hour before each of its matches — in your local time. That's the whole app. No app to install, no betting odds, no engagement pings. One person, a $6 server, plain email. Free for the whole tournament.
+
+**3/** And the World Cup's just the start. Next: the sports nobody covers properly — curling, BattleBots, speedcubing, competitive Excel (real, on ESPN), and any others. All weirdos welcome. Sign up for World Cup alerts and vote on what's next: `https://oddlympics.app/?utm_source=x&utm_medium=social&utm_campaign=wc2026`
 
 ## Querying ad → signups → referrals (DB)
 
