@@ -22,6 +22,17 @@ votes lives in the prod DB (`vip_signups`, `feature_requests`) — Plausible is 
 top-of-funnel mirror; UTM is not stored per-row in the DB (window-correlate, or
 add a hidden `utm_source` field later if you want airtight per-signup attribution).
 
+## Creative assets
+
+- **Brand icon** — `marketing/oddlympics-icon.png` (512×512, ~12 KB PNG). The
+  slashed-circle **ø** mark, rust (`#e06a37`) on near-black (`#0b0b0e`). Used as the
+  kickbacks "brand icon" slot (PNG/JPG/WebP ≤ 64 KB). Reads as `null` / empty-set /
+  ø to developers — eye-catching for the dev audience and a nod to "odd".
+  - Canonical source: `public/favicon.svg` — the same mark is the site favicon, so
+    browser tab and ad share one identity.
+  - Regenerate: `node scripts/render-icon.mjs` (deterministic; `ICON_SIZE=256` for a
+    smaller variant). Pure shapes, no font dependency.
+
 ## Ad buys
 
 | date       | network   | medium  | campaign | content     | ad copy (what was shown)                                                | destination URL | result |
