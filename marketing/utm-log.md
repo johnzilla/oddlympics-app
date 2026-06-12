@@ -37,8 +37,14 @@ add a hidden `utm_source` field later if you want airtight per-signup attributio
 
 | date       | network   | medium  | campaign | content     | ad copy (what was shown)                                                | destination URL | result |
 |------------|-----------|---------|----------|-------------|-------------------------------------------------------------------------|-----------------|--------|
-| 2026-06-11 | kickbacks | spinner | wc2026   | weird-next  | `Thinking… World Cup alerts now, weird sports next → oddlympics`         | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=weird-next` | _pending_ |
-| 2026-06-11 | kickbacks | spinner | wc2026   | utility     | `Compiling… your team's World Cup matches, your timezone, one ping → oddlympics` | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=utility` | _pending_ |
+| 2026-06-11 | kickbacks | spinner | wc2026   | weird-next  | `World Cup alerts now, weird sports next - oddlympics` (52ch)         | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=weird-next` | _pending_ |
+| 2026-06-11 | kickbacks | spinner | wc2026   | utility     | `World Cup alerts in your time zone, one ping - oddlympics` (57ch) | `https://oddlympics.app/?utm_source=kickbacks&utm_medium=spinner&utm_campaign=wc2026&utm_content=utility` | _pending_ |
+
+> **kickbacks format gotcha:** visible ad text is capped at **60 characters** (the
+> destination URL is a separate, uncapped field). Keep `oddlympics` in the copy;
+> drop gerund prefixes / arrows to fit; ASCII only (it renders in a terminal). The
+> first buy's originals ran past 60 and silently lost the brand cue — the copy in
+> the table above is the corrected ≤60 version.
 
 ### Copy/paste URLs
 
