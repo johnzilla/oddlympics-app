@@ -29,6 +29,31 @@ const rate = f.total ? Math.round((100 * f.confirmed) / f.total) : 0;
 console.log(`  signups: ${f.total}   confirmed: ${f.confirmed} (${rate}%)   unsubscribed: ${f.unsubscribed}`);
 console.log(`  new — last 24h: ${f.last_24h}   last 7d: ${f.last_7d}`);
 
+rule('KICKOFF EMAILS (sent receipts)');
+const n = one(`SELECT COUNT(*) total,
+  SUM(sent_at > strftime('%s','now')-86400) last_24h, MAX(sent_at) last
+  FROM match_notifications`);
+console.log(`  total sent: ${n.total}   last 24h: ${n.last_24h}   last send: ${n.last ? new Date(n.last*1000).toISOString().replace('T',' ').slice(0,16)+'Z' : 'never'}`);
+const sent = all(`SELECT datetime(nt.sent_at,'unixepoch') sent_utc, nt.user_email,
+  h.tla||' v '||a.tla AS match
+  FROM match_notifications nt
+  JOIN matches m ON m.id=nt.match_id
+  JOIN teams h ON m.home_team_id=h.id JOIN teams a ON m.away_team_id=a.id
+  ORDER BY nt.sent_at DESC LIMIT 6`);
+console.table(sent.length ? sent : [{ note: 'no kickoff emails sent yet' }]);
+
+rule('NEXT EXPECTED SENDS (subscribed teams, upcoming)');
+const due = all(`SELECT datetime(m.utc_date,'unixepoch') kickoff_utc,
+  h.tla||' v '||a.tla AS match, COUNT(DISTINCT v.email) subscribers
+  FROM matches m
+  JOIN teams h ON m.home_team_id=h.id JOIN teams a ON m.away_team_id=a.id
+  JOIN vip_signups v ON v.confirmed_at IS NOT NULL AND v.unsubscribed_at IS NULL
+  LEFT JOIN user_teams ut ON ut.email = v.email
+  WHERE m.utc_date > strftime('%s','now')
+    AND (h.slug = COALESCE(ut.team_slug, v.team) OR a.slug = COALESCE(ut.team_slug, v.team))
+  GROUP BY m.id ORDER BY m.utc_date LIMIT 5`);
+console.table(due.length ? due : [{ note: 'no upcoming matches for any subscriber team' }]);
+
 rule('BY SOURCE (utm_source)');
 console.table(all(`SELECT COALESCE(utm_source,'direct') source, COUNT(*) signups,
   SUM(confirmed_at IS NOT NULL) confirmed
