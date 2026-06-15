@@ -33,6 +33,47 @@ add a hidden `utm_source` field later if you want airtight per-signup attributio
   - Regenerate: `node scripts/render-icon.mjs` (deterministic; `ICON_SIZE=256` for a
     smaller variant). Pure shapes, no font dependency.
 
+## Kickbacks retrospective — CLOSED 2026-06-15 (do not re-run)
+
+7 campaigns over Jun 11–15, every variable tested. **Verdict: kickbacks delivers
+cheap, fast, broad, globally-distributed dev reach that converts to ~0 real
+signups.** Fully characterized — more buys would only re-confirm the zero.
+
+| date | impressions | spend | CPM | kb-clicks |
+|---|---|---|---|---|
+| 6/11 | 1,264 | $38.60 | ~$31 | 6 |
+| 6/11 | 1,392 | $40.02 | ~$29 | 4 |
+| 6/12 | 1,310 | $38.37 | ~$29 | 0 |
+| 6/12 | 2,203 | $42.31 | ~$19 | 0 |
+| 6/12 | 2,138 | $21.38 | ~$10 | 0 |
+| 6/13 | 11,198 | $28.40 | ~$2.50 | 0 |
+| 6/15 | 8,691 | $11.04 | ~$1.27 | 0 |
+| **Σ** | **~28,000** | **~$218** | **~$7.8** | **10** |
+
+**Reconciled funnel:** ~28,000 impressions → ~52 real visits (Plausible) → 1 signup
+(freebie-farmer `myairdropacc@`, tz-pain creative) → **0 genuine fans.**
+
+**Learnings (so we don't repeat the path):**
+- **Converts ~0 regardless** of price ($31→$1 CPM), volume, creative, geo, or timing.
+  Reach/price/delivery/geo were never the problem — *intent* is: a dev mid-coding
+  isn't in "sign up for sports alerts" mode, anywhere on Earth.
+- **Only buy at the cheap floor, if ever.** 80% of spend (~$180) bought 30% of reach;
+  the two $1–2.50 CPM buys delivered 20k of the 28k impressions for ~$40. Ride the
+  price down; never buy at $20–30 CPM.
+- **Delivery is fast** (8,691 in 42 min at a cleared bid). Trust the live advertiser
+  dashboard counter over any single report or my inference.
+- **Kickbacks "clicks" metric is unreliable** (reported 10 vs Plausible's 52 visits).
+  Trust the DB + Plausible, never the platform's click field.
+- **Daypart/off-peak "clock" buying is feasible but low-value** — geo was already
+  global without it (India 8, Indonesia, ME, Africa all showed up). Don't bother.
+
+**What actually showed signal (the real levers):**
+- **`weird-next` / identity creative**: 5 visitors but 20% bounce + 219s avg (vs
+  tz-pain's 79% / 55s). The weird-sports identity angle drew *engaged* people. Test it.
+- **Organic converts where paid doesn't**: the 1 genuine user (Jakarta Japan fan)
+  came direct, converted in 24s. X drove ~0 (cold account = no reach) → the work is
+  **audience-building**, not more ad spend.
+
 ## Ad buys
 
 | date       | network   | medium  | campaign | content     | ad copy (what was shown)                                                | destination URL | result |
