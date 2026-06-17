@@ -25,6 +25,8 @@ interface Props {
     imageAlt?: string;
     twitterDescription?: string;
   };
+  /** Self-referencing canonical URL. SEO hygiene for indexable pages. */
+  canonical?: string;
   /** Render the shared site footer. Default on for consistent chrome. */
   footer?: boolean;
 }
@@ -35,6 +37,7 @@ const {
   noindex = false,
   analytics = false,
   og,
+  canonical,
   footer = true,
 } = Astro.props;
 ---
@@ -47,6 +50,7 @@ const {
   {noindex && <meta name="robots" content="noindex" />}
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
+  {canonical && <link rel="canonical" href={canonical} />}
   {og && (
     <Fragment>
       <meta property="og:title" content={og.title} />
