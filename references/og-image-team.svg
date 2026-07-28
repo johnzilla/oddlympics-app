@@ -24,8 +24,8 @@
 
   <!-- Banner pill -->
   <g transform="translate(72, 168)">
-    <rect x="0" y="0" rx="999" ry="999" width="430" height="40" fill="#fbe9e0" stroke="#d94a1f" stroke-width="1.5"/>
-    <text x="20" y="26" font-family="JetBrains Mono" font-size="14" font-weight="700" letter-spacing="2.2" fill="#d94a1f">WORLD CUP 2026 · JUNE 11 – JULY 19</text>
+    <rect x="0" y="0" rx="999" ry="999" width="400" height="40" fill="#fbe9e0" stroke="#d94a1f" stroke-width="1.5"/>
+    <text x="20" y="26" font-family="JetBrains Mono" font-size="14" font-weight="700" letter-spacing="2.2" fill="#d94a1f">FREE · NO ADS · NO BETTING ODDS</text>
   </g>
 
   <!-- Headline (parameterized — D-05/D-07/D-08) -->
@@ -37,7 +37,7 @@
 
   <!-- Sub line -->
   <g transform="translate(72, 488)">
-    <text font-family="Inter" font-size="22" fill="#5a5d68">Pick your team. Free for the whole tournament. No ads.</text>
+    <text font-family="Inter" font-size="22" fill="#5a5d68">Pick your team. One ping, an hour before kickoff. Free.</text>
   </g>
 
   <!-- URL -->

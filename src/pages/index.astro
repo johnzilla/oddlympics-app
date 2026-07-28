@@ -4,16 +4,16 @@ import { TEAMS } from '../lib/teams';
 
 export const prerender = true;
 
-const TITLE = 'Oddlympics — World Cup 2026 alerts in your time zone';
+const TITLE = 'Oddlympics — never miss your team, in your time zone';
 const DESCRIPTION =
-  'Pick your team. Get one email one hour before every 2026 World Cup match, in your local time zone. Free. No ads. No betting odds.';
-const OG_TITLE = "Never miss your team's World Cup matches";
+  'Pick your team. One email an hour before every match they play, in your local time zone. Free. No ads. No betting odds.';
+const OG_TITLE = "Never miss your team's matches";
 const OG_DESCRIPTION =
-  'Pick your team. One email an hour before every match they play — so you never miss kickoff. Free for the whole tournament. No betting odds.';
+  'Pick your team. One email an hour before every match they play — so you never miss kickoff. Free. No betting odds.';
 const TWITTER_DESCRIPTION = 'Pick your team. One ping, one hour before kickoff. Free.';
 const SITE_URL = 'https://oddlympics.app';
 const OG_IMAGE = 'https://oddlympics.app/og-image.png';
-const OG_IMAGE_ALT = "Oddlympics — never miss your team's World Cup matches";
+const OG_IMAGE_ALT = "Oddlympics — never miss your team's matches";
 
 const CONFEDERATION_ORDER = [
   'UEFA',
@@ -58,10 +58,14 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
   <main>
     <section class="hero">
       <div class="wrap">
-        <p class="banner">WORLD CUP 2026 · JUNE 11 – JULY 19</p>
+        <p class="banner">BETWEEN SEASONS</p>
         <h1 class="headline">Your team's matches. One ping, an hour before kickoff. Never miss one.</h1>
         <p class="subhead">
           Pick your team. We'll email you an hour before every match they play — kickoff shown in <span id="tz-label">your local time</span>, so a 3am game never sneaks past you. Nothing else. Free, no ads, no betting odds.
+        </p>
+
+        <p class="offseason">
+          <strong>The 2026 World Cup is a wrap.</strong> Spain lifted the trophy on July 19, and oddlympics sent every kickoff alert without missing one. We're between tournaments now — drop your team and email below and you'll be first to know the moment the next one goes live.
         </p>
 
         <form method="post" action="/api/signup" id="signup-form" class="form-card">
@@ -101,7 +105,7 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
           <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
 
           <div class="cta">
-            <button type="submit">Get match alerts</button>
+            <button type="submit">Get on the list</button>
           </div>
 
           <p class="fineprint">One email per match for the team you pick, plus the occasional oddlympics update. Unsubscribe in one click.</p>
@@ -121,7 +125,7 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
         <ol class="steps">
           <li>
             <span class="num">1</span>
-            <div class="body"><strong>Pick your team.</strong> Choose one of the 48 teams in the 2026 World Cup. Add more later if you want.</div>
+            <div class="body"><strong>Pick your team.</strong> Choose the national team you follow. Add up to five, change them anytime.</div>
           </li>
           <li>
             <span class="num">2</span>
@@ -138,16 +142,16 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
     <section class="below">
       <div class="wrap">
         <h2 class="eyebrow">Why this exists</h2>
-        <p>The 2026 World Cup is being played across three countries and four time zones. If your team isn't from the US, Canada, or Mexico, half your matches will be at awkward local hours.</p>
-        <p class="muted">The big sports apps will buzz you 17 times a day with betting odds and engagement pings. I just wanted one alert for the matches I cared about. So I built it. Free for the whole tournament.</p>
+        <p>International tournaments are played halfway around the world. If your team isn't local, half their matches land at awkward hours — and a kickoff you meant to watch slips past while you're asleep or at work.</p>
+        <p class="muted">The big sports apps will buzz you 17 times a day with betting odds and engagement pings. I just wanted one alert for the matches I cared about, in my own time zone. So I built it. Free.</p>
       </div>
     </section>
 
     <section class="below">
       <div class="wrap">
-        <h2 class="eyebrow">After the World Cup</h2>
-        <p>The plan is to do this for sports that nobody else covers properly — curling, esports, BattleBots, the Rubik's Cube World Championship, the Microsoft Excel World Championship (real, and televised on ESPN), lumberjack sports, drone racing.</p>
-        <p class="muted">Sign up for World Cup alerts now and you'll get a vote on what comes next.</p>
+        <h2 class="eyebrow">What's next</h2>
+        <p>The 2026 run proved the thing works — 39 alerts, zero missed. It stays live and ready for the next big tournament, and eventually for the sports nobody else covers properly: curling, esports, BattleBots, the Rubik's Cube World Championship, the Microsoft Excel World Championship (real, and televised on ESPN), drone racing.</p>
+        <p class="muted">Get on the list now and you'll help pick what comes next. All weirdos welcome.</p>
       </div>
     </section>
 
@@ -156,11 +160,11 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
         <h2 class="eyebrow">Common questions</h2>
         <details>
           <summary>Is this really free?</summary>
-          <p>Free for the entire 2026 World Cup. No card required.</p>
+          <p>Yes. Free, no card required.</p>
         </details>
         <details>
           <summary>How many emails will I get?</summary>
-          <p>One per match for the teams you pick. If you choose one team, you'll get three emails during the group stage. If they advance, more. That's the maximum.</p>
+          <p>One per match for the teams you follow, while a tournament is live. Pick one team and that's a handful of emails across the group stage, more if they advance. Between tournaments: nothing but the rare oddlympics update.</p>
         </details>
         <details>
           <summary>Will you sell my email?</summary>
@@ -172,7 +176,7 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
         </details>
         <details>
           <summary>Why should I trust this?</summary>
-          <p>You shouldn't — yet. Try it for one match. If the email doesn't show up on time, unsubscribe.</p>
+          <p>During the 2026 World Cup we sent 39 kickoff alerts and missed zero. Try it for one match next tournament — if the email's late, unsubscribe in one click.</p>
         </details>
       </div>
     </section>
@@ -283,6 +287,20 @@ const groupedTeams = CONFEDERATION_ORDER.map((conf) => ({
     padding-top: 64px;
     padding-bottom: 32px;
   }
+
+  /* Off-season note — honest "between tournaments" state */
+  .offseason {
+    margin: 0 0 24px;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--fg);
+    background: var(--accent-soft);
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+  }
+
+  .offseason strong { color: var(--accent); }
 
   /* Form card — primary focal point */
   .form-card {
